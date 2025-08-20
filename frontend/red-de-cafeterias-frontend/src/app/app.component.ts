@@ -11,5 +11,5 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'red-de-cafeterias-frontend';
+  title = 'red-de-cafeterias';
 }
