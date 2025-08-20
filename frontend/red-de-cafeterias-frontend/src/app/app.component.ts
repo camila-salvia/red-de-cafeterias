@@ -3,12 +3,12 @@
 
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { HomeComponent } from "./features/home/home.component";
+import { LoginComponent } from "./features/login/login.component";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, 
-    HomeComponent],
+  imports: [RouterOutlet,
+    LoginComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
