@@ -1,4 +1,4 @@
-.btn-confirmar {
+.btn {
   background-color: #9C7B4D;
   color: black;
   border: none;
@@ -10,6 +10,6 @@
   transition: all 0.3s ease;
 }
 
-.btn-confirmar:hover {
+.btn:hover {
   background-color: #b08d5a;
 }
