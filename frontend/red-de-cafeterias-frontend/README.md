@@ -1,30 +1,30 @@
 # RedDeCafeteriasFrontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.15.
+Este proyecto usa [Angular CLI](https://github.com/angular/angular-cli) versión 19.2.15.
+
+Es necesaria una versión de node v 20.19.4 (con esta funciona)
+
+Tutorial útil
+(https://v17.angular.io/tutorial/first-app/first-app-lesson-01)
 
 ## Development server
 
-To start a local development server, run:
+Para iniciar un servidor de desarrollo local, ejecute:
 
 ```bash
-ng serve
+npx ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Una vez que el servidor esté en funcionamiento, abre tu navegador y navega a `http://localhost:4200/`. La aplicación se recargará automáticamente cada vez que modifiques alguno de los archivos fuente.
 
 ## Code scaffolding
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Angular CLI incluye potentes herramientas de creación de código. Para generar un nuevo componente, ejecuta:
 
 ```bash
-ng generate component component-name
+npx ng generate component nombre-del-componente
 ```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
+Se debe crear un componente para cada página que el usuario pueda ver (como por ejemplo home, login) y uno para cada parte reutilizable (como por ejemplo un botón, una barra de búsqueda)
 
 ## Building
 
