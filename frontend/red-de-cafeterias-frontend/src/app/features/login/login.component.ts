@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
-import { FormulariosComponent } from "../../shared/formularios/formularios.component";
+import { FormularioLoginComponent } from "./formulario-login/formulario-login.component";
+
 
 @Component({
   selector: 'app-login',
-  imports: [FormulariosComponent],
+  imports: [FormularioLoginComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
