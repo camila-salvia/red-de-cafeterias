@@ -2,6 +2,8 @@
 
 Link al DER https://app.diagrams.net/?src=about#G1wZRgIzEEi9JHjXuftYsQcJz70cL4A5S6#%7B%22pageId%22%3A%22oqMWFtEkVHO3Dq0xf25_%22%7D
 
+Canva https://www.canva.com/design/DAGwjx2Sasc/qmI5rThJDTLgwvQYwCrOew/edit
+
 Tabla de tareas https://b24-ibf2f0.bitrix24.es/company/personal/user/1/tasks/projects/
 
 Este proyecto usa [Angular CLI](https://github.com/angular/angular-cli) versión 19.2.15.
