@@ -1,1 +1,31 @@
-<p>formulario-reserva works!</p>
+<div class="reservas-box">
+
+  <h1>Reservas</h1>
+  <p>Dejanos tus datos para realizar la reserva. Solo reservas para eventos privados.</p>
+  <form>
+    <ul>
+      <li>
+        <label for="nombre">Nombre</label>
+        <input type="string" id="nombre" name="nombre" placeholder="Nombre" />
+      </li>
+      <li>
+        <label for="apellido">Apellido</label>
+        <input type="string" id="apellido" name="apellido" placeholder="Apellido" />
+      </li>
+      <li>
+        <label for="telefono">Número de teléfono</label>
+        <input type="string" id="telefono" name="telefono" placeholder="Teléfono" />
+      </li>
+      <li>
+        <label for="fecha">Fecha de la reserva</label>
+        <input type="date" id="fecha-reserva" name="fecha" placeholder="" />
+      </li>
+      <li>
+        <label for="cantidad">Cantidad de personas</label>
+        <input type="number" id="cantidad" name="cantidad" placeholder="Cantidad" />
+      </li>
+    </ul>
+    <app-botones texto="Enviar"></app-botones>
+  </form>
+
+  <div class="extra-options">
