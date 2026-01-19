@@ -1,14 +1,29 @@
-# Node
-node_modules/
+# coverage reports
+coverage
 
-# Env
+# API keys and secrets
 .env
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# dependency directory
+node_modules
 
-# OS
+# OS metadata
 .DS_Store
 Thumbs.db
+
+# ignore built ts files
+dist/**/*
+
+# vscode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+## local jistory for vscode
+.history/
+
+## built vscode extensions
+*.vsix
