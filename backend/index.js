@@ -1,3 +1,5 @@
+import categoriaRoutes from './src/categoria/categoria.routes';
+
 const express = require('express');
 
 const app = express();
@@ -10,6 +12,8 @@ app.use(express.json());
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
+
+app.use('/api/categoria', categoriaRoutes);
 
 // Levantar servidor
 app.listen(PORT, () => {
