@@ -27,4 +27,31 @@ export async function getCategoriaById(req, res) {
     }
     res.status(200).send({ data: categoria });
 }
+export async function updateCategoria(req, res) {
+    const id = req.params.id;
+    const updatedData = req.body.sanitizedInput;
+    try {
+        const categoria = await categoriaService.update(id, updatedData);
+        if (!categoria) {
+            return res.status(404).send({ message: 'Categoría no encontrada' });
+        }
+        res.status(200).send({ data: categoria });
+    }
+    catch (error) {
+        res.status(500).send({ message: 'Error al actualizar categoría' });
+    }
+}
+export async function deleteCategoria(req, res) {
+    const id = req.params.id;
+    try {
+        const categoria = await categoriaService.delete(id);
+        if (!categoria) {
+            return res.status(404).send({ message: 'Categoría no encontrada' });
+        }
+        res.status(200).send({ data: categoria });
+    }
+    catch (error) {
+        res.status(500).send({ message: 'Error al eliminar categoría' });
+    }
+}
 //# sourceMappingURL=categoria.controller.js.map
