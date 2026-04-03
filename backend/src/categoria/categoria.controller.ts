@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { categoriaService } from './categoria.service.js'
+import { CategoriaService } from './categoria.service.js'
 export function sanitizeCategoriaInput( req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
     id_categoria: req.body.id_categoria,
@@ -9,9 +9,13 @@ export function sanitizeCategoriaInput( req: Request, res: Response, next: NextF
 } 
 
 export async function createCategoria(req: Request, res: Response) {
-  const input = req.body.sanitizedInput;
-  const categoria = await categoriaService.create(input);
-  res.status(201).send({ message: 'Categoría creada', data: categoria });
+  try {
+    const input = req.body.sanitizedInput;
+    const categoria = await categoriaService.create(input);
+    res.status(201).send({ message: 'Categoría creada', data: categoria });
+  } catch (error) {
+    res.status(500).send({ message: 'Error al crear categoría' });
+  }
 }
 
 export async function getCategorias(req: Request, res: Response) {

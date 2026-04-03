@@ -1,22 +1,28 @@
-import { Categoria } from "./categoria.entity.js";
+import { CategoriaRepository } from "./categoria.repository.js";
 
-const categorias: Categoria[] = [];
+export class CategoriaService {
 
-export const categoriaService = {
+  private repository = new CategoriaRepository();
 
   getAll() {
-    return categorias;
-  },
+    return this.repository.findAll();
+  }
 
-  getById(id: string) {
-  const categoria = categorias.find(c => c.id_categoria === id);
-  return categoria;
-  },
+  getById(id: number) {
+    return this.repository.findById(id);
+  }
+
+  create(data: any) {
+    return this.repository.create(data);
+  }
+
+  update(id: number, data: any) {
+    return this.repository.update(id, data);
+  }
+
+  delete(id: number) {
+    return this.repository.delete(id);
+  }
+}
 
 
-  create(input: { id_categoria: string; nombre: string }) {
-    const categoria = new Categoria(input.id_categoria, input.nombre);
-    categorias.push(categoria);
-    return categoria;
-  },
-};
