@@ -33,4 +33,19 @@ export async function getCategoriaById(req: Request, res: Response) {
 
   res.status(200).send({ data: categoria });
 }
+export async function updateCategoria(req: Request, res: Response) {
+  const id = req.params.id as string;
+  const updatedData = req.body.sanitizedInput;
 
+  try {
+    const categoria = await categoriaService.update(id, updatedData);
+
+    if (!categoria) {
+      return res.status(404).send({ message: 'Categoría no encontrada' });
+    }
+
+    res.status(200).send({ data: categoria });
+  } catch (error) {
+    res.status(500).send({ message: 'Error al actualizar categoría' });
+  }
+}

@@ -10,6 +10,6 @@ POST http://localhost:3000/api/categoria
 Content-Type: application/json
 
 {
-  "id_categoria": "1",
-  "nombre": "Bebidas"
+  "id_categoria": "2",
+  "nombre": "Comidas"
 }
