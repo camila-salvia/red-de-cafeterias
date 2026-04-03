@@ -3,7 +3,7 @@ import categoriaRoutes from './categoria/categoria.routes.js';
 const app = express();
 // Middleware para JSON
 app.use(express.json());
-// Rutas
+// Rutas 
 app.use('/api/categoria', categoriaRoutes);
 // Health / root
 app.get('/', (req, res) => {

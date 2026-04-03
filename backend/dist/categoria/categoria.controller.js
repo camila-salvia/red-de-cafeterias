@@ -7,9 +7,13 @@ export function sanitizeCategoriaInput(req, res, next) {
     next();
 }
 export async function createCategoria(req, res) {
-    const input = req.body.sanitizedInput;
-    const categoria = await categoriaService.create(input);
-    res.status(201).send({ message: 'Categoría creada', data: categoria });
+    try {
+        const categoria = await categoriaService.create(req.body.sanitizedInput);
+        res.status(201).send({ data: categoria });
+    }
+    catch (error) {
+        res.status(500).send({ message: 'Error al crear categoría' });
+    }
 }
 export async function getCategorias(req, res) {
     const categorias = await categoriaService.getAll();
