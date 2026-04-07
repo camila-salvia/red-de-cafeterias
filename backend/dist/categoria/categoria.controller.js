@@ -1,7 +1,7 @@
 import { categoriaService } from './categoria.service.js';
 export function sanitizeCategoriaInput(req, res, next) {
     req.body.sanitizedInput = {
-        id_categoria: req.body.id_categoria,
+        id: req.body.id,
         nombre: req.body.nombre
     };
     next();

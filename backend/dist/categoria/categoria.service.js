@@ -1,28 +1,28 @@
 import { Categoria } from "./categoria.entity.js";
 const categorias = [];
 export const categoriaService = {
-    getAll() {
+    async getAll() {
         return categorias;
     },
-    getById(id) {
-        const categoria = categorias.find(c => c.id_categoria === id);
+    async getById(id) {
+        const categoria = categorias.find(c => c.id === id);
         return categoria;
     },
-    create(input) {
-        const categoria = new Categoria(input.id_categoria, input.nombre);
+    async create(input) {
+        const categoria = new Categoria(input.id, input.nombre);
         categorias.push(categoria);
         return categoria;
     },
-    update(id, input) {
-        const index = categorias.findIndex(c => c.id_categoria === id);
+    async update(id, input) {
+        const index = categorias.findIndex(c => c.id === id);
         if (index === -1) {
             return null;
         }
-        categorias[index] = new Categoria(input.id_categoria, input.nombre);
+        categorias[index] = new Categoria(input.id, input.nombre);
         return categorias[index];
     },
-    delete(id) {
-        const index = categorias.findIndex(c => c.id_categoria === id);
+    async delete(id) {
+        const index = categorias.findIndex(c => c.id === id);
         if (index === -1) {
             return null;
         }

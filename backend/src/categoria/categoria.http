@@ -9,18 +9,19 @@ POST http://localhost:3000/api/categoria
 Content-Type: application/json
 
 {
-  "id_categoria": "1",
+  "id": "1",
   "nombre": "Bebidas"
 }
 
+
 ### Actualizar una categoría
-PUT http://localhost:3000/api/categoria/2
+PUT http://localhost:3000/api/categoria/1
 Content-Type: application/json
 
 {
-  "id_categoria": "2",
+  "id": "2",
   "nombre": "Comidas saladas"
 }
 
 ### Eliminar una categoría
-DELETE http://localhost:3000/api/categoria/2
+DELETE http://localhost:3000/api/categoria/1

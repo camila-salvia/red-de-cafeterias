@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import { categoriaService } from './categoria.service.js'
 export function sanitizeCategoriaInput( req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
-    id_categoria: req.body.id_categoria,
+    id: req.body.id,
     nombre: req.body.nombre
   } 
   next();

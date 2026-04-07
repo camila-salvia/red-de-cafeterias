@@ -4,33 +4,32 @@ const categorias: Categoria[] = [];
 
 export const categoriaService = {
 
-  getAll() {
+  async getAll() {
     return categorias;
   },
 
-  getById(id: string) {
-  const categoria = categorias.find(c => c.id_categoria === id);
-  return categoria;
+  async getById(id: string) {
+    const categoria = categorias.find(c => c.id === id);
+    return categoria;
   },
 
-
-  create(input: { id_categoria: string; nombre: string }) {
-    const categoria = new Categoria(input.id_categoria, input.nombre);
+  async create(input: { id: string; nombre: string }) {
+    const categoria = new Categoria(input.id, input.nombre);
     categorias.push(categoria);
     return categoria;
   },
 
-  update(id: string, input: { id_categoria: string; nombre: string }) {
-    const index = categorias.findIndex(c => c.id_categoria === id);
+  async update(id: string, input: { id: string; nombre: string }) {
+    const index = categorias.findIndex(c => c.id === id);
     if (index === -1) {
       return null;
     }
-    categorias[index] = new Categoria(input.id_categoria, input.nombre);
+    categorias[index] = new Categoria(input.id, input.nombre);
     return categorias[index];
   },
 
-  delete(id: string) {
-    const index = categorias.findIndex(c => c.id_categoria === id);
+  async delete(id: string) {
+    const index = categorias.findIndex(c => c.id === id);
     if (index === -1) {
       return null;
     }
