@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@mikro-orm/core": "6.6.12",
+    "@mikro-orm/mysql": "6.6.12",
+    "@mikro-orm/sql-highlighter": "1.0.1",
+    "reflect-metadata": "0.2.2"
+  }
+}
