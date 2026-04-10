@@ -3,8 +3,8 @@ import {MySqlDriver} from '@mikro-orm/mysql';
 import {SqlHighlighter} from '@mikro-orm/sql-highlighter';
 
 export const orm = await MikroORM.init({
-  entities: ['backend/dist/**/*.entity.js'],
-  entitiesTs: ['backend/src/**/*.entity.ts'],
+  entities: ['./dist/**/*.entity.js'],
+  entitiesTs: ['./src/**/*.entity.ts'],
   dbName: 'cafeteria',
   driver: MySqlDriver,
   clientUrl: 'mysql://root:1234@localhost:3306/cafeteria',

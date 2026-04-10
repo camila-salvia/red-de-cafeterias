@@ -1,3 +1,4 @@
+/*
 import { Categoria } from "./categoria.entity.js";
 
 const categorias: Categoria[] = [];
@@ -38,4 +39,4 @@ export const categoriaService = {
     return deletedCategoria;
   }
 };
-
+*/

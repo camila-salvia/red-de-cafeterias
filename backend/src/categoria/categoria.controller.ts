@@ -1,28 +1,41 @@
 import { Request, Response, NextFunction } from 'express'
-import { categoriaService } from './categoria.service.js'
-export function sanitizeCategoriaInput( req: Request, res: Response, next: NextFunction) {
+import { orm } from '../shared/database/orm.js'
+//import { categoriaService } from './categoria.service.js'
+import { Categoria } from './categoria.entity.js'
+
+const em = orm.em
+/*export function sanitizeCategoriaInput( req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
     id: req.body.id,
     nombre: req.body.nombre
   } 
   next();
-} 
+} */
 
-export async function createCategoria(req: Request, res: Response) {
+// obtener todas las categorías
+async function findAll(req: Request, res: Response) {
   try {
-    const categoria = await categoriaService.create(req.body.sanitizedInput);
-    res.status(201).send({ data: categoria });
-  } catch (error) {
-    res.status(500).send({ message: 'Error al crear categoría' });
+    const categorias = await em.find(Categoria, {})
+    res.status(200).json({ message: 'Todas las categorías encontradas', data: categorias })
+  } catch (error:any) {
+    res.status(500).json({ message: 'Error al obtener categorías' })
   }
 }
 
-export async function getCategorias(req: Request, res: Response) {
-  const categorias = await categoriaService.getAll();
-  res.status(200).send({ data: categorias });
+// crear nueva categoría
+async function add(req: Request, res: Response) {
+  try {
+    const categoria = em.create(Categoria, req.body)
+    await em.flush()
+    res.status(201).json({ message: 'Categoría creada', data: categoria })
+  } catch (error:any) {
+    res.status(500).json({ message: 'Error al crear categoría' })
+  }
 }
 
-export async function getCategoriaById(req: Request, res: Response) {
+
+// obtener categoría por id
+/* export async function getCategoriaById(req: Request, res: Response) {
   const id = req.params.id as string;
 
   const categoria = await categoriaService.getById(id);
@@ -66,3 +79,5 @@ export async function deleteCategoria(req: Request, res: Response) {
     res.status(500).send({ message: 'Error al eliminar categoría' });
   }
 }
+*/
+export {findAll, add}

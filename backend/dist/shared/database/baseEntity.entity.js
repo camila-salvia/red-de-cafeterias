@@ -1,11 +1,3 @@
-/*
-export class Categoria {
-  constructor(
-    public id: string,
-    public nombre: string
-  ) {}
-}
-*/
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -15,18 +7,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
-export let Categoria = class Categoria {
-};
+import { PrimaryKey } from '@mikro-orm/core';
+export class BaseEntity {
+}
 __decorate([
     PrimaryKey(),
     __metadata("design:type", String)
-], Categoria.prototype, "id", void 0);
-__decorate([
-    Property(),
-    __metadata("design:type", String)
-], Categoria.prototype, "nombre", void 0);
-Categoria = __decorate([
-    Entity()
-], Categoria);
-//# sourceMappingURL=categoria.entity.js.map
+], BaseEntity.prototype, "id", void 0);
+//# sourceMappingURL=baseEntity.entity.js.map
