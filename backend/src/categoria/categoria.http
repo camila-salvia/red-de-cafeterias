@@ -1,27 +1,29 @@
 ### Obtener todas las categorías
 GET http://localhost:3000/api/categoria
 
-### Obtener una categoría por id
-GET http://localhost:3000/api/categoria/1
-
-### Publicar una categoría
+### Crear una categoría
+# @name createCategoria
 POST http://localhost:3000/api/categoria
 Content-Type: application/json
 
 {
-  "id": "1",
-  "nombre": "Bebidas"
+  "id": "3",
+  "nombre": "Postres"
 }
 
+### ID
+@id = {{createCategoria.response.body.data.id}}
+
+### Obtener una categoría por id
+GET http://localhost:3000/api/categoria/{{id}}
 
 ### Actualizar una categoría
-PUT http://localhost:3000/api/categoria/1
+PUT http://localhost:3000/api/categoria/{{id}}
 Content-Type: application/json
 
 {
-  "id": "2",
   "nombre": "Comidas saladas"
 }
 
 ### Eliminar una categoría
-DELETE http://localhost:3000/api/categoria/1
+DELETE http://localhost:3000/api/categoria/{{id}}

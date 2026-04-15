@@ -35,49 +35,37 @@ async function add(req: Request, res: Response) {
 
 
 // obtener categoría por id
-/* export async function getCategoriaById(req: Request, res: Response) {
-  const id = req.params.id as string;
-
-  const categoria = await categoriaService.getById(id);
-
-  if (!categoria) {
-    return res.status(404).send({ message: 'Categoría no encontrada' });
-  }
-
-  res.status(200).send({ data: categoria });
-}
-
-export async function updateCategoria(req: Request, res: Response) {
-  const id = req.params.id as string;
-  const updatedData = req.body.sanitizedInput;
-
+ async function findOne(req: Request, res: Response) {
   try {
-    const categoria = await categoriaService.update(id, updatedData);
-
-    if (!categoria) {
-      return res.status(404).send({ message: 'Categoría no encontrada' });
-    }
-
-    res.status(200).send({ data: categoria });
-  } catch (error) {
-    res.status(500).send({ message: 'Error al actualizar categoría' });
+    const id = req.params.id as string
+    const categoria = await em.findOneOrFail(Categoria, { id })
+    res.status(200).json({ message: 'Categoría encontrada', data: categoria })
+  } catch (error:any) {
+    res.status(404).json({ message: 'Categoría no encontrada' })
   }
 }
 
-export async function deleteCategoria(req: Request, res: Response) {
-  const id = req.params.id as string;
-
+async function update(req: Request, res: Response) {
   try {
-    const categoria = await categoriaService.delete(id);
+      const id = req.params.id as string
+      const categoria = em.getReference(Categoria,  id)
+      em.assign(categoria, req.body)
+      await em.flush()
+      res.status(200).json({ message: 'Categoría actualizada', data: categoria })
+  } catch (error:any) {
+    res.status(500).json({ message: 'Error al actualizar categoría' })
+  }
+}
 
-    if (!categoria) {
-      return res.status(404).send({ message: 'Categoría no encontrada' });
-    }
-
-    res.status(200).send({ data: categoria });
+async function remove(req: Request, res: Response) {
+  try {
+    const id = req.params.id as string
+    const categoria = em.getReference(Categoria, id)
+    await em.removeAndFlush(categoria)
+    res.status(200).send({ message: 'Categoría eliminada' })
   } catch (error) {
     res.status(500).send({ message: 'Error al eliminar categoría' });
   }
 }
-*/
-export {findAll, add}
+
+export {findAll, add, findOne, update, remove}
