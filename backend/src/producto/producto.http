@@ -1,0 +1,72 @@
+### GET all productos
+http://localhost:3000/api/productos
+
+
+### POST a producto
+# @name createProducto
+POST http://localhost:3000/api/productos
+Content-Type: application/json
+
+{
+    "nombre": "Café Latte",
+    "categoria": 1,
+    "descripcion": "Café con leche vaporizada",
+    "precio": 3500
+}
+
+### ID
+@id = {{createProducto.response.body.data.id}}
+
+### GET one producto
+http://localhost:3000/api/productos/{{id}}
+
+### PUT a producto
+PUT http://localhost:3000/api/productos/{{id}}
+Content-Type: application/json
+
+{
+  "nombre": "Café Latte",
+  "categoria": 1,
+  "descripcion": "Café con leche vaporizada",
+  "precio": 3800
+}
+
+### POST a producto
+POST http://localhost:3000/api/productos
+Content-Type: application/json
+
+{
+    "nombre": "Café Latte",
+    "categoria": 1,
+    "descripcion": "Café con leche vaporizada",
+    "precio": 3500
+}
+
+### POST a producto
+# @name createProductoToDelete
+POST http://localhost:3000/api/productos
+Content-Type: application/json
+
+{
+    "nombre": "Café Latte",
+    "categoria": 1,
+    "descripcion": "Café con leche vaporizada",
+    "precio": 3500
+}
+   
+### DELETE a producto
+@idToDelete = {{createProductoToDelete.response.body.data.id}}
+DELETE http://localhost:3000/api/productos/{{idToDelete}}
+
+### PATCH a producto
+PATCH http://localhost:3000/api/productos/{{idToDelete}}
+Content-Type: application/json
+
+{
+  "level": 6,
+  "characterClass":4,
+  "items": [1]
+}
+
+### DELETE a producto
+DELETE http://localhost:3000/api/productos/{{idToDelete}}
