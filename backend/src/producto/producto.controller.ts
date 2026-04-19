@@ -46,7 +46,8 @@ async function add(req: Request, res: Response) {
     await em.flush()
     res.status(201).json({ message: 'Producto creado', data: producto })
   } catch (error:any) {
-    res.status(500).json({ message: 'Error al crear producto' })
+    console.error('Error detallado al crear:', error);
+    res.status(500).json({ message: 'Error al crear producto', detalle: error.message })
   }
 }
 

@@ -1,38 +1,26 @@
 ### GET all productos
-http://localhost:3000/api/productos
-
-
-### POST a producto
-# @name createProducto
-POST http://localhost:3000/api/productos
-Content-Type: application/json
-
-{
-    "nombre": "Café Latte",
-    "categoria": 1,
-    "descripcion": "Café con leche vaporizada",
-    "precio": 3500
-}
+http://localhost:3000/api/producto
 
 ### ID
 @id = {{createProducto.response.body.data.id}}
 
 ### GET one producto
-http://localhost:3000/api/productos/{{id}}
+http://localhost:3000/api/producto/{{id}}
 
 ### PUT a producto
-PUT http://localhost:3000/api/productos/{{id}}
+PUT http://localhost:3000/api/producto/{{id}}
 Content-Type: application/json
 
 {
-  "nombre": "Café Latte",
+  "nombre": "Café cortado",
   "categoria": 1,
-  "descripcion": "Café con leche vaporizada",
-  "precio": 3800
+  "descripcion": "Café con leche vaporizada en menor cantidad que el café latte",
+  "precio": 3000
 }
 
 ### POST a producto
-POST http://localhost:3000/api/productos
+# @name createProducto
+POST http://localhost:3000/api/producto
 Content-Type: application/json
 
 {
@@ -41,32 +29,16 @@ Content-Type: application/json
     "descripcion": "Café con leche vaporizada",
     "precio": 3500
 }
-
-### POST a producto
-# @name createProductoToDelete
-POST http://localhost:3000/api/productos
-Content-Type: application/json
-
-{
-    "nombre": "Café Latte",
-    "categoria": 1,
-    "descripcion": "Café con leche vaporizada",
-    "precio": 3500
-}
-   
-### DELETE a producto
-@idToDelete = {{createProductoToDelete.response.body.data.id}}
-DELETE http://localhost:3000/api/productos/{{idToDelete}}
 
 ### PATCH a producto
-PATCH http://localhost:3000/api/productos/{{idToDelete}}
+PATCH http://localhost:3000/api/producto/{{id}}
 Content-Type: application/json
 
 {
-  "level": 6,
-  "characterClass":4,
-  "items": [1]
+  "nombre": "Café",
 }
 
 ### DELETE a producto
-DELETE http://localhost:3000/api/productos/{{idToDelete}}
+@id = {{createProducto.response.body.data.id}}
+DELETE http://localhost:3000/api/producto/{{id}}
+

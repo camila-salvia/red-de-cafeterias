@@ -25,5 +25,13 @@ Content-Type: application/json
   "nombre": "Comidas saladas"
 }
 
+### PATCH a categoria
+PATCH http://localhost:3000/api/categoria/{{id}}
+Content-Type: application/json
+
+{
+  "nombre": "Comidas saladas"
+}
+
 ### Eliminar una categoría
 DELETE http://localhost:3000/api/categoria/{{id}}
