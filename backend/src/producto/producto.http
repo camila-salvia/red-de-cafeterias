@@ -7,16 +7,6 @@ http://localhost:3000/api/producto
 ### GET one producto
 http://localhost:3000/api/producto/{{id}}
 
-### PUT a producto
-PUT http://localhost:3000/api/producto/{{id}}
-Content-Type: application/json
-
-{
-  "nombre": "Café cortado",
-  "categoria": 1,
-  "descripcion": "Café con leche vaporizada en menor cantidad que el café latte",
-  "precio": 3000
-}
 
 ### POST a producto
 # @name createProducto
@@ -29,6 +19,19 @@ Content-Type: application/json
     "descripcion": "Tarta con base de galleta y relleno de crema de limón",
     "precio": 3500
 }
+
+
+### PUT a producto
+PUT http://localhost:3000/api/producto/{{id}}
+Content-Type: application/json
+
+{
+  "nombre": "Café cortado",
+  "categoria": 1,
+  "descripcion": "Café con leche vaporizada en menor cantidad que el café latte",
+  "precio": 3000
+}
+
 
 ### PATCH a producto
 PATCH http://localhost:3000/api/producto/{{id}}

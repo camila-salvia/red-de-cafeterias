@@ -4,7 +4,7 @@ import { orm } from '../shared/database/orm.js'
 
 const em = orm.em
 
-function sanitizeProductoInput( 
+function sanitizeUsuarioInput( 
     req: Request, 
     res: Response, 
     next: NextFunction
@@ -12,7 +12,7 @@ function sanitizeProductoInput(
     req.body.sanitizedInput = {
         id: req.body.id,
         nombre: req.body.nombre,
-        apellido: req.body.descripcion,
+        apellido: req.body.apellido,
         telefono: req.body.telefono,
         direccion: req.body.direccion,
         email: req.body.email,
@@ -93,4 +93,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export {sanitizeProductoInput, findAll, add, findOne, update, remove}
+export {sanitizeUsuarioInput, findAll, add, findOne, update, remove}

@@ -1,0 +1,50 @@
+### GET all usuarios
+http://localhost:3000/api/usuario
+
+### ID
+@id = {{createUsuario.response.body.data.id}}
+
+### GET one usuario
+http://localhost:3000/api/usuario/{{id}}
+
+
+### POST a usuario
+# @name createUsuario
+POST http://localhost:3000/api/usuario
+Content-Type: application/json
+
+{
+    "nombre": "Martin",
+    "apellido": "Vivas",
+    "telefono": "123456780",
+    "direccion": "Calle Real 123",
+    "email": "martin.vivas@example.com",
+    "password": "password000",
+    "esAdmin": false
+}
+### PUT a usuario
+PUT http://localhost:3000/api/usuario/{{id}}
+Content-Type: application/json
+
+{
+    "nombre": "Camila",
+    "apellido": "Salvia",
+    "telefono": "123456789",
+    "direccion": "Calle Falsa 123",
+    "email": "camila.salvia@example.com",
+    "password": "password123",
+    "esAdmin": false
+}
+
+
+### PATCH a usuario
+PATCH http://localhost:3000/api/usuario/{{id}}
+Content-Type: application/json
+
+{
+    "nombre": "Josefina"
+}
+
+### DELETE a usuario
+@id = {{createUsuario.response.body.data.id}}
+DELETE http://localhost:3000/api/usuario/{{id}}
