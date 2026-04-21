@@ -5,7 +5,7 @@ import {
     Collection,
 } from '@mikro-orm/core'
 import { BaseEntity } from '../shared/database/baseEntity.entity.js'
-// import { Comentario } from '../comentario/comentario.entity.js'
+import { Comentario } from '../comentario/comentario.entity.js'
 // import { Pedido } from '../pedido/pedido.entity.js'
 
 @Entity()
@@ -31,8 +31,8 @@ export class Usuario extends BaseEntity {
     @Property({ nullable: false })
     esAdmin: boolean = false
 
-    // @OneToMany(() => Comentario, comentario => comentario.usuario)
-    // comentarios = new Collection<Comentario>(this)
+    @OneToMany(() => Comentario, comentario => comentario.usuario)
+    comentarios = new Collection<Comentario>(this)
 
     // @OneToMany(() => Pedido, pedido => pedido.usuario)
     // pedidos = new Collection<Pedido>(this)

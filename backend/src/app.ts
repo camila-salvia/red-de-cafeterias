@@ -2,7 +2,8 @@ import express from 'express';
 import categoriaRoutes from './categoria/categoria.routes.js';
 import productoRoutes from './producto/producto.routes.js';
 import usuarioRoutes from './usuario/usuario.routes.js';
-import 'reflect-metadata'
+import comentarioRoutes from './comentario/comentario.routes.js';
+import 'reflect-metadata';
 import { orm, syncSchema } from './shared/database/orm.js';
 import { RequestContext } from '@mikro-orm/core';
 
@@ -20,6 +21,7 @@ app.use((req, res, next)=>{
 app.use('/api/categoria', categoriaRoutes);
 app.use('/api/producto', productoRoutes);
 app.use('/api/usuario', usuarioRoutes);
+app.use('/api/comentario', comentarioRoutes);
 
 // Health / root
 app.get('/', (req, res) => {

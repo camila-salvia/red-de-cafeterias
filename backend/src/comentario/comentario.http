@@ -1,0 +1,39 @@
+### GET all comentarios
+GET http://localhost:3000/api/comentario
+
+### POST a comentario
+# @name createComentario
+POST http://localhost:3000/api/comentario
+Content-Type: application/json
+
+{
+  "contenido": "Me encantó este café, el ambiente es muy acogedor y el servicio excelente. Definitivamente volveré pronto.",
+  "fecha_publicacion": "2023-01-01",
+  "puntuacion": 5,
+  "usuario": "<USER_ID>"
+}
+
+### ID
+@id = {{createComentario.response.body.data.id}}
+
+### GET one comentario
+GET http://localhost:3000/api/comentario/{{id}}
+
+### PUT a comentario
+PUT http://localhost:3000/api/comentario/{{id}}
+Content-Type: application/json
+
+{
+  "nombre": "Comidas saladas"
+}
+
+### PATCH a comentario
+PATCH http://localhost:3000/api/comentario/{{id}}
+Content-Type: application/json
+
+{
+  "nombre": "Comidas saladas"
+}
+
+### DELETE a comentario
+DELETE http://localhost:3000/api/comentario/{{id}}
