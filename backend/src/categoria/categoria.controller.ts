@@ -1,16 +1,27 @@
 import { Request, Response, NextFunction } from 'express'
 import { orm } from '../shared/database/orm.js'
-//import { categoriaService } from './categoria.service.js'
 import { Categoria } from './categoria.entity.js'
 
 const em = orm.em
-/*export function sanitizeCategoriaInput( req: Request, res: Response, next: NextFunction) {
-  req.body.sanitizedInput = {
-    id: req.body.id,
-    nombre: req.body.nombre
-  } 
-  next();
-} */
+
+function sanitizeCategoriaInput( 
+    req: Request, 
+    res: Response, 
+    next: NextFunction
+) {
+    req.body.sanitizedInput = {
+        id: req.body.id,
+        nombre: req.body.nombre,
+    }
+
+    Object.keys(req.body.sanitizedInput).forEach(key => {
+        if (req.body.sanitizedInput[key] === undefined) {
+            delete req.body.sanitizedInput[key]
+        }
+    })
+
+    next();
+}
 
 // obtener todas las categorías
 async function findAll(req: Request, res: Response) {
@@ -25,7 +36,7 @@ async function findAll(req: Request, res: Response) {
 // crear nueva categoría
 async function add(req: Request, res: Response) {
   try {
-    const categoria = em.create(Categoria, req.body)
+    const categoria = em.create(Categoria, req.body.sanitizedInput)
     await em.flush()
     res.status(201).json({ message: 'Categoría creada', data: categoria })
   } catch (error:any) {
@@ -49,7 +60,7 @@ async function update(req: Request, res: Response) {
   try {
       const id = req.params.id as string
       const categoria = em.getReference(Categoria,  id)
-      em.assign(categoria, req.body)
+      em.assign(categoria, req.body.sanitizedInput)
       await em.flush()
       res.status(200).json({ message: 'Categoría actualizada', data: categoria })
   } catch (error:any) {
@@ -68,4 +79,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export {findAll, add, findOne, update, remove}
+export {sanitizeCategoriaInput, findAll, add, findOne, update, remove}

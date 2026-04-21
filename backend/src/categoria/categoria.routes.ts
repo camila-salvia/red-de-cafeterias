@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { add, findAll, findOne, update, remove } from './categoria.controller.js';
+import { add, findAll, findOne, update, remove, sanitizeCategoriaInput } from './categoria.controller.js';
 
 const router = Router();
 
-router.post('/', add);
+router.post('/', sanitizeCategoriaInput, add);
 router.get('/', findAll);
 router.get('/:id', findOne);
-router.put('/:id', update);
+router.put('/:id', sanitizeCategoriaInput, update);
 router.delete('/:id', remove);
 
 

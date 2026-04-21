@@ -1,18 +1,12 @@
-/*
-export class Categoria {
-  constructor(
-    public id: string,
-    public nombre: string
-  ) {}
-}
-*/
-
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core'
+import { Entity, Property, OneToMany, Collection } from '@mikro-orm/core'
+import { BaseEntity } from '../shared/database/baseEntity.entity.js'
+import { Producto } from '../producto/producto.entity.js'
 
 @Entity()
-export class Categoria {
-  @PrimaryKey()
-  id?: string
-  @Property()
+export class Categoria extends BaseEntity {
+  @Property({nullable: false})
   nombre!: string
+
+  @OneToMany(() => Producto, producto => producto.categoria)
+  productos = new Collection<Producto>(this)
 }

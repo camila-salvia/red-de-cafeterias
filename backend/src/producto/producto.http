@@ -24,9 +24,9 @@ POST http://localhost:3000/api/producto
 Content-Type: application/json
 
 {
-    "nombre": "Café Latte",
-    "categoria": 1,
-    "descripcion": "Café con leche vaporizada",
+    "nombre": "Lemon pie",
+    "categoria": "4ac64c2c-6a7e-44a4-9e7f-7dc451d3c913",
+    "descripcion": "Tarta con base de galleta y relleno de crema de limón",
     "precio": 3500
 }
 
