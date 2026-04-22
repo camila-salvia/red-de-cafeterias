@@ -13,7 +13,8 @@ function sanitizeComentarioInput(
         id: req.body.id,
         contenido: req.body.contenido,
         fecha_publicacion: req.body.fecha_publicacion,
-        puntuacion: req.body.puntuacion
+        puntuacion: req.body.puntuacion,
+        usuario: req.body.usuario,
     }
 
     Object.keys(req.body.sanitizedInput).forEach(key => {
@@ -28,7 +29,7 @@ function sanitizeComentarioInput(
 // obtener todas los comentarios
 async function findAll(req: Request, res: Response) {
   try {
-    const comentarios = await em.find(Comentario, {})
+    const comentarios = await em.find(Comentario, {}, { populate: ['usuario'] })
     res.status(200).json({ message: 'Todos los comentarios encontrados', data: comentarios })
   } catch (error:any) {
     res.status(500).json({ message: 'Error al obtener comentarios' })
@@ -42,7 +43,8 @@ async function add(req: Request, res: Response) {
     await em.flush()
     res.status(201).json({ message: 'Comentario creado', data: comentario })
   } catch (error:any) {
-    res.status(500).json({ message: 'Error al crear comentario' })
+    console.error('Error detallado al crear:', error);
+    res.status(500).json({ message: 'Error al crear comentario', detalle: error.message })
   }
 }
 
@@ -50,7 +52,7 @@ async function add(req: Request, res: Response) {
  async function findOne(req: Request, res: Response) {
   try {
     const id = req.params.id as string
-    const comentario = await em.findOneOrFail(Comentario, { id })
+    const comentario = await em.findOneOrFail(Comentario, { id }, { populate: ['usuario'] })
     res.status(200).json({ message: 'Comentario encontrado', data: comentario })
   } catch (error:any) {
     res.status(404).json({ message: 'Comentario no encontrado' })

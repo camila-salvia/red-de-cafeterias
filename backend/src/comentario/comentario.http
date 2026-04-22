@@ -10,8 +10,7 @@ Content-Type: application/json
   "contenido": "Me encantó este café, el ambiente es muy acogedor y el servicio excelente. Definitivamente volveré pronto.",
   "fecha_publicacion": "2023-01-01",
   "puntuacion": 5,
-  "usuario": "<USER_ID>"
-}
+  "usuario": "25b6e2e5-dbe8-4089-9f8e-4e9a12b7611e"}
 
 ### ID
 @id = {{createComentario.response.body.data.id}}
@@ -24,15 +23,17 @@ PUT http://localhost:3000/api/comentario/{{id}}
 Content-Type: application/json
 
 {
-  "nombre": "Comidas saladas"
-}
+  "contenido": "El café estaba bien, pero el ambiente no era tan agradable como esperaba. El servicio fue un poco lento, pero en general fue una experiencia decente.",
+  "fecha_publicacion": "2023-01-01",
+  "puntuacion": 3,
+  "usuario": "25b6e2e5-dbe8-4089-9f8e-4e9a12b7611e"}
 
 ### PATCH a comentario
 PATCH http://localhost:3000/api/comentario/{{id}}
 Content-Type: application/json
 
 {
-  "nombre": "Comidas saladas"
+  "puntuacion": 4
 }
 
 ### DELETE a comentario
