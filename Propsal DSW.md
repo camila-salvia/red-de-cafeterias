@@ -18,9 +18,8 @@ Descripción:
 Es la aplicación web de una cafetería, los usuarios van a poder registrarse, realizar pedidos y agregar comentarios a dichos pedidos.
 
 Modelo:  
-![][image1]  
-Link: [https://drive.google.com/file/d/1S-lPzVQTwFN9fGTa9AQZpUMt-QzcrCRj/view?usp=sharing](https://drive.google.com/file/d/1S-lPzVQTwFN9fGTa9AQZpUMt-QzcrCRj/view?usp=sharing) 
-
+![][]  
+Link: [https://drive.google.com/file/d/1pX8mOUXs5Atuw59P-m_Qa1YiaA_OYwKt/view]
 ## 
 
 ## Alcance Funcional:
