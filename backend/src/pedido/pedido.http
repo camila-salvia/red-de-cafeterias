@@ -1,0 +1,46 @@
+### Obtener todos los pedidos
+GET http://localhost:3000/api/pedido
+
+### Crear un pedido
+# @name createPedido
+POST http://localhost:3000/api/pedido
+Content-Type: application/json
+
+{
+  "fecha_pedido": "2024-06-15",
+  "costo_total": 100.50,
+  "direccion_envio": "Calle Principal 123",
+  "fecha_pago": "2024-06-16",
+  "estado_pago": "pendiente",
+  "usuario": "639fd3ed-c0b1-42b7-97a7-341b1bdecb4a",
+  "metodo_pago":"6748ac98-6103-4965-a17d-6b3fff777eea"
+}
+
+### ID
+@id = {{createPedido.response.body.data.id}}
+
+### Obtener un pedido por id
+GET http://localhost:3000/api/pedido/{{id}}
+
+### Actualizar un pedido
+PUT http://localhost:3000/api/pedido/{{id}}
+Content-Type: application/json
+
+{
+  "fecha_pedido": "2025-08-15",
+  "costo_total": 180.30,
+  "direccion_envio": "Calle Principal 123",
+  "fecha_pago": "2024-06-16",
+  "estado_pago": "pendiente"
+}
+
+### PATCH a pedido
+PATCH http://localhost:3000/api/pedido/{{id}}
+Content-Type: application/json
+
+{
+  "fecha_pedido": "2025-08-16"
+}
+
+### Eliminar un pedido
+DELETE http://localhost:3000/api/pedido/{{id}}

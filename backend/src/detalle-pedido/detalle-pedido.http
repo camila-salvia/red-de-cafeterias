@@ -1,0 +1,38 @@
+### Obtener todos los detalles de pedido
+GET http://localhost:3000/api/detalle-pedido
+
+### Crear un detalle de pedido
+# @name createDetallePedido
+POST http://localhost:3000/api/detalle-pedido
+Content-Type: application/json
+
+{
+  "cantidad": 5,
+  "precio_unitario": 10.99
+}
+
+### ID
+@id = {{createDetallePedido.response.body.data.id}}
+
+### Obtener un detalle de pedido por id
+GET http://localhost:3000/api/detalle-pedido/{{id}}
+
+### Actualizar un detalle de pedido
+PUT http://localhost:3000/api/detalle-pedido/{{id}}
+Content-Type: application/json
+
+{
+  "cantidad": 10,
+  "precio_unitario": 12.99
+}
+
+### PATCH a detalle-pedido
+PATCH http://localhost:3000/api/detalle-pedido/{{id}}
+Content-Type: application/json
+
+{
+  "cantidad": 15
+}
+
+### Eliminar un detalle pedido
+DELETE http://localhost:3000/api/detalle-pedido/{{id}}

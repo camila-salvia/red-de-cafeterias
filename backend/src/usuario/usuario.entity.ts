@@ -6,7 +6,7 @@ import {
 } from '@mikro-orm/core'
 import { BaseEntity } from '../shared/database/baseEntity.entity.js'
 import { Comentario } from '../comentario/comentario.entity.js'
-// import { Pedido } from '../pedido/pedido.entity.js'
+import { Pedido } from '../pedido/pedido.entity.js'
 
 @Entity()
 export class Usuario extends BaseEntity {
@@ -34,6 +34,6 @@ export class Usuario extends BaseEntity {
     @OneToMany(() => Comentario, comentario => comentario.usuario)
     comentarios = new Collection<Comentario>(this)
 
-    // @OneToMany(() => Pedido, pedido => pedido.usuario)
-    // pedidos = new Collection<Pedido>(this)
+    @OneToMany(() => Pedido, pedido => pedido.usuario)
+    pedidos = new Collection<Pedido>(this)
 }
