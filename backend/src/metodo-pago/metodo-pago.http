@@ -1,0 +1,36 @@
+### Obtener todos los métodos de pago
+GET http://localhost:3000/api/metodo-pago
+
+### Crear un método de pago
+# @name createMetodoPago
+POST http://localhost:3000/api/metodo-pago
+Content-Type: application/json
+
+{
+  "nombre": "Efectivo"
+}
+
+### ID
+@id = {{createMetodoPago.response.body.data.id}}
+
+### Obtener un método de pago por id
+GET http://localhost:3000/api/metodo-pago/{{id}}
+
+### Actualizar un método de pago
+PUT http://localhost:3000/api/metodo-pago/{{id}}
+Content-Type: application/json
+
+{
+  "activo": false
+}
+
+### PATCH a metodo-pago
+PATCH http://localhost:3000/api/metodo-pago/{{id}}
+Content-Type: application/json
+
+{
+  "nombre": "Transferencia bancaria"
+}
+
+### Eliminar un método de pago
+DELETE http://localhost:3000/api/metodo-pago/{{id}}

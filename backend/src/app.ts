@@ -3,6 +3,7 @@ import categoriaRoutes from './categoria/categoria.routes.js';
 import productoRoutes from './producto/producto.routes.js';
 import usuarioRoutes from './usuario/usuario.routes.js';
 import comentarioRoutes from './comentario/comentario.routes.js';
+import metodoPagoRoutes from './metodo-pago/metodo-pago.routes.js';
 import 'reflect-metadata';
 import { orm, syncSchema } from './shared/database/orm.js';
 import { RequestContext } from '@mikro-orm/core';
@@ -22,6 +23,7 @@ app.use('/api/categoria', categoriaRoutes);
 app.use('/api/producto', productoRoutes);
 app.use('/api/usuario', usuarioRoutes);
 app.use('/api/comentario', comentarioRoutes);
+app.use('/api/metodo-pago', metodoPagoRoutes);
 
 // Health / root
 app.get('/', (req, res) => {
