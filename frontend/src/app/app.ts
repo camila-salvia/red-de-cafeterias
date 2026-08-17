@@ -1,3 +1,4 @@
+/*
 // app.component.ts usando Signals (Lo más moderno en Angular 21)
 import { Component, inject, signal } from '@angular/core';
 import { JsonPipe } from '@angular/common';
@@ -22,9 +23,28 @@ export class AppComponent {
   datosDelServidor = signal<any>(null); 
 
   constructor() {
-    this.apiService.obtenerDatos().subscribe(respuesta => {
+    this.apiService.getProductos().subscribe(respuesta => {
       // En lugar de this.datos = respuesta, actualizamos el Signal así:
       this.datosDelServidor.set(respuesta);
     });
   }
+}
+
+*/
+
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { Header } from './components/header/header';
+import { Footer } from './components/footer/footer';
+
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  // Importamos el ruteo y las partes de la estructura base
+  imports: [RouterOutlet, Header, Footer], 
+  templateUrl: './app.html',
+  styleUrl: './app.scss'
+})
+export class AppComponent {
+  
 }

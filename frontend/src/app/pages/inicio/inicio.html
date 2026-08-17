@@ -1,0 +1,9 @@
+<div>
+      <h1>Menú de la Cafetería:</h1>
+      
+      @if (errorMsg()) {
+        <p style="color: red;">{{ errorMsg() }}</p>
+      } @else {
+        <pre>{{ datosDelServidor() | json }}</pre> 
+      }
+</div>
