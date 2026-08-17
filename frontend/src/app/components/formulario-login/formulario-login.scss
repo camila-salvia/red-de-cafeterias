@@ -1,0 +1,61 @@
+.login-box {
+  background-color: #E2D1B6;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  width: 320px;
+  text-align: center;
+}
+
+.login-box h1 {
+  margin-bottom: 20px;
+  font-size: 28px;
+  color: #2e2b26;
+  font-weight: normal;
+}
+
+form ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+form li {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+label {
+  display: none;
+}
+
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+app-botones {
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.extra-options {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #2e2b26;
+}
+
+.extra-options a {
+  color: #2e2b26;
+  text-decoration: none;
+  margin: 0 5px;
+}
+
+.extra-options a:hover {
+  text-decoration: underline;
+}
