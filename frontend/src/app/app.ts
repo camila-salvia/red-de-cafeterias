@@ -34,14 +34,14 @@ export class AppComponent {
 
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Header } from './components/header/header';
+import { HeaderComponent } from './components/header/header.js';
 import { Footer } from './components/footer/footer';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   // Importamos el ruteo y las partes de la estructura base
-  imports: [RouterOutlet, Header, Footer], 
+  imports: [RouterOutlet, HeaderComponent, Footer], 
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
