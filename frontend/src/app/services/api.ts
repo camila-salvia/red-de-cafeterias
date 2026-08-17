@@ -11,6 +11,9 @@ export class ApiService {
   private apiUrl = 'http://localhost:3000/api';
 
   obtenerDatos(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/endpoint`);
+    return this.http.get(`${this.apiUrl}/usuario`);
   }
 }
+
+
+

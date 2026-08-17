@@ -14,11 +14,11 @@ POST http://localhost:3000/api/usuario
 Content-Type: application/json
 
 {
-    "nombre": "Martin",
+    "nombre": "Mart",
     "apellido": "Vivas",
     "telefono": "123456780",
     "direccion": "Calle Real 123",
-    "email": "martin.vivas@example.com",
+    "email": "martin.vi@example.com",
     "password": "password000",
     "esAdmin": false
 }
