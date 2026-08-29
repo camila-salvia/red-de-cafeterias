@@ -1,22 +1,26 @@
+//Vista Base (Mobile - Breakpoint SM)
 .header-container {
   background-color: #8b6a3f;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column; // Apila los elementos en celular 
   align-items: center;
-  padding: 12px 40px;
+  padding: 15px 20px;
   font-family: Arial, sans-serif;
+  gap: 15px;
 }
 
 .header-title {
   margin: 0;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: bold;
   color: black;
 }
 
 .header-nav {
   display: flex;
-  gap: 10px;
+  flex-wrap: wrap; // Permite que los links bajen de línea si no caben 
+  justify-content: center;
+  gap: 15px;
 }
 
 .nav-link {
@@ -24,9 +28,17 @@
   text-decoration: none;
   font-weight: bold;
   font-size: 14px;
-  position: relative;
 }
 
 .nav-link:hover {
   color: white;
+}
+
+// Vista Escritorio (Breakpoint MD / LG)
+@media (min-width: 768px) {
+  .header-container {
+    flex-direction: row; // Coloca el título y menú en la misma línea
+    justify-content: space-between;
+    padding: 12px 40px;
+  }
 }

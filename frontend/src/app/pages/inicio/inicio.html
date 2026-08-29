@@ -1,9 +1,19 @@
-<div>
-      <h1>Menú de la Cafetería:</h1>
+<div class="container py-5">
+  <h1 class="text-center mb-5 fw-bold">Menú de la Cafetería</h1>
       
-      @if (errorMsg()) {
-        <p style="color: red;">{{ errorMsg() }}</p>
-      } @else {
-        <pre>{{ datosDelServidor() | json }}</pre> 
+  @if (errorMsg()) {
+    <div class="alert alert-danger text-center shadow-sm">{{ errorMsg() }}</div>
+  } @else {
+    <!-- Grilla con breakpoints mobile-first (12, 6, 4) -->
+    <div class="row g-4">
+      @for (item of datosDelServidor(); track item.id) {
+        <div class="col-12 col-md-6 col-lg-4">
+          <app-tarjeta-producto 
+            [producto]="item" 
+            (productoAgregado)="manejarAgregado($event)">
+          </app-tarjeta-producto>
+        </div>
       }
+    </div>
+  }
 </div>

@@ -1,6 +1,13 @@
-<div class="tarjeta" style="border: 1px solid #ccc; padding: 16px; margin: 8px;">
-  <h3>{{ producto.nombre }}</h3>
-  <p>{{ producto.descripcion }}</p>
-  <strong>${{ producto.precio }}</strong><br><br>
-  <button (click)="agregarAlCarrito()">Agregar al pedido</button>
+<div class="card h-100 shadow-sm border-0">
+  <div class="bg-secondary text-white text-center py-5 rounded-top">
+    <span class="fs-1">☕</span>
+  </div>
+  <div class="card-body d-flex flex-column">
+    <h5 class="card-title fw-bold">{{ producto.nombre }}</h5>
+    <p class="card-text text-muted">{{ producto.descripcion }}</p>
+    <h4 class="mt-auto text-success fw-bold">${{ producto.precio }}</h4>
+    <button class="btn btn-outline-dark mt-3 w-100" (click)="agregarAlCarrito()">
+      Agregar al pedido
+    </button>
+  </div>
 </div>
