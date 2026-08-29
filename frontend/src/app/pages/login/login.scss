@@ -1,0 +1,186 @@
+:host {
+  display: block;
+  width: 100%;
+  min-height: calc(100vh - 150px);
+  background-image: url('../../../fondo_cafeteria.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  font-family: 'Open Sans', sans-serif;
+}
+
+// Fondo a pantalla completa
+.auth-background {
+  min-height: calc(100vh - 150px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+// Tarjeta principal
+.auth-card {
+  background: rgba(195, 173, 152, 0.92);
+  backdrop-filter: blur(2px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 440px;
+  color: #1a1a1a;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 20px 40px rgba(35, 24, 14, 0.18);
+
+  h2 {
+    font-weight: 700;
+    font-size: 2.3rem;
+    letter-spacing: -0.5px;
+    color: #2a1d12;
+  }
+}
+
+.login-content,
+.login-form {
+  width: 100%;
+}
+
+.login-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+
+.checkbox-row {
+  width: 100%;
+  justify-content: center;
+}
+
+.login-form > * {
+  width: 100%;
+}
+
+.login-content h2,
+.login-content .text-center,
+.login-content .checkbox-row,
+.login-content .btn,
+.login-content a,
+.auth-card > .text-end,
+.auth-card > .text-start,
+.auth-card .create-form .text-center,
+.auth-card > .text-center {
+  text-align: center;
+}
+
+.create-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.create-form > * {
+  width: 100%;
+}
+
+.create-form .row .custom-input {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 0;
+  min-height: 52px;
+}
+
+.create-form .row {
+  width: 100%;
+  --bs-gutter-x: 0.9rem;
+  margin-bottom: 0.8rem;
+}
+
+.create-form .row .col-6 {
+  display: flex;
+  align-items: stretch;
+}
+
+.create-form .custom-input {
+  min-height: 52px;
+  margin-bottom: 1.1rem;
+}
+
+// Inputs personalizados
+.custom-input {
+  display: block;
+  width: 100%;
+  max-width: 380px;
+  min-height: 52px;
+  box-sizing: border-box;
+  border: 1px solid rgba(60, 42, 25, 0.14);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  transition: all 0.2s ease;
+  margin-bottom: 1.1rem;
+
+  &::placeholder {
+    text-align: center;
+    color: #4f4338;
+    font-weight: 500;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 3px rgba(110, 80, 48, 0.18);
+    border-color: rgba(110, 80, 48, 0.35);
+    outline: none;
+    background: rgba(255, 255, 255, 0.9);
+  }
+}
+
+// Botón marrón
+.custom-btn {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    background: linear-gradient(135deg, #8b6a3f, #6f512f);
+    border: none;
+    border-radius: 999px;
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 12px 42px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 18px rgba(111, 81, 47, 0.28);
+    margin-top: 0.4rem;
+    margin-bottom: 0.8rem;
+
+  &:hover {
+    background: linear-gradient(135deg, #725632, #5a4229);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+}
+
+// Checkbox
+.custom-checkbox {
+  border: none;
+  border-radius: 4px;
+  width: 16px;
+  height: 16px;
+}
+
+.text-dark {
+  color: #1d120d !important;
+}
+
+.small {
+  font-weight: 600;
+}
