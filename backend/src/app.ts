@@ -10,6 +10,8 @@ import 'reflect-metadata';
 import { orm, syncSchema } from './shared/database/orm.js';
 import { RequestContext } from '@mikro-orm/core';
 import cors from 'cors';
+import { Categoria } from './categoria/categoria.entity.js';
+import { Producto } from './producto/producto.entity.js';
 
 const app = express();
 
@@ -37,7 +39,37 @@ app.get('/', (req, res) => {
 });
 
 await syncSchema()  //never in production
+/*
+async function seedInitialData() {
+  const em = orm.em
 
+  await em.nativeDelete(Producto, {})
+  await em.nativeDelete(Categoria, {})
+
+  const bebidas = em.create(Categoria, { nombre: 'bebidas' })
+  const comidas = em.create(Categoria, { nombre: 'comidas' })
+
+  await em.flush()
+
+  em.create(Producto, {
+    nombre: 'cafe cortado',
+    descripcion: 'Café con leche vaporizada en menor cantidad que el café latte',
+    precio: 3000,
+    categoria: bebidas,
+  })
+
+  em.create(Producto, {
+    nombre: 'lemon pie',
+    descripcion: 'Tarta con base de galleta y relleno de crema de limón',
+    precio: 3500,
+    categoria: comidas,
+  })
+
+  await em.flush()
+}
+
+await seedInitialData()
+*/
 app.listen(3000, () => {
   console.log('Server is running on http://localhost:3000');
 });

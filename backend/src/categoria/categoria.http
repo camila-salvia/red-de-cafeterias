@@ -1,17 +1,27 @@
 ### Obtener todas las categorías
 GET http://localhost:3000/api/categoria
 
-### Crear una categoría
-# @name createCategoria
+### Crear categoría bebidas
+# @name createCategoriaBebidas
 POST http://localhost:3000/api/categoria
 Content-Type: application/json
 
 {
-  "nombre": "Postres"
+  "nombre": "bebidas"
+}
+
+### Crear categoría comidas
+# @name createCategoriaComidas
+POST http://localhost:3000/api/categoria
+Content-Type: application/json
+
+{
+  "nombre": "comidas"
 }
 
 ### ID
-@id = {{createCategoria.response.body.data.id}}
+@id = {{createCategoriaBebidas.response.body.data.id}}
+@id = {{createCategoriaComidas.response.body.data.id}}
 
 ### Obtener una categoría por id
 GET http://localhost:3000/api/categoria/{{id}}
@@ -21,7 +31,7 @@ PUT http://localhost:3000/api/categoria/{{id}}
 Content-Type: application/json
 
 {
-  "nombre": "Comidas saladas"
+  "nombre": "comidas"
 }
 
 ### PATCH a categoria
@@ -29,7 +39,7 @@ PATCH http://localhost:3000/api/categoria/{{id}}
 Content-Type: application/json
 
 {
-  "nombre": "Comidas saladas"
+  "nombre": "bebidas"
 }
 
 ### Eliminar una categoría
