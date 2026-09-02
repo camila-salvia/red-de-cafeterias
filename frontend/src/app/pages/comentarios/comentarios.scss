@@ -1,0 +1,66 @@
+.comentarios-container {
+  background-color: #E2CFBB; /* Mismo fondo beige de Inicio */
+  min-height: 100vh;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.form-card, .resena-card {
+  background-color: #fffaf0; /* Crema claro de las tarjetas */
+  border: none;
+  border-radius: 15px;
+}
+
+.custom-input, .custom-textarea {
+  border: none;
+  background-color: #f3f3f3;
+  border-radius: 8px;
+  &:focus {
+    box-shadow: 0 0 0 3px rgba(139, 106, 63, 0.3);
+    outline: none;
+  }
+}
+
+.btn-marron {
+  background-color: #8b6a3f;
+  border: none;
+  border-radius: 20px;
+  color: white;
+  font-weight: bold;
+  &:hover { background-color: #725632; }
+}
+
+/* Lógica de colores para las Estrellas */
+.estrellas-selector {
+  font-size: 2rem;
+  .estrella-click {
+    color: #ccc;
+    cursor: pointer;
+    transition: color 0.2s;
+    &.activa, &:hover { color: #f5b301; } /* Dorado */
+  }
+}
+
+.estrellas-display {
+  font-size: 1.2rem;
+  span { color: #ccc; }
+  .dorada { color: #f5b301; }
+}
+
+/* Diseño del Pop-Up de Éxito */
+.popup-exito {
+  position: fixed;
+  top: 80px; /* Debajo del header */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #28a745; /* Verde Bootstrap */
+  color: white;
+  padding: 15px 30px;
+  border-radius: 30px;
+  z-index: 1000;
+  animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+  from { top: 0; opacity: 0; }
+  to { top: 80px; opacity: 1; }
+}

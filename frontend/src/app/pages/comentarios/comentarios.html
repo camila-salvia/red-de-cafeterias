@@ -1,0 +1,119 @@
+<!-- Pop-up de éxito -->
+@if (mostrarPopup()) {
+  <div class="popup-exito shadow-lg">
+    <strong>¡Gracias por tu comentario!</strong> Valoramos mucho tu opinión.
+  </div>
+}
+
+<!-- Banner Header -->
+<div class="bg-white py-4 d-flex justify-content-center align-items-center shadow-sm">
+  <h1 class="fw-bold m-0" style="font-family: 'Open Sans', sans-serif;">Reseñas de la Comunidad</h1>
+</div>
+
+<div class="comentarios-container py-5">
+  <div class="container-fluid px-4 px-md-5">
+    <div class="row">
+
+      <!-- Columna Izquierda: Formulario y Filtros -->
+      <div class="col-12 col-md-4 mb-5">
+        
+        <!-- Formulario de Envío -->
+        <div class="card form-card shadow-sm mb-4 p-4">
+          <h4 class="fw-bold mb-3 text-center">Dejanos tu opinión</h4>
+          
+          @if (sesionIniciada()) {
+            <!-- Estrellas Interactivas -->
+            <div class="estrellas-selector text-center mb-3">
+              @for (i of [1, 2, 3, 4, 5]; track i) {
+                <span 
+                  class="estrella-click" 
+                  [class.activa]="i <= puntajeSeleccionado()" 
+                  (click)="marcarEstrella(i)">★
+                </span>
+              }
+            </div>
+
+            <!-- Autocompletado IA -->
+            <textarea 
+              [(ngModel)]="textoComentario" 
+              class="form-control mb-2 custom-textarea" 
+              rows="3" 
+              placeholder="Escribe tu comentario (Opcional)..."
+              list="sugerenciasIA"></textarea>
+            
+            <datalist id="sugerenciasIA">
+              <option value="El café estaba delicioso y a buena temperatura."></option>
+              <option value="Excelente atención por parte del personal."></option>
+              <option value="Me encantó la decoración del lugar."></option>
+            </datalist>
+
+            @if (mensajeError()) {
+              <div class="text-danger small text-center mb-2">{{ mensajeError() }}</div>
+            }
+
+            <button class="btn btn-marron w-100" (click)="enviarResena()">PUBLICAR RESEÑA</button>
+          } @else {
+            <div class="text-center">
+              <p class="text-muted">Inicia sesión para calificar y comentar.</p>
+              <a href="/login" class="btn btn-marron px-4">Ingresar</a>
+            </div>
+          }
+        </div>
+
+        <!-- Panel de Filtros -->
+        <div class="card p-4 form-card shadow-sm">
+          <h5 class="fw-bold mb-3">Filtros</h5>
+          
+          <label class="small fw-bold">Ordenar por fecha:</label>
+          <select class="form-select mb-3 custom-input" [ngModel]="ordenReciente()" (ngModelChange)="ordenReciente.set($event)">
+            <option [ngValue]="true">Más recientes</option>
+            <option [ngValue]="false">Más antiguos</option>
+          </select>
+
+          <label class="small fw-bold">Filtrar por puntaje:</label>
+          <select class="form-select custom-input" [ngModel]="filtroEstrellas()" (ngModelChange)="filtroEstrellas.set(+$event)">
+            <option value="0">Todas las estrellas</option>
+            <option value="5">5 Estrellas</option>
+            <option value="4">4 Estrellas</option>
+            <option value="3">3 Estrellas</option>
+            <option value="2">2 Estrellas</option>
+            <option value="1">1 Estrella</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Columna Derecha: Lista de Reseñas -->
+      <div class="col-12 col-md-8">
+        <div class="row g-3">
+          @for (resena of resenasFiltradas(); track resena.id) {
+            <div class="col-12">
+              <div class="card resena-card shadow-sm p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h6 class="fw-bold m-0">{{ resena.usuario }}</h6>
+                  <span class="text-muted small">{{ resena.fecha_publicacion | date:'dd/MM/yyyy' }}</span>
+                </div>
+                
+                <div class="estrellas-display mb-2">
+                  @for (i of [1, 2, 3, 4, 5]; track i) {
+                    <span [class.dorada]="i <= resena.puntuacion">★</span>
+                  }
+                </div>
+                
+                @if (resena.contenido) {
+                  <p class="m-0 text-dark">{{ resena.contenido }}</p>
+                } @else {
+                  <p class="m-0 text-muted fst-italic">El usuario solo dejó una calificación.</p>
+                }
+              </div>
+            </div>
+          } @empty {
+            <div class="text-center p-5 text-muted">
+              No hay reseñas que coincidan con tus filtros.
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

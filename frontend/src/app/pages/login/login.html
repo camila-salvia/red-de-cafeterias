@@ -2,30 +2,38 @@
   <div class="auth-card p-4 p-md-5 shadow-lg">
 
     @if (vistaLogin()) {
-      <!-- VISTA INICIO DE SESIÓN -->
-      <div class="login-content">
-        <h2 class="text-center mb-4">Bienvenido</h2>
-        <form class="login-form">
-          <input type="email" class="form-control custom-input mb-3" placeholder="mail">
-          <input type="password" class="form-control custom-input mb-3" placeholder="contraseña">
+    <!-- VISTA INICIO DE SESIÓN -->
+    <div class="login-content">
+      <h2 class="text-center mb-4">Bienvenido</h2>
+      <form class="login-form">
+        <!-- Agregamos name y [(ngModel)] a los inputs -->
+        <input type="email" name="email" [(ngModel)]="email" class="form-control custom-input mb-3" placeholder="email">
+        <input type="password" name="password" [(ngModel)]="password" class="form-control custom-input mb-3" placeholder="password">
 
-          <div class="d-flex align-items-center justify-content-center mb-3 ps-1 checkbox-row">
-            <input type="checkbox" class="form-check-input mt-0 me-2 custom-checkbox" id="recordar">
-            <label class="form-check-label small" for="recordar">Recordar</label>
-          </div>
+        <!-- Renderizado de errores -->
+        @if (mensajeError()) {
+          <div class="text-danger small text-center mb-3 fw-bold">{{ mensajeError() }}</div>
+        }
 
-          <div class="text-center mb-4">
-            <a href="#" class="small text-dark text-decoration-none">¿Olvidaste tu contraseña?</a>
-          </div>
+        <div class="d-flex align-items-center justify-content-center mb-3 ps-1 checkbox-row">
+          <input type="checkbox" class="form-check-input mt-0 me-2 custom-checkbox" id="recordar">
+          <label class="form-check-label small" for="recordar">Recordar</label>
+        </div>
 
-          <div class="text-center">
-            <button type="button" class="btn custom-btn px-5 mb-4">INGRESAR</button>
-          </div>
-        </form>
-      </div>
-      <div class="text-end mt-2">
-        <a href="javascript:void(0)" (click)="toggleVista()" class="text-dark text-decoration-none small d-block">Crear cuenta</a>
-      </div>
+        <div class="text-center mb-4">
+          <a href="#" class="small text-dark text-decoration-none">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <div class="text-center">
+          <!-- Agregamos el evento (click) al botón -->
+          <button type="button" class="btn custom-btn px-5 mb-4" (click)="iniciarSesion()">INGRESAR</button>
+        </div>
+      </form>
+    </div>
+    <div class="text-end mt-2">
+      <a href="javascript:void(0)" (click)="toggleVista()" class="text-dark text-decoration-none small d-block">Crear cuenta</a>
+    </div>
+       
     } @else {
       <!-- VISTA CREAR CUENTA -->
       <h2 class="text-center mb-4">Crear cuenta</h2>
@@ -46,8 +54,8 @@
             <input type="text" class="form-control custom-input" placeholder="dirección">
           </div>
         </div>
-        <input type="email" class="form-control custom-input mb-3" placeholder="mail">
-        <input type="password" class="form-control custom-input mb-4" placeholder="contraseña">
+        <input type="email" class="form-control custom-input mb-3" placeholder="email">
+        <input type="password" class="form-control custom-input mb-4" placeholder="password">
 
         <div class="text-center">
           <button type="button" class="btn custom-btn px-5">CREAR</button>

@@ -28,6 +28,14 @@ export class ApiService {
     if (error.status === 500) mensajeAmigable = 'Problema en el servidor. Intenta más tarde.';
     return throwError(() => new Error(mensajeAmigable));
   }
+
+  obtenerUsuarios() {
+    return this.http.get<any[]>('http://localhost:3000/api/usuario');
+  }
+
+  crearUsuario(nuevoUsuario: any) {
+    return this.http.post<any>('http://localhost:3000/api/usuario', nuevoUsuario);
+  }
 }
 
 
