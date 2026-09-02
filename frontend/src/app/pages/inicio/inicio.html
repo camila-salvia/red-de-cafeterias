@@ -1,19 +1,35 @@
-<div class="container py-5">
-  <h1 class="text-center mb-5 fw-bold">Menú de la Cafetería</h1>
+<!-- Cabecera Blanca -->
+<div class="header-banner bg-white py-4 d-flex justify-content-center align-items-center gap-4 shadow-sm">
+  <h1 class="fw-bold m-0">Descubrí nuestros productos</h1>
+  <span class="fs-1">☕</span>
+</div>
+
+<!-- Sección Beige (Menú y Filtros) -->
+<div class="menu-container py-5">
+  <div class="container-fluid px-4 px-md-5">
+    <div class="row">
       
-  @if (errorMsg()) {
-    <div class="alert alert-danger text-center shadow-sm">{{ errorMsg() }}</div>
-  } @else {
-    <!-- Grilla con breakpoints mobile-first (12, 6, 4) -->
-    <div class="row g-4">
-      @for (item of datosDelServidor(); track item.id) {
-        <div class="col-12 col-md-6 col-lg-4">
-          <app-tarjeta-producto 
-            [producto]="item" 
-            (productoAgregado)="manejarAgregado($event)">
-          </app-tarjeta-producto>
+      <!-- Barra lateral de Filtros -->
+      <div class="col-12 col-md-2 mb-4 mb-md-0 d-flex flex-row flex-md-column gap-3 justify-content-center justify-content-md-start">
+        <button class="btn-filtro" [class.active]="filtroCategoria() === 'TODO'" (click)="cambiarFiltro('TODO')">VER TODO</button>
+        <button class="btn-filtro" [class.active]="filtroCategoria() === 'BEBIDAS'" (click)="cambiarFiltro('BEBIDAS')">BEBIDAS</button>
+        <button class="btn-filtro" [class.active]="filtroCategoria() === 'COMIDA'" (click)="cambiarFiltro('COMIDA')">COMIDA</button>
+      </div>
+
+      <!-- Grilla de Productos -->
+      <div class="col-12 col-md-10">
+        <div class="row g-3 g-md-4 justify-content-center">
+          @for (item of productosFiltrados(); track item.id) {
+            <div class="col-6 col-sm-4 col-md-4 col-lg-3 d-flex justify-content-center">
+              <app-tarjeta-producto 
+                [producto]="item" 
+                (productoAgregado)="manejarAgregado($event)">
+              </app-tarjeta-producto>
+            </div>
+          }
         </div>
-      }
+      </div>
+
     </div>
-  }
+  </div>
 </div>

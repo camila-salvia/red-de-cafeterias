@@ -13,6 +13,20 @@ export class TarjetaProductoComponent {
   @Input() producto!: Producto; 
   @Output() productoAgregado = new EventEmitter<Producto>(); 
 
+  getBackgroundImage(): string {
+    const nombre = (this.producto?.nombre || '').toLowerCase();
+
+    if (nombre.includes('cafe') || nombre.includes('café')) {
+      return 'url("/assets/cafe.png")';
+    }
+
+    if (nombre.includes('lemon') || nombre.includes('pie')) {
+      return 'url("/assets/lemon.png")';
+    }
+
+    return 'url("/assets/cafe.png")';
+  }
+
   agregarAlCarrito() {
     this.productoAgregado.emit(this.producto);
   }

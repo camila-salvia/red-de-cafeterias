@@ -1,0 +1,26 @@
+.header-banner {
+  h1 { font-family: 'Open Sans', sans-serif; }
+}
+
+.menu-container {
+  background-color: #E2CFBB; // Beige de fondo
+  min-height: 100vh;
+}
+
+.btn-filtro {
+  background-color: #9E7D5C; // Color de los botones
+  color: black;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 25px;
+  font-weight: bold;
+  font-size: 14px;
+  font-family: 'Open Sans', sans-serif;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+
+  &:hover, &.active {
+    background-color: #6C5237; // Más oscuro al seleccionar
+    color: white;
+  }
+}
