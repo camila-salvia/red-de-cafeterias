@@ -36,6 +36,14 @@ export class ApiService {
   crearUsuario(nuevoUsuario: any) {
     return this.http.post<any>('http://localhost:3000/api/usuario', nuevoUsuario);
   }
+
+  crearPedido(pedidoData: any) {
+    return this.http.post(`${this.apiUrl}/pedidos`, pedidoData);
+  }
+
+  obtenerMisPedidos(usuarioId: string | number) {
+    return this.http.get(`${this.apiUrl}/pedidos/usuario/${usuarioId}`);
+  }
 }
 
 

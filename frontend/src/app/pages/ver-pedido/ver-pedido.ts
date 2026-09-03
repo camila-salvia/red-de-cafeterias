@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { CartService } from '../../services/cart.js';
 import { AuthService } from '../../services/auth';
+import { ApiService } from '../../services/api';
 
 @Component({
   selector: 'app-ver-pedido',
@@ -13,6 +14,7 @@ import { AuthService } from '../../services/auth';
 })
 export class VerPedidoComponent {
   cartService = inject(CartService);
+  private apiService = inject(ApiService);
   private router = inject(Router);
 
   incrementar(id?: number | string) {
@@ -35,12 +37,32 @@ export class VerPedidoComponent {
 
   confirmarPedido() {
     if (this.cartService.items().length === 0) return;
+    const usuarioId = localStorage.getItem('usuario_id') || 1; // Ajusta según cómo guardes el ID en login
 
-    // Aquí más adelante llamaremos al backend para guardar en la base de datos
-    console.log('Enviando pedido al backend...', this.cartService.items());
-    alert('¡Pedido confirmado con éxito!');
-    
-    this.cartService.limpiarCarrito();
-    this.router.navigate(['/mis-pedidos']);
-  }
+  const pedidoPayload = {
+    usuario: usuarioId,
+    metodo_pago: 1, // ID del método de pago por defecto
+    direccion_envio: 'Retiro en sucursal',
+    fecha_pedido: new Date(),
+    fecha_pago: new Date(),
+    estado_pago: 'Aprobado',
+    costo_total: this.cartService.precioTotal(),
+    items: this.cartService.items().map(item => ({
+      productoId: item.producto.id,
+      cantidad: item.cantidad
+    }))
+  };
+
+  this.apiService.crearPedido(pedidoPayload).subscribe({
+    next: (res: any) => {
+      alert('¡Pedido confirmado con éxito!');
+      this.cartService.limpiarCarrito();
+      this.router.navigate(['/mis-pedidos']);
+    },
+    error: (err) => {
+      console.error('Error al crear pedido:', err);
+      alert('Ocurrió un error al procesar tu pedido.');
+    }
+  });
+}
 }

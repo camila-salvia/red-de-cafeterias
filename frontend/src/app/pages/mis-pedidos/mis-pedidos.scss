@@ -1,0 +1,88 @@
+.pedidos-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  font-family: inherit;
+
+  h2 {
+    color: #4a2c11;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+}
+
+.tarjeta-pedido {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.2rem;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #ebdccb;
+
+  .cabecera-pedido {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f0e6da;
+    padding-bottom: 0.8rem;
+    margin-bottom: 0.8rem;
+
+    .numero-pedido {
+      font-weight: bold;
+      color: #3b220c;
+      margin-right: 0.8rem;
+    }
+
+    .fecha-pedido {
+      font-size: 0.85rem;
+      color: #8c735d;
+    }
+
+    .estado-badge {
+      background-color: #d1e7dd;
+      color: #0f5132;
+      padding: 0.3rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+  }
+
+  .detalles-productos {
+    margin-bottom: 0.8rem;
+
+    .linea-producto {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.3rem 0;
+      color: #553924;
+      font-size: 0.95rem;
+    }
+  }
+
+  .pie-pedido {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px dashed #d4c3ab;
+    padding-top: 0.8rem;
+    font-size: 1.1rem;
+    color: #301a07;
+  }
+}
+
+.sin-pedidos {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #7b5836;
+
+  .btn-ir-carta {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.6rem 1.2rem;
+    background-color: #6f4e37;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+  }
+}
