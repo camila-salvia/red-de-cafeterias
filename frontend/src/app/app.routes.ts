@@ -12,5 +12,6 @@ export const routes: Routes = [
   { path: 'pedidos', component: Pedidos, canActivate: [authGuard] },
   { path: 'admin', component: AdminDashboard, canActivate: [authGuard] },
   { path: 'comentarios', component: ComentariosComponent },
+  { path: 'ver-pedido', loadComponent: () => import('./pages/ver-pedido/ver-pedido').then(m => m.VerPedidoComponent), canActivate: [authGuard]},
   { path: '**', redirectTo: '' }
 ];

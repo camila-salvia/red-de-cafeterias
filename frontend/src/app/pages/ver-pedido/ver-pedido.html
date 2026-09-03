@@ -1,0 +1,64 @@
+<div class="carrito-container">
+  <h2>Tu Pedido</h2>
+
+  @if (cartService.items().length === 0) {
+  <div class="carrito-vacio">
+    <p>Tu carrito está vacío</p>
+    <a routerLink="/" class="btn-volver">Explorar la carta</a>
+  </div>
+  } @else {
+  <div class="carrito-contenido">
+
+    <!-- Lista de productos -->
+    <div class="lista-items">
+      @for (item of cartService.items(); track item.producto.id) {
+      <div class="item-fila">
+        <div class="item-info">
+          <span class="item-nombre">{{ item.producto.nombre }}</span>
+          <span class="item-unitario">${{ item.producto.precio }} c/u</span>
+        </div>
+
+        <!-- Controles de cantidad -->
+        <div class="item-cantidad">
+          <button type="button" (click)="decrementar(item.producto.id)">-</button>
+          <span class="numero-cantidad">{{ item.cantidad }}</span>
+          <button type="button" (click)="incrementar(item.producto.id)">+</button>
+        </div>
+
+        <!-- Subtotal por ítem -->
+        <div class="item-subtotal">
+          <span>${{ item.producto.precio * item.cantidad }}</span>
+        </div>
+
+        <!-- Botón quitar -->
+        <button type="button" class="btn-eliminar" (click)="eliminar(item.producto.id)" title="Eliminar">
+          Eliminar
+        </button>
+      </div>
+      }
+    </div>
+
+    <!-- Resumen y Confirmación -->
+    <div class="resumen-pedido">
+      <div class="resumen-fila">
+        <span>Total de productos:</span>
+        <span>{{ cartService.cantidadTotal() }}</span>
+      </div>
+      <div class="resumen-fila total">
+        <span>Total a pagar:</span>
+        <strong>${{ cartService.precioTotal() }}</strong>
+      </div>
+
+      <div class="acciones">
+        <button type="button" class="btn-vaciar" (click)="cartService.limpiarCarrito()">
+          Vaciar Carrito
+        </button>
+        <button type="button" class="btn-confirmar" (click)="confirmarPedido()">
+          Confirmar Pedido
+        </button>
+      </div>
+    </div>
+
+  </div>
+  }
+</div>
