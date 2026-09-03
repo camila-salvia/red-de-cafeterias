@@ -3,6 +3,7 @@ import {CommonModule} from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../../services/api';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-login',
@@ -14,6 +15,7 @@ import { ApiService } from '../../services/api';
 export class LoginComponent {
   private router = inject(Router);
   private apiService = inject(ApiService);
+  private authService = inject(AuthService);
 
   vistaLogin = signal<boolean>(true);
   email = signal<string>('');
@@ -43,8 +45,8 @@ export class LoginComponent {
         );
 
         if (usuarioValido) {
-          localStorage.setItem('token_cafeteria', 'sesion-activa');
-          localStorage.setItem('nombre_usuario', usuarioValido.nombre);
+          this.authService.login(usuarioValido.nombre);
+          this.router.navigate(['/inicio']);
           
           this.router.navigate(['/inicio']);
         } else {
