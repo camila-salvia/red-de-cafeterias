@@ -3,7 +3,7 @@ POST http://localhost:3000/api/usuario/login
 Content-Type: application/json
 
 {
-  "email": "martin.vivas@example.com",
+  "email": "camila@example.com",
   "password": "password000"
 }
 
@@ -17,4 +17,15 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzOWZkM2VkL
   "categoria": "1",
   "descripcion": "Café doble con leche y azúcar",
    "precio": 3200
+}
+
+### Crear producto incorrecto
+POST http://localhost:3000/api/producto
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhiMzZkYTkyLWRhZmQtNDM5Ni1hNjY5LTQ5Y2QwZjBlMTZmOSIsImVtYWlsIjoiY2FtaWxhQGV4YW1wbGUuY29tIiwiZXNBZG1pbiI6dHJ1ZSwiaWF0IjoxNzg4NTUzMTQ1LCJleHAiOjE3ODg1ODE5NDV9.I_EnUdrFqcPH0vso0zjCXJmXgpMe1PHhH1XUgq0SDjo
+
+{
+  "nombre": "",
+  "precio": -200,
+  "categoria": ""
 }
