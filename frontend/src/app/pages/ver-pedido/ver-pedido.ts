@@ -37,11 +37,11 @@ export class VerPedidoComponent {
 
   confirmarPedido() {
     if (this.cartService.items().length === 0) return;
-    const usuarioId = localStorage.getItem('usuario_id') || 1; // Ajusta según cómo guardes el ID en login
+    const usuarioId = localStorage.getItem('usuario_id') || '1'; // Ajusta según cómo guardes el ID en login
 
   const pedidoPayload = {
     usuario: usuarioId,
-    metodo_pago: 1, // ID del método de pago por defecto
+    metodo_pago: "6748ac98-6103-4965-a17d-6b3fff777eea", // ID del método de pago por defecto - tarjeta
     direccion_envio: 'Retiro en sucursal',
     fecha_pedido: new Date(),
     fecha_pago: new Date(),

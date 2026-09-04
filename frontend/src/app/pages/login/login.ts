@@ -45,9 +45,7 @@ export class LoginComponent {
         );
 
         if (usuarioValido) {
-          this.authService.login(usuarioValido.nombre);
-          this.router.navigate(['/inicio']);
-          
+          this.authService.login(usuarioValido.nombre, usuarioValido.id);
           this.router.navigate(['/inicio']);
         } else {
           this.mensajeError.set('Credenciales incorrectas');

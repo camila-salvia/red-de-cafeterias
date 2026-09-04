@@ -24,7 +24,7 @@ export class ApiService {
   }
 
 // usuario
-  obtenerUsuarios() {
+  obtenerUsuarios(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/usuario`)
     .pipe(catchError(this.manejarError));
   }
