@@ -1,1 +1,3 @@
-<button class="btn">{{ texto }}</button>
+<button class="btn" [ngClass]="'btn-' + variante" (click)="onClick.emit()">
+  {{ texto }}
+</button>

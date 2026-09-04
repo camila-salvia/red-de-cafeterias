@@ -1,3 +1,168 @@
+.carrito-container {
+  max-width: 850px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #f7f3ee;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  font-family: inherit;
+
+  h2 {
+    color: #4a2c11;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+}
+
+.carrito-vacio {
+  text-align: center;
+  padding: 3rem 1rem;
+
+  p {
+    font-size: 1.2rem;
+    color: #7b5836;
+    margin-bottom: 1.5rem;
+  }
+
+  .btn-volver {
+    display: inline-block;
+    padding: 0.6rem 1.4rem;
+    background-color: #6f4e37;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background 0.2s;
+
+    &:hover {
+      background-color: #553924;
+    }
+  }
+}
+
+.item-fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e0d5c1;
+
+  .item-info {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+
+    .item-nombre {
+      font-weight: bold;
+      color: #3b220c;
+    }
+
+    .item-unitario {
+      font-size: 0.85rem;
+      color: #8c735d;
+    }
+  }
+
+  .item-cantidad {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    button {
+      width: 30px;
+      height: 30px;
+      border: 1px solid #c2ad94;
+      background-color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+
+      &:hover {
+        background-color: #ece1d1;
+      }
+    }
+
+    .numero-cantidad {
+      min-width: 24px;
+      text-align: center;
+      font-weight: 600;
+    }
+  }
+
+  .item-subtotal {
+    flex: 1;
+    text-align: right;
+    font-weight: bold;
+    color: #4a2c11;
+    padding: 0 1rem;
+  }
+
+  .btn-eliminar {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    opacity: 0.7;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.resumen-pedido {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #d4c3ab;
+
+  .resumen-fila {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    color: #553924;
+
+    &.total {
+      font-size: 1.3rem;
+      color: #301a07;
+      margin-top: 1rem;
+    }
+  }
+
+  .acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+
+    .btn-vaciar {
+      padding: 0.7rem 1.2rem;
+      background-color: transparent;
+      border: 1px solid #b84a39;
+      color: #b84a39;
+      border-radius: 6px;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #ffeae8;
+      }
+    }
+
+    .btn-confirmar {
+      padding: 0.7rem 1.5rem;
+      background-color: #52796f;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+
+      &:hover {
+        background-color: #3f6057;
+      }
+    }
+  }
+}
+
 .confirmacion-exitosa {
   text-align: center;
   padding: 1.5rem 0;
