@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { Producto } from './producto.entity.js'
+import { Categoria } from '../categoria/categoria.entity.js'
 import { orm } from '../shared/database/orm.js'
 
 const em = orm.em
@@ -29,13 +30,34 @@ function sanitizeProductoInput(
 // obtener todas los productos
 async function findAll(req: Request, res: Response) {
   try {
+    const { categoria } = req.query
+
+    // devolvemos todos
+    if (!categoria || categoria === 'TODO') {
+      const productos = await em.find(Producto, {}, { populate: ['categoria'] })
+      return res.status(200).json({ message: 'Todos los productos', data: productos })
+    }
+
+    // buscamos las categorías que coincidan con el texto
+    const cats = await em.find(Categoria, {
+      nombre: { $like: `%${String(categoria).toLowerCase()}%` }
+    })
+
+    if (cats.length === 0) {
+      return res.status(200).json({ message: 'Sin productos para esa categoría', data: [] })
+    }
+
+    // traemos los productos asociados a esas categorías encontradas
     const productos = await em.find(
-        Producto, 
-        {}, 
-        { populate: ['categoria']})
-    res.status(200).json({ message: 'Todos los productos encontrados', data: productos })
-  } catch (error:any) {
-    res.status(500).json({ message: 'Error al obtener productos' })
+      Producto,
+      { categoria: { $in: cats } },
+      { populate: ['categoria'] }
+    )
+
+    return res.status(200).json({ message: 'Productos filtrados', data: productos })
+  } catch (error: any) {
+    console.error('Error detallado en findAll:', error)
+    return res.status(500).json({ message: 'Error al obtener productos', error: error.message })
   }
 }
 

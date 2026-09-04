@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError, catchError } from 'rxjs';
 import { Producto } from '../models/producto.interface';
 import { environment } from '../../environments/environment';
@@ -13,8 +13,12 @@ export class ApiService {
   private apiUrl = environment.apiUrl;
 
   // producto
-  getProductos(): Observable<Producto[]> {
-    return this.http.get<Producto[]>(`${this.apiUrl}/producto`)
+  getProductos(categoria?: string): Observable<any> {
+    let params = new HttpParams();
+    if (categoria && categoria.toLowerCase() !== 'todos') {
+      params = params.set('categoria', categoria);
+    }
+    return this.http.get<any>(`${this.apiUrl}/producto`, { params })
       .pipe(catchError(this.manejarError));
   }
 

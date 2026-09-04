@@ -11,19 +11,19 @@
       
       <!-- Barra lateral de Filtros -->
       <div class="col-12 col-md-2 mb-4 mb-md-0 d-flex flex-row flex-md-column gap-3 justify-content-center justify-content-md-start">
-        <button class="btn-filtro" [class.active]="filtroCategoria() === 'TODO'" (click)="cambiarFiltro('TODO')">VER TODO</button>
-        <button class="btn-filtro" [class.active]="filtroCategoria() === 'BEBIDAS'" (click)="cambiarFiltro('BEBIDAS')">BEBIDAS</button>
-        <button class="btn-filtro" [class.active]="filtroCategoria() === 'COMIDA'" (click)="cambiarFiltro('COMIDA')">COMIDA</button>
+        <button [class.activo]="filtroCategoria() === 'TODO'" (click)="cambiarFiltro('TODO')">VER TODO</button>
+        <button [class.activo]="filtroCategoria() === 'BEBIDAS'" (click)="cambiarFiltro('BEBIDAS')">BEBIDAS</button>
+        <button [class.activo]="filtroCategoria() === 'COMIDAS'" (click)="cambiarFiltro('COMIDAS')">COMIDAS</button>
       </div>
 
       <!-- Grilla de Productos -->
       <div class="col-12 col-md-10">
         <div class="row g-3 g-md-4 justify-content-center">
-          @for (item of productosFiltrados(); track item.id) {
+          @for (producto of productos(); track producto.id) {
             <div class="col-6 col-sm-4 col-md-4 col-lg-3 d-flex justify-content-center">
               <app-tarjeta-producto 
-                [producto]="item" 
-                (productoAgregado)="manejarAgregado($event)">
+                [producto]="producto" 
+                (agregar)="manejarAgregado($event)">
               </app-tarjeta-producto>
             </div>
           }
