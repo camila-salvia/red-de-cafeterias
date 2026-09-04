@@ -6,8 +6,8 @@
     <a routerLink="/comentarios" class="nav-link">Reseñas</a>
 
     @if (authService.isLoggedIn()) {
-      <a routerLink="ver-pedido" class="nav-link">Ver pedido</a>
-      <a routerLink="#" class="nav-link">Mis pedidos</a>
+      <a routerLink="/ver-pedido" class="nav-link">Ver carrito</a>
+      <a routerLink="/mis-pedidos" class="nav-link">Mis pedidos</a>
       <span class="nav-user">Hola, {{ authService.usuarioActual() }}</span>
       <button type="button" (click)="cerrarSesion()" class="nav-link nav-btn-logout">
         Cerrar sesión

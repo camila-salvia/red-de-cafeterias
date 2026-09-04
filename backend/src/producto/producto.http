@@ -13,9 +13,9 @@ POST http://localhost:3000/api/producto
 Content-Type: application/json
 
 {
-    "nombre": "lemon pie",
-    "categoria": "<id_categoria_comidas>",
-    "descripcion": "Tarta con base de galleta y relleno de crema de limón",
+    "nombre": "torta de chocolate",
+    "categoria": "2", // no me funcionó el id insertado en la tabla categoria, por eso puse 2
+    "descripcion": "Torta de chocolate con relleno de crema y cobertura de chocolate",
     "precio": 3500
 }
 
