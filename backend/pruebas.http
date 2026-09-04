@@ -1,0 +1,20 @@
+### Probar Login
+POST http://localhost:3000/api/usuario/login
+Content-Type: application/json
+
+{
+  "email": "martin.vivas@example.com",
+  "password": "password000"
+}
+
+### Crear producto (Ruta protegida)
+POST http://localhost:3000/api/producto
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzOWZkM2VkLWMwYjEtNDJiNy05N2E3LTM0MWIxYmRlY2I0YSIsImVtYWlsIjoibWFydGluLnZpdmFzQGV4YW1wbGUuY29tIiwiZXNBZG1pbiI6ZmFsc2UsImlhdCI6MTc4ODU1MTQzNywiZXhwIjoxNzg4NTgwMjM3fQ.Ar0xmdWPvT8UnfXDZinlN28nu8Xy5uxdeJeTt73giQU
+
+{
+  "nombre": "Café doble",
+  "categoria": "1",
+  "descripcion": "Café doble con leche y azúcar",
+   "precio": 3200
+}

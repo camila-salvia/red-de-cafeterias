@@ -64,12 +64,24 @@ async function findAll(req: Request, res: Response) {
 // crear nuevo producto
 async function add(req: Request, res: Response) {
   try {
-    const producto = em.create(Producto, req.body.sanitizedInput)
-    await em.flush()
-    res.status(201).json({ message: 'Producto creado', data: producto })
-  } catch (error:any) {
+    const input = req.body.sanitizedInput || req.body;
+    if (!input.categoria) {
+      return res.status(400).json({ message: 'La categoría es obligatoria' });
+    }
+    // Extrae el ID sin importar si envían "uuid" o { id: "uuid" }
+    const categoriaId = typeof input.categoria === 'object' ? input.categoria.id : input.categoria;
+    if (!categoriaId) {
+      return res.status(400).json({ message: 'El ID de la categoría es inválido o no fue proporcionado' });
+    }
+    const producto = em.create(Producto, {
+      ...input,
+      categoria: em.getReference(Categoria, categoriaId)
+    });
+    await em.flush();
+    return res.status(201).json({ message: 'Producto creado exitosamente', data: producto });
+  } catch (error: any) {
     console.error('Error detallado al crear:', error);
-    res.status(500).json({ message: 'Error al crear producto', detalle: error.message })
+    return res.status(500).json({ message: 'Error al crear producto', detalle: error.message });
   }
 }
 

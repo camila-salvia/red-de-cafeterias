@@ -14,13 +14,13 @@ POST http://localhost:3000/api/usuario
 Content-Type: application/json
 
 {
-    "nombre": "Mart",
-    "apellido": "Vivas",
-    "telefono": "123456780",
-    "direccion": "Calle Real 123",
-    "email": "martin.vi@example.com",
+    "nombre": "Camila",
+    "apellido": "Salvia",
+    "telefono": "654456780",
+    "direccion": "Calle Falsa 1234",
+    "email": "camila@example.com",
     "password": "password000",
-    "esAdmin": false
+    "esAdmin": true
 }
 ### PUT a usuario
 PUT http://localhost:3000/api/usuario/{{id}}
@@ -42,7 +42,7 @@ PATCH http://localhost:3000/api/usuario/{{id}}
 Content-Type: application/json
 
 {
-    "nombre": "Josefina"
+    "esAdmin": true
 }
 
 ### DELETE a usuario

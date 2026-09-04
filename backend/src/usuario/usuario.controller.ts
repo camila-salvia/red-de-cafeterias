@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
 import { Usuario } from './usuario.entity.js'
 import { orm } from '../shared/database/orm.js'
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
 
 const em = orm.em
 
@@ -27,6 +29,58 @@ function sanitizeUsuarioInput(
     })
 
     next();
+}
+
+async function login(req: Request, res: Response) {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email y contraseña requeridos' });
+    }
+
+    const usuario = await em.findOne(Usuario, { email });
+    if (!usuario) {
+      return res.status(401).json({ message: 'Credenciales inválidas' });
+    }
+
+    // Valida contraseña hasheada con bcrypt o texto plano temporal
+    let passwordValida = false;
+    if (usuario.password.startsWith('$2b$') || usuario.password.startsWith('$2a$')) {
+      passwordValida = await bcrypt.compare(password, usuario.password);
+    } else {
+      passwordValida = usuario.password === password;
+    }
+
+    if (!passwordValida) {
+      return res.status(401).json({ message: 'Credenciales inválidas' });
+    }
+
+    const secret = process.env.JWT_SECRET || 'clave_cafeteria';
+    const token = jwt.sign(
+      {
+        id: usuario.id,
+        email: usuario.email,
+        esAdmin: usuario.esAdmin
+      },
+      secret,
+      { expiresIn: '8h' }
+    );
+
+    return res.status(200).json({
+      message: 'Inicio de sesión exitoso',
+      data: {
+        id: usuario.id,
+        nombre: usuario.nombre,
+        email: usuario.email,
+        esAdmin: usuario.esAdmin,
+        token
+      }
+    });
+  } catch (error: any) {
+    console.error('Error en login:', error);
+    return res.status(500).json({ message: 'Error interno en el servidor' });
+  }
 }
 
 // obtener todas los usuarios
@@ -93,4 +147,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export {sanitizeUsuarioInput, findAll, add, findOne, update, remove}
+export {sanitizeUsuarioInput, findAll, add, findOne, update, remove, login}

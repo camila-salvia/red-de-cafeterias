@@ -12,11 +12,15 @@ export class ApiService {
   // Base común: 'http://localhost:3000/api'
   private apiUrl = environment.apiUrl;
 
+  login(credenciales: { email: string; password: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/usuario/login`, credenciales);
+  }
+
   // producto
   getProductos(categoria?: string): Observable<any> {
     let params = new HttpParams();
-    if (categoria && categoria.toLowerCase() !== 'todos') {
-      params = params.set('categoria', categoria);
+    if (categoria && categoria !== 'TODO') {
+      params = params.set('categoria', categoria.toLowerCase());
     }
     return this.http.get<any>(`${this.apiUrl}/producto`, { params })
       .pipe(catchError(this.manejarError));
