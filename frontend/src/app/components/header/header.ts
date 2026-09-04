@@ -1,10 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { CommonModule } from '@angular/common';
+import { BotonComponent } from '../boton/boton';
 
 @Component({
   selector: 'app-header',
-  imports: [RouterLink],
+  imports: [RouterLink, CommonModule, BotonComponent],
   templateUrl: './header.html',
   styleUrl: './header.scss',
 })

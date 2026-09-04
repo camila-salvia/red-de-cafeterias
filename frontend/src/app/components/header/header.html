@@ -9,9 +9,8 @@
       <a routerLink="/ver-pedido" class="nav-link">Ver carrito</a>
       <a routerLink="/mis-pedidos" class="nav-link">Mis pedidos</a>
       <span class="nav-user">Hola, {{ authService.usuarioActual() }}</span>
-      <button type="button" (click)="cerrarSesion()" class="nav-link nav-btn-logout">
-        Cerrar sesión
-      </button>
+      <app-boton texto="Cerrar sesión" variante="logout" (onClick)="authService.logout()">
+      </app-boton>
     } @else {
       <a routerLink="/login" class="nav-link">Ingresar</a>
     }
