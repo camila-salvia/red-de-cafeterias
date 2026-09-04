@@ -1,4 +1,4 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://api.tucafeteria.com/api/producto'
+    apiUrl: 'https://api.tucafeteria.com/api'
 };

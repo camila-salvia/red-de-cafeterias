@@ -31,7 +31,7 @@ app.use('/api/usuario', usuarioRoutes);
 app.use('/api/comentario', comentarioRoutes);
 app.use('/api/metodo-pago', metodoPagoRoutes);
 app.use('/api/detalle-pedido', detallePedidoRoutes);
-app.use('/api/pedidos', pedidoRoutes);
+app.use('/api/pedido', pedidoRoutes);
 
 // Health / root
 app.get('/', (req, res) => {

@@ -9,40 +9,47 @@ import { environment } from '../../environments/environment';
 })
 export class ApiService {
   private http = inject(HttpClient);
-  //Angular usará LOCALHOST o la URL de PRODUCCION automaticamente
+  // Base común: 'http://localhost:3000/api'
   private apiUrl = environment.apiUrl;
 
+  // producto
   getProductos(): Observable<Producto[]> {
-    return this.http.get<Producto[]>(this.apiUrl)
+    return this.http.get<Producto[]>(`${this.apiUrl}/producto`)
       .pipe(catchError(this.manejarError));
   }
 
   crearProducto(producto: Producto): Observable<any> {
-    return this.http.post(this.apiUrl, producto)
+    return this.http.post(`${this.apiUrl}/producto`, producto)
       .pipe(catchError(this.manejarError));
   }
 
-  private manejarError(error: HttpErrorResponse) {
+// usuario
+  obtenerUsuarios() {
+    return this.http.get<any[]>(`${this.apiUrl}/usuario`)
+    .pipe(catchError(this.manejarError));
+  }
+
+  crearUsuario(nuevoUsuario: any) {
+    return this.http.post<any>(`${this.apiUrl}/usuario`, nuevoUsuario)
+      .pipe(catchError(this.manejarError));
+  }
+
+  // pedido
+  crearPedido(pedidoData: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/pedido`, pedidoData)
+      .pipe(catchError(this.manejarError));
+  }
+
+  obtenerMisPedidos(usuarioId: string | number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/pedido/usuario/${usuarioId}`)
+      .pipe(catchError(this.manejarError));
+  }
+
+    private manejarError(error: HttpErrorResponse) {
     let mensajeAmigable = 'Ocurrió un error inesperado al procesar tu solicitud.';
     if (error.status === 404) mensajeAmigable = 'No pudimos encontrar el recurso solicitado.';
     if (error.status === 500) mensajeAmigable = 'Problema en el servidor. Intenta más tarde.';
     return throwError(() => new Error(mensajeAmigable));
-  }
-
-  obtenerUsuarios() {
-    return this.http.get<any[]>('http://localhost:3000/api/usuario');
-  }
-
-  crearUsuario(nuevoUsuario: any) {
-    return this.http.post<any>('http://localhost:3000/api/usuario', nuevoUsuario);
-  }
-
-  crearPedido(pedidoData: any) {
-    return this.http.post(`${this.apiUrl}/pedidos`, pedidoData);
-  }
-
-  obtenerMisPedidos(usuarioId: string | number) {
-    return this.http.get(`${this.apiUrl}/pedidos/usuario/${usuarioId}`);
   }
 }
 

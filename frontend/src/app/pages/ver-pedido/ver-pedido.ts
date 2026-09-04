@@ -60,9 +60,11 @@ export class VerPedidoComponent {
       this.router.navigate(['/mis-pedidos']);
     },
     error: (err) => {
-      console.error('Error al crear pedido:', err);
-      alert('Ocurrió un error al procesar tu pedido.');
-    }
+      console.error('Error completo:', err);
+      console.error('Status HTTP:', err.status);
+      console.error('Mensaje del Backend:', err.error);
+      alert('Ocurrió un error al procesar tu pedido. Revisa la consola.');
+}
   });
 }
 }
