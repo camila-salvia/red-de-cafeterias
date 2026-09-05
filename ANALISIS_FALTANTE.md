@@ -23,7 +23,8 @@
 - ✅ Autenticación JWT implementada
 - ✅ 2 niveles de acceso: usuario y admin (esAdmin boolean)
 - ✅ Middleware de autenticación (verificarToken, soloAdmin)
-- ⚠️ Validaciones básicas de entrada (parciales; faltan relaciones, duplicados y comentarios)
+- ✅ Validadores de usuario, categoría, producto, pedido y comentario implementados
+- ⚠️ Persisten validaciones de autorización, propiedad y manejo uniforme de errores
 
 ### Backend - Entidades
 
@@ -65,7 +66,7 @@
 - ✅ Login (página)
 - ✅ Inicio (página con listado de productos)
 - ✅ Pedidos (página)
-- ✅ AdminDashboard (página - existe pero VACÍA)
+- ⚠️ AdminDashboard (página existente, pero CRUD incompleto)
 - ✅ Comentarios (página)
 - ✅ MisPedidos (página)
 - ✅ VerPedido (página)
@@ -92,7 +93,7 @@
 
 **Tareas**:
 
-- [ ] Configurar testing framework en backend (vitest, jest o similar) y reemplazar el script `test` placeholder de `backend/package.json`
+- [ ] Configurar testing framework en backend (vitest, jest o similar) y reemplazar el script `test` placeholder de `backend/package.json`; solo existe `debug-db.ts`
 - [ ] Test 1 - Integrante Vivas Martin: Test unitario de Usuario (crear, obtener, validar)
 - [ ] Test 2 - Integrante Salvia Camila: Test unitario de Producto (crear con categoría, filtrar)
 - [ ] Test 3 - Integrante Marianela Leonardelli: Test unitario de Comentario (crear, validar relación)
@@ -106,19 +107,18 @@
 
 **Tareas**:
 
-- [x] Usuario: validar email (regex) y password (mínimo 6 caracteres)
-- [ ] Usuario: validar teléfono con formato completo y email duplicado antes de persistir
-- [ ] Categoría: validar nombre no vacío y no duplicado
-- [ ] Producto: validar nombre no vacío y precio > 0 (ya implementado)
-- [ ] Producto: confirmar que la categoría exista; actualmente se crea una referencia ORM sin validarla previamente
-- [ ] Comentario: **FALTA COMPLETAMENTE** - validar contenido no vacío, puntuación 1-5, usuario válido
-- [ ] Pedido: validar items no vacío, usuario válido, productos existentes y método de pago existente
-- [ ] Manejo de errores: devolver errores detallados y amigables con códigos HTTP correctos; varios duplicados o relaciones inválidas terminan actualmente en 500
+- [x] Usuario: validar email, password, teléfono y email duplicado
+- [x] Categoría: validar nombre no vacío y no duplicado
+- [x] Producto: validar nombre no vacío y precio > 0
+- [ ] Producto: confirmar que la categoría exista; el controlador todavía crea una referencia ORM sin validarla previamente
+- [x] Comentario: validar contenido no vacío, puntuación 1-5 y usuario existente
+- [x] Pedido: validar items no vacío, usuario, productos y método de pago existentes
+- [ ] Manejo uniforme de errores: algunos errores de persistencia todavía pueden terminar como 500 en vez de 400/404/409
 
 **Archivos a completar/crear**:
 
-- `backend/src/comentario/comentario.validator.ts` (NO EXISTE)
-- Mejorar validaciones en otros validators
+- Revisar `backend/src/producto/producto.controller.ts` para validar explícitamente la categoría
+- Unificar el manejo de errores de persistencia en controllers
 
 #### 3. **Protección de Rutas - INCOMPLETA** 🔓
 
@@ -156,22 +156,22 @@
 
 ### 🔴 **CRÍTICO - Frontend (DEBE COMPLETARSE)**
 
-#### 1. **Login Desacoplado - PROBLEMA GRAVE** 🚨
+#### 1. **Login frontend - PARCIALMENTE RESUELTO** ⚠️
 
 **Requisito**: Login con autenticación propia usando API
 
 **Problema**:
 
-- El frontend está obteniendo TODOS los usuarios y comparando passwords en memoria
-- **NUNCA** está usando el endpoint `/api/usuario/login` que ya existe en backend
-- NO está usando JWT correctamente
+- ✅ El frontend usa el endpoint `/api/usuario/login`
+- ✅ `AuthService` guarda el token JWT, los datos del usuario y permite cerrar sesión
+- ✅ El interceptor envía el token en los headers
 
 **Tareas**:
 
-- [ ] Modificar login.ts para usar `apiService.login(email, password)` (ya existe en api.service)
-- [ ] Actualizar AuthService.login() para recibir token JWT del backend
-- [ ] Validar que token JWT se guarda y se envía en requests (interceptor YA existe ✓)
-- [ ] Implementar logout con limpieza de localStorage
+- [x] Modificar login.ts para usar `apiService.login(...)`
+- [x] Actualizar AuthService.login() para recibir token JWT del backend
+- [x] Validar que token JWT se guarda y se envía en requests
+- [x] Implementar logout con limpieza de localStorage
 
 **Archivo**: `frontend/src/app/pages/login/login.ts`
 
@@ -195,24 +195,21 @@
 - `frontend/src/app/components/formulario-login/formulario-login.spec.ts` (mejorar)
 - `frontend/e2e/` (CREAR)
 
-#### 3. **AdminDashboard - VACÍO** ❌
+#### 3. **AdminDashboard - INCOMPLETO** ⚠️
 
 **Requisito**: Admin debe poder gestionar productos (CRUD de productos)
 
 **Tareas**:
 
-- [ ] Implementar AdminDashboard para mostrar:
-  - Listado de productos con opciones de editar/eliminar
-  - Formulario para agregar nuevo producto
-  - Listado de categorías
-  - Opcionalmente: Listado de pedidos y sus estados
-- [ ] Proteger AdminDashboard para solo admins
-- [ ] Añadir guard de admin en rutas (actualmente solo verificar token)
+- [ ] Agregar listado de productos con opciones de editar/eliminar
+- [x] Formulario para agregar producto
+- [x] Listado y creación de categorías
+- [ ] Corregir la ruta duplicada `/admin`: actualmente existe una entrada con `authGuard` que permite acceso a cualquier usuario autenticado antes de `adminGuard`
 
 **Archivo**:
 
 - `frontend/src/app/pages/admin-dashboard/admin-dashboard.ts`
-- `frontend/src/app/guards/admin-guard.ts` (CREAR)
+- `frontend/src/app/guards/admin.guard.ts` (ya existe)
 
 ---
 
@@ -237,13 +234,13 @@
 - [ ] Mostrar fecha, estado, costo total, cliente, dirección envío
 - [ ] Listar productos dentro del pedido (detalles)
 
-#### 3. **Mis Pedidos - IMPLEMENTAR**
+#### 3. **Mis Pedidos - INCOMPLETO**
 
 **Requisito**: Usuario autenticado puede ver su historial de pedidos
 
 **Archivo existente**: `mis-pedidos.ts`
 
-- [ ] Cargar pedidos del usuario usando `apiService.obtenerMisPedidos(usuarioId)`
+- [x] Cargar pedidos del usuario usando `apiService.obtenerMisPedidos(usuarioId)`
 - [ ] Mostrar listado filtrable por estado
 - [ ] Click en pedido → ver detalle (ver-pedido)
 
@@ -258,23 +255,23 @@
 - [ ] Validar que usuario esté autenticado antes de crear pedido
 - [ ] Limpiar carrito después de crear pedido exitosamente
 
-#### 5. **Comentarios - PÁGINA VACÍA**
+#### 5. **Comentarios - SOLO LOCAL**
 
 **Requisito**: Usuarios pueden dejar comentarios en pedidos
 
 **Archivo existente**: `comentarios.ts`
 
-- [ ] Listar comentarios existentes
-- [ ] Formulario para crear nuevo comentario (asociado a pedido/usuario)
+- [ ] Listar comentarios desde la API; actualmente usa datos locales de ejemplo
+- [ ] Formulario para crear comentario mediante el backend y asociarlo al usuario actual
 - [ ] Protección: solo usuarios autenticados pueden comentar
 
 ---
 
 ### 🟡 **IMPORTANTE - Backend (FUNCIONALIDAD)**
 
-#### 1. **Validador de Comentario - CREAR** ❌
+#### 1. **Validador de Comentario - IMPLEMENTADO** ✅
 
-**Archivo faltante**: `backend/src/comentario/comentario.validator.ts`
+**Archivo existente**: `backend/src/comentario/comentario.validator.ts`
 
 ```typescript
 // Debe validar:
@@ -294,7 +291,7 @@
 
 **Archivo**: `backend/src/app.ts` - tiene seed comentado
 
-- [ ] Descomenta para datos de prueba
+- [ ] Descomentar para datos de prueba
 - Útil para development
 
 ---
@@ -329,20 +326,20 @@
 ### **Vivas Martin**
 
 - [ ] Implementar 1 test unitario de Usuario (backend)
-- [ ] Mejorar validación de Usuario
+- [x] Mejorar validación de Usuario
 - [ ] Proteger rutas de Usuario que faltan
 
 ### **Salvia Camila**
 
 - [ ] Implementar 1 test unitario de Producto (backend)
-- [ ] Crear y validar Comentario validator
-- [ ] Implementar AdminDashboard (frontend)
+- [x] Crear y validar Comentario validator
+- [ ] Completar AdminDashboard (frontend)
 
 ### **Marianela Leonardelli**
 
 - [ ] Implementar 1 test unitario de Comentario (backend)
-- [ ] Arreglar login del frontend (usar JWT correctamente)
-- [ ] Implementar MisPedidos y Comentarios (frontend)
+- [x] Arreglar login del frontend (usar JWT correctamente)
+- [ ] Completar MisPedidos y conectar Comentarios con la API
 
 ### **Todos**
 
@@ -357,7 +354,7 @@
 
 ### Funcionales requeridos (3 integrantes):
 
-- ✅ 3 CRUDs simples: Usuario, Categoría, + 1 más
+- ✅ CRUDs simples: Usuario, Categoría y MetodoPago
 - ✅ CRUDs dependientes: Producto(Categoría), Pedido(Usuario/MetodoPago), DetallePedido(Pedido/Producto), Comentario(Usuario)
 - ❌ Listados con filtro: existe Productos por categoría y Pedidos por usuario; falta filtro de Pedidos por estado
 - ❌ Detalle para cada listado: FALTA completar
