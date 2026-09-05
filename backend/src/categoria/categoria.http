@@ -43,4 +43,4 @@ Content-Type: application/json
 }
 
 ### Eliminar una categoría
-DELETE http://localhost:3000/api/categoria/{{id}}
+DELETE http://localhost:3000/api/categoria/4ac64c2c-6a7e-44a4-9e7f-7dc451d3c913

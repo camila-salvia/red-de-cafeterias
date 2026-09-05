@@ -32,27 +32,15 @@ export class LoginComponent {
       return;
     }
 
-    this.apiService.obtenerUsuarios().subscribe({
+    this.apiService.login({ email: this.email(), password: this.password() }).subscribe({
       next: (respuesta: any) => {
-        const listaUsuarios = respuesta.data ? respuesta.data : respuesta;
-
-        console.log('Usuarios en la BD: ', listaUsuarios);
-        console.log('Email ingresado: ', this.email());
-        console.log('Password ingresado: ', this.password());
-
-        const usuarioValido = listaUsuarios.find(
-          (u: any) => u.email === this.email() && u.password === this.password()
-        );
-
-        if (usuarioValido) {
-          this.authService.login(usuarioValido.nombre, usuarioValido.id);
+        if (respuesta.data) {
+          this.authService.login(respuesta.data); //Recibe {token, id, nombre, esAdmin}
           this.router.navigate(['/inicio']);
-        } else {
-          this.mensajeError.set('Credenciales incorrectas');
         }
       },
       error: (err) => {
-        this.mensajeError.set('Error al conectar con la base de datos.');
+        this.mensajeError.set('Credenciales inválidas');
       }
     });
   }

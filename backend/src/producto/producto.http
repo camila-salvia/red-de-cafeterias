@@ -31,13 +31,14 @@ Content-Type: application/json
 }
 
 ### PUT a producto
-PUT http://localhost:3000/api/producto/{{id}}
+PUT http://localhost:3000/api/producto/d51d171b-38af-4258-bcea-751d2f8d8fb5
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjI1YjZlMmU1LWRiZTgtNDA4OS05ZjhlLTRlOWExMmI3NjExZSIsImVtYWlsIjoiY2FtaWxhLnNhbHZpYUBleGFtcGxlLmNvbSIsImVzQWRtaW4iOnRydWUsImlhdCI6MTc4ODU2NjgxMCwiZXhwIjoxNzg4NTk1NjEwfQ.NTD-cgND51b5Ilk99CLvdTQ8Bt3j75x7tu5EiC8vjXQ
 
 {
-  "nombre": "cafe cortado",
-  "categoria": "<id_categoria_bebidas>",
-  "descripcion": "Café con leche vaporizada en menor cantidad que el café latte",
+  "nombre": "lemon pie",
+  "categoria": "1b08ee67-671e-4684-b783-09a0a11020e0",
+  "descripcion": "Tarta con base de galleta y relleno de crema de limón",
   "precio": 3000
 }
 
