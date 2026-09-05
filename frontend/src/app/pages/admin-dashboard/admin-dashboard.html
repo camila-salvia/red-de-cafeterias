@@ -1,1 +1,61 @@
-<p>admin-dashboard works!</p>
+<div class="admin-container">
+  <h2>Panel de Administración</h2>
+
+  @if (mensaje()) {
+  <div class="alerta exito">{{ mensaje() }}</div>
+  }
+  @if (error()) {
+  <div class="alerta error">{{ error() }}</div>
+  }
+
+  <div class="grid-paneles">
+    <!-- Panel Nueva Categoría -->
+    <section class="card">
+      <h3>Crear Categoría</h3>
+      <form (ngSubmit)="guardarCategoria()">
+        <div class="campo">
+          <label>Nombre de la Categoría</label>
+          <input type="text" placeholder="Ej: Cafetería, Pastelería" [(ngModel)]="nuevaCategoriaNombre" name="catNombre"
+            required />
+        </div>
+        <button type="submit" class="btn-guardar">Agregar Categoría</button>
+      </form>
+    </section>
+
+    <!-- Panel Nuevo Producto -->
+    <section class="card">
+      <h3>Crear Producto</h3>
+      <form (ngSubmit)="guardarProducto()">
+        <div class="campo">
+          <label>Nombre del Producto</label>
+          <input type="text" placeholder="Ej: Espresso Doble" [(ngModel)]="nuevoProducto.nombre" name="nombre"
+            required />
+        </div>
+
+        <div class="campo">
+          <label>Descripción</label>
+          <textarea placeholder="Breve detalle del producto..." [(ngModel)]="nuevoProducto.descripcion"
+            name="descripcion">
+          </textarea>
+        </div>
+
+        <div class="campo">
+          <label>Precio ($)</label>
+          <input type="number" placeholder="0.00" [(ngModel)]="nuevoProducto.precio" name="precio" min="1" required />
+        </div>
+
+        <div class="campo">
+          <label>Categoría</label>
+          <select [(ngModel)]="nuevoProducto.categoria" name="categoria" required>
+            <option value="" disabled selected>Seleccione una categoría</option>
+            @for (cat of categorias(); track cat.id) {
+            <option [value]="cat.id">{{ cat.nombre }}</option>
+            }
+          </select>
+        </div>
+
+        <button type="submit" class="btn-guardar">Guardar Producto</button>
+      </form>
+    </section>
+  </div>
+</div>

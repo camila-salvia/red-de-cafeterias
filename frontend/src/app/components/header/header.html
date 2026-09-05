@@ -14,5 +14,9 @@
     } @else {
       <a routerLink="/login" class="nav-link">Ingresar</a>
     }
+
+    @if (authService.esAdmin()) {
+    <a routerLink="/admin" class="nav-link">Panel Admin</a>
+    }
   </nav>
 </div>
