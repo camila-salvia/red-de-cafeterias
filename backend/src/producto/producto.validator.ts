@@ -1,6 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
+import { orm } from '../shared/database/orm.js';
+import { Categoria } from '../categoria/categoria.entity.js';
 
-export function validarProductoInput(req: Request, res: Response, next: NextFunction) {
+const em = orm.em;
+
+export async function validarProductoInput(req: Request, res: Response, next: NextFunction) {
   const input = req.body.sanitizedInput || req.body;
   const errores: string[] = [];
 
@@ -21,11 +25,18 @@ export function validarProductoInput(req: Request, res: Response, next: NextFunc
   }
 
   if (errores.length > 0) {
-    return res.status(400).json({
-      message: 'Datos de producto inválidos.',
-      errores
-    });
+    return res.status(400).json({ message: 'Datos de producto inválidos.', errores});
   }
 
+  // Confirmar existencia real de la categoría en DB
+  try {
+    const categoriaExiste = await em.findOne(Categoria, { id: categoriaId });
+    if (!categoriaExiste) {
+      return res.status(404).json({ message: 'La categoría especificada no existe.' });
+    }
+  } catch (error: any) {
+    return res.status(500).json({ message: 'Error al verificar categoría', error: error.message });
+  }
+  
   next();
 }

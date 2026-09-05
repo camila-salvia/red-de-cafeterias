@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
+import { orm } from '../shared/database/orm.js';
+import { Usuario } from './usuario.entity.js';
 
-export function validarUsuarioInput(req: Request, res: Response, next: NextFunction) {
-  const { nombre, apellido, email, password, telefono } = req.body;
+const em = orm.em;
+
+export async function validarUsuarioInput(req: Request, res: Response, next: NextFunction) {
+  const { nombre, apellido, email, password, telefono, direccion } = req.body;
   const errores: string[] = [];
 
   // Nombre y Apellido
@@ -24,15 +28,28 @@ export function validarUsuarioInput(req: Request, res: Response, next: NextFunct
   }
 
   // Teléfono numérico
-  if (telefono && isNaN(Number(telefono))) {
-    errores.push('El teléfono debe ser un valor numérico.');
+  const telRegex = /^[0-9]{7,15}$/;
+  if (!telefono || !telRegex.test(String(telefono).trim())) {
+    errores.push('El teléfono debe ser un valor numérico entre 7 y 15 dígitos.');
+  }
+
+  // Dirección
+  if (!direccion || typeof direccion !== 'string' || direccion.trim().length < 5) {
+    errores.push('La dirección es obligatoria y debe tener al menos 5 caracteres.');
   }
 
   if (errores.length > 0) {
-    return res.status(400).json({
-      message: 'Datos de usuario inválidos.',
-      errores
-    });
+    return res.status(400).json({ message: 'Datos de usuario inválidos.', errores});
+  }
+
+  // Comprobar email duplicado antes de persistir 
+  try {
+    const usuarioExistente = await em.findOne(Usuario, { email });
+    if (usuarioExistente) {
+      return res.status(409).json({ message: 'El correo electrónico ya se encuentra registrado.' });
+    }
+  } catch (error: any) {
+    return res.status(500).json({ message: 'Error al verificar email duplicado', error: error.message });
   }
 
   next();
