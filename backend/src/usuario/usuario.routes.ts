@@ -5,7 +5,7 @@ import { validarUsuarioInput } from './usuario.validator.js'; // verificar
 
 const router = Router();
 
-router.post('/', validarUsuarioInput, add);
+router.post('/', validarUsuarioInput, sanitizeUsuarioInput, add);
 router.get('/', findAll);
 router.post('/login', login);
 router.get('/:id', findOne);

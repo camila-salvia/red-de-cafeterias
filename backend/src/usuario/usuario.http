@@ -18,7 +18,7 @@ Content-Type: application/json
     "apellido": "Salvia",
     "telefono": "654456780",
     "direccion": "Calle Falsa 1234",
-    "email": "camila@example.com",
+    "email": "cami@example.com",
     "password": "password000",
     "esAdmin": true
 }
