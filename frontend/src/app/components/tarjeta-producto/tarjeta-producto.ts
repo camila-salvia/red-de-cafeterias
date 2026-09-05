@@ -21,7 +21,7 @@ export class TarjetaProductoComponent {
     }
 
     if (nombre.includes('lemon') || nombre.includes('pie')) {
-      return 'url("/assets/lemon.png")';
+      return 'url("/assets/lemon.jpg")';
     }
 
     return 'url("/assets/cafe.png")';

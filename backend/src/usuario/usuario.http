@@ -22,8 +22,9 @@ Content-Type: application/json
     "password": "password000",
     "esAdmin": true
 }
+
 ### PUT a usuario
-PUT http://localhost:3000/api/usuario/{{id}}
+PUT http://localhost:3000/api/usuario/25b6e2e5-dbe8-4089-9f8e-4e9a12b7611e
 Content-Type: application/json
 
 {

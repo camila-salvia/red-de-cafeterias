@@ -103,14 +103,23 @@ async function add(req: Request, res: Response) {
 
 async function update(req: Request, res: Response) {
   try {
-      const id = req.params.id as string
-      const producto = em.getReference(Producto,  id)
-      em.assign(producto, req.body.sanitizedInput)
-      await em.flush()
-      res.status(200).json({ message: 'Producto actualizado', data: producto })
+      const id = req.params.id as string;
+      // buscar producto 
+      const producto = await em.findOneOrFail(Producto, { id });
+      const input = req.body.sanitizedInput || req.body;
+      // si el front envió categoria para actualizar, la convertimos en referencia
+      if (input.categoria) {
+        const categoriaId = typeof input.categoria === 'object' ? input.categoria.id : input.categoria;
+        input.categoria = em.getReference(Categoria, categoriaId);
+      }
+      // asignar datos limpios al prodcucto encontrado
+      em.assign(producto, input);
+      await em.flush();
+      res.status(200).json({ message: 'Producto actualizado', data: producto });
   } catch (error:any) {
-    res.status(500).json({ message: 'Error al actualizar producto' })
-  }
+      console.error('Detalle del error en update:', error);
+      res.status(500).json({ message: 'Error al actualizar producto', detalle: error.message });
+    }
 }
 
 async function remove(req: Request, res: Response) {

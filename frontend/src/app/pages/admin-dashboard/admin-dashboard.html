@@ -58,4 +58,59 @@
       </form>
     </section>
   </div>
+
+  <div class="grid-paneles listas-admin">
+    <!-- Tabla de categorias -->
+    <section class="tabla-admin">
+      <h3>Lista de Categorías</h3>
+      <table class="tabla-admin">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cat of categorias();track cat.id) {
+            <tr>
+              <td>{{ cat.nombre }}</td>
+              <td>
+                <button type="button" class="btn-eliminar" (click)="eliminarCategoria(cat.id)">Borrar</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section> 
+
+    <!-- Tabla de productos -->
+     <section class="card">
+      <h3>Lista de Productos</h3>
+      <table class="tabla-admin">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Precio</th>
+            <th>Categoría</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (prod of productos(); track prod.id) {
+            <tr>
+              <td>{{ prod.nombre }}</td>
+              <td>{{ prod.descripcion }}</td>
+              <td>{{ prod.precio | currency:'ARS' }}</td>
+              <td>{{ prod.categoria.nombre }}</td>
+              <td>
+                <button type="button" class="btn-editar" (click)="cargarParaEditar(prod)">Editar</button>
+                <button type="button" class="btn-eliminar" (click)="eliminarProducto(prod.id)">Borrar</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+     </section>
+  </div>
 </div>

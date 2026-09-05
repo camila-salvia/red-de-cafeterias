@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError, catchError } from 'rxjs';
 import { Producto } from '../models/producto.interface';
 import { environment } from '../../environments/environment';
@@ -33,14 +33,29 @@ export class ApiService {
       .pipe(catchError(this.manejarError));
   }
 
+  eliminarProducto(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/producto/${id}`, this.getHeaders())
+      .pipe(catchError(this.manejarError));
+  }
+
+  actualizarProducto(id: string, producto: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/producto/${id}`, producto, this.getHeaders())
+      .pipe(catchError(this.manejarError));
+  }
+
 // categoría
-getCategorias(): Observable<any> {
+  getCategorias(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/categoria`)
       .pipe(catchError(this.manejarError));
   }
 
   crearCategoria(categoria: { nombre: string }): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/categoria`, categoria)
+      .pipe(catchError(this.manejarError));
+  }
+
+  eliminarCategoria(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/categoria/${id}`, this.getHeaders())
       .pipe(catchError(this.manejarError));
   }
 
@@ -77,7 +92,14 @@ getCategorias(): Observable<any> {
     
     return throwError(() => new Error(mensajeAmigable));
   }
+
+  // admin
+  private getHeaders() {
+    const token = localStorage.getItem('token_cafeteria');
+    return {
+      headers: new HttpHeaders({
+        'Authorization': `Bearer ${token}`
+      })
+    };
+  }
 }
-
-
-
