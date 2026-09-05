@@ -13,4 +13,11 @@
       AGREGAR
     </button>
   </div>
+  <!-- Notificación de producto agregado al carrito -->
+  @if (notificacionCarrito()) {
+    <div class="toast-carrito">
+      <span class="icono-check">✓</span>
+      {{ notificacionCarrito() }}
+    </div>
+  }
 </div>

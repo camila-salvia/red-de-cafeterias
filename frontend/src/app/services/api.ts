@@ -72,7 +72,12 @@ export class ApiService {
 
   // pedido
   crearPedido(pedidoData: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/pedido`, pedidoData)
+    return this.http.post<any>(`${this.apiUrl}/pedido`, pedidoData, this.getHeaders())
+      .pipe(catchError(this.manejarError));
+  }
+
+  crearDetallePedido(detalleData: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/detalle-pedido`, detalleData, this.getHeaders())
       .pipe(catchError(this.manejarError));
   }
 
@@ -101,5 +106,11 @@ export class ApiService {
         'Authorization': `Bearer ${token}`
       })
     };
+  }
+
+  // pago
+  getMetodosPago(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/metodo-pago`)
+      .pipe(catchError(this.manejarError));
   }
 }

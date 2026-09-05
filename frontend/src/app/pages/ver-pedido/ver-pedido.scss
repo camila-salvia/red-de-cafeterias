@@ -260,3 +260,33 @@
     }
   }
 }
+
+.selector-pago {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px dashed #d4c3ab;
+
+  label {
+    font-weight: 600;
+    color: #553924;
+  }
+
+  select {
+    padding: 0.5rem;
+    border: 1px solid #c2ad94;
+    border-radius: 6px;
+    background-color: #fff;
+    color: #3b220c;
+    font-family: inherit;
+    font-size: 0.95rem;
+    outline: none;
+    cursor: pointer;
+
+    &:focus {
+      border-color: #6f4e37;
+    }
+  }
+}

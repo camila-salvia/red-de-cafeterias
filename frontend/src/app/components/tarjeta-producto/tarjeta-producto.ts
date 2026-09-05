@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Producto } from '../../models/producto.interface';
 
@@ -9,9 +9,11 @@ import { Producto } from '../../models/producto.interface';
   templateUrl: './tarjeta-producto.html',
   styleUrls: ['./tarjeta-producto.scss']
 })
+
 export class TarjetaProductoComponent {
   @Input() producto!: Producto; 
-  @Output() productoAgregado = new EventEmitter<Producto>(); 
+  @Output() productoAgregado = new EventEmitter<Producto>();
+  notificacionCarrito = signal<string | null>(null); 
 
   getBackgroundImage(): string {
     const nombre = (this.producto?.nombre || '').toLowerCase();
@@ -29,5 +31,9 @@ export class TarjetaProductoComponent {
 
   agregarAlCarrito() {
     this.productoAgregado.emit(this.producto);
+    this.notificacionCarrito.set(`${this.producto.nombre} agregado al carrito`);
+    setTimeout(() => {
+      this.notificacionCarrito.set(null);
+    }, 3000);
   }
 }
