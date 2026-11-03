@@ -11,13 +11,15 @@ function sanitizePedidoInput(
     res: Response, 
     next: NextFunction
 ) {
+    const esCreacion = req.method === 'POST'
+
     req.body.sanitizedInput = {
-        fecha_pedido: req.body.fecha_pedido ? new Date(req.body.fecha_pedido) : new Date(),
+        fecha_pedido: req.body.fecha_pedido ? new Date(req.body.fecha_pedido) : (esCreacion ? new Date() : undefined),
         costo_total: req.body.costo_total,
-        direccion_envio: req.body.direccion_envio || 'Retiro en sucursal',
-        fecha_pago: req.body.fecha_pago ? new Date(req.body.fecha_pago) : new Date(),
-        estado_pago: req.body.estado_pago || 'Aprobado',
-        usuario: req.body.usuario,
+        direccion_envio: req.body.direccion_envio || (esCreacion ? 'Retiro en sucursal' : undefined),
+        fecha_pago: req.body.fecha_pago ? new Date(req.body.fecha_pago) : (esCreacion ? new Date() : undefined),
+        estado_pago: req.body.estado_pago || (esCreacion ? 'Pendiente' : undefined),
+        usuario: esCreacion ? req.usuarioToken?.id : req.body.usuario,
         metodo_pago: req.body.metodo_pago
     }
 
@@ -61,11 +63,13 @@ async function findByUsuario(req: Request, res: Response) {
 }
 
 // crear nuevo pedido
+// Al crear, el usuario sale del token
+// Los valores por defecto se aplican SOLO al crear
 async function add(req: Request, res: Response) {
   try {
     const { items } = req.body; // Array de { productoId, cantidad } que viene del carrito
 
-    const pedido = em.create(Pedido, req.body.sanitizedInput)
+    const pedido = em.create(Pedido, { ...req.body.sanitizedInput, estado_pago: 'Pendiente' })
 
     // Si vienen ítems desde el carrito, calculamos y generamos cada DetallePedido
     if (items && Array.isArray(items)) {
@@ -89,7 +93,7 @@ async function add(req: Request, res: Response) {
         pedido.detalles.add(detalle)
       }
 
-      // Si el frontend no mandó costo_total o queremos asegurarlo por backend:
+      // El total siempre lo calcula el backend con los precios reales de la base
       pedido.costo_total = totalCalculado
     }
 
@@ -102,7 +106,7 @@ async function add(req: Request, res: Response) {
   }
 }
 
-// obtener pedido por id
+// obtener pedido por id (solo el propietario o el admin)
  async function findOne(req: Request, res: Response) {
   try {
     const id = req.params.id as string
@@ -111,12 +115,18 @@ async function add(req: Request, res: Response) {
       { id: id as any },
       { populate: ['detalles.producto', 'usuario', 'metodo_pago'] }
     )
+    const esDuenio = pedido.usuario.id === req.usuarioToken?.id
+    if (!esDuenio && !req.usuarioToken?.esAdmin) {
+      return res.status(403).json({ message: 'Acceso denegado: este pedido pertenece a otro usuario' })
+    }
+
     res.status(200).json({ message: 'Pedido encontrado', data: pedido })
   } catch (error:any) {
     res.status(404).json({ message: 'Pedido no encontrado' })
   }
 }
 
+// actualizar pedido
 async function update(req: Request, res: Response) {
   try {
       const id = req.params.id as string
@@ -129,13 +139,14 @@ async function update(req: Request, res: Response) {
   }
 }
 
+// eliminar pedido
 async function remove(req: Request, res: Response) {
   try {
     const id = req.params.id as string
     const pedido = em.getReference(Pedido, id as any)
     await em.removeAndFlush(pedido)
     res.status(200).send({ message: 'Pedido eliminado' })
-  } catch (error) {
+  } catch (error:any) {
     res.status(500).send({ message: 'Error al eliminar pedido' });
   }
 }

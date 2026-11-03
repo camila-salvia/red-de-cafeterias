@@ -7,7 +7,8 @@ import { MetodoPago } from '../metodo-pago/metodo-pago.entity.js';
 const em = orm.em;
 
 export async function validarPedidoInput(req: Request, res: Response, next: NextFunction) {
-  const { usuario, metodo_pago, items } = req.body;
+  const { metodo_pago, items } = req.body;
+  const usuario = req.body.sanitizedInput?.usuario ?? req.body.usuario;
   const errores: string[] = [];
 
   const usuarioId = typeof usuario === 'object' ? usuario?.id : usuario;
