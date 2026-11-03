@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { orm } from '../shared/database/orm.js'
+import { NotFoundError } from '@mikro-orm/core'
 import { Pedido } from '../pedido/pedido.entity.js'
 import { Producto } from '../producto/producto.entity.js'
 import { DetallePedido } from '../detalle-pedido/detalle-pedido.entity.js'
@@ -14,13 +15,15 @@ function sanitizePedidoInput(
     const esCreacion = req.method === 'POST'
 
     req.body.sanitizedInput = {
-        fecha_pedido: req.body.fecha_pedido ? new Date(req.body.fecha_pedido) : (esCreacion ? new Date() : undefined),
-        costo_total: req.body.costo_total,
-        direccion_envio: req.body.direccion_envio || (esCreacion ? 'Retiro en sucursal' : undefined),
-        fecha_pago: req.body.fecha_pago ? new Date(req.body.fecha_pago) : (esCreacion ? new Date() : undefined),
-        estado_pago: req.body.estado_pago || (esCreacion ? 'Pendiente' : undefined),
-        usuario: esCreacion ? req.usuarioToken?.id : req.body.usuario,
+        fecha_pedido: esCreacion ? new Date() : undefined,
+        direccion_envio: req.body.direccion_envio,
+        fecha_pago: req.body.fecha_pago ? new Date(req.body.fecha_pago) : undefined,
+        estado_pago: esCreacion ? 'Pendiente' : req.body.estado_pago,
         metodo_pago: req.body.metodo_pago
+    }
+
+    if (esCreacion) {
+        req.body.sanitizedInput.usuario = req.usuarioToken?.id;
     }
 
     Object.keys(req.body.sanitizedInput).forEach(key => {
@@ -32,7 +35,7 @@ function sanitizePedidoInput(
     next();
 }
 
-// obtener todos los pedidos
+// obtener todos los pedidos (solo admin)
 async function findAll(req: Request, res: Response) {
   try {
     const pedidos = await em.find(Pedido, 
@@ -48,6 +51,12 @@ async function findAll(req: Request, res: Response) {
 async function findByUsuario(req: Request, res: Response) {
   try {
     const usuarioId = req.params.usuarioId as string
+    
+    // Un usuario común solo debería poder ver sus propios pedidos (a menos que sea admin)
+    if (usuarioId !== req.usuarioToken?.id && !req.usuarioToken?.esAdmin) {
+      return res.status(403).json({ message: 'Acceso denegado' });
+    }
+
     const pedidos = await em.find(
       Pedido, 
       { usuario: usuarioId as any }, 
@@ -64,38 +73,42 @@ async function findByUsuario(req: Request, res: Response) {
 
 // crear nuevo pedido
 // Al crear, el usuario sale del token
-// Los valores por defecto se aplican SOLO al crear
 async function add(req: Request, res: Response) {
   try {
     const { items } = req.body; // Array de { productoId, cantidad } que viene del carrito
 
-    const pedido = em.create(Pedido, { ...req.body.sanitizedInput, estado_pago: 'Pendiente' })
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: 'El pedido debe contener al menos un producto' });
+    }
 
-    // Si vienen ítems desde el carrito, calculamos y generamos cada DetallePedido
-    if (items && Array.isArray(items)) {
-      let totalCalculado = 0
+    const pedido = em.create(Pedido, req.body.sanitizedInput)
+    let totalCalculado = 0
 
-      for (const item of items) {
-        const prodId = item.productoId || item.producto?.id
-        const producto = await em.findOneOrFail(Producto, { id: prodId })
+    for (const item of items) {
+      const prodId = item.productoId || item.producto?.id
+      const producto = await em.findOneOrFail(Producto, { id: prodId })
 
-        const precioUnitario = Number(producto.precio)
-        const cantidad = Number(item.cantidad)
-        totalCalculado += precioUnitario * cantidad
+      const precioUnitario = Number(producto.precio)
+      const cantidad = Number(item.cantidad)
+      
+      if (isNaN(cantidad) || cantidad <= 0) {
+        return res.status(400).json({ message: 'Cantidad inválida en los ítems' });
+      }
 
-        const detalle = em.create(DetallePedido, {
+      totalCalculado += precioUnitario * cantidad
+
+      const detalle = em.create(DetallePedido, {
           cantidad,
           precio_unitario: precioUnitario,
           pedido,
           producto
-        })
+      })
 
         pedido.detalles.add(detalle)
       }
 
       // El total siempre lo calcula el backend con los precios reales de la base
       pedido.costo_total = totalCalculado
-    }
 
     await em.flush()
 
@@ -122,7 +135,10 @@ async function add(req: Request, res: Response) {
 
     res.status(200).json({ message: 'Pedido encontrado', data: pedido })
   } catch (error:any) {
-    res.status(404).json({ message: 'Pedido no encontrado' })
+  if (error instanceof NotFoundError) {
+      return res.status(404).json({ message: 'Pedido no encontrado' })
+    }
+    res.status(500).json({ message: 'Error al buscar el pedido' })
   }
 }
 
@@ -130,11 +146,14 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
       const id = req.params.id as string
-      const pedido = em.getReference(Pedido,  id as any)
+      const pedido = await em.findOneOrFail(Pedido, { id: id as any })
       em.assign(pedido, req.body.sanitizedInput)
       await em.flush()
       res.status(200).json({ message: 'Pedido actualizado', data: pedido })
   } catch (error:any) {
+    if (error instanceof NotFoundError) {
+      return res.status(404).json({ message: 'Pedido no encontrado' })
+    }
     res.status(500).json({ message: 'Error al actualizar pedido' })
   }
 }
@@ -143,10 +162,13 @@ async function update(req: Request, res: Response) {
 async function remove(req: Request, res: Response) {
   try {
     const id = req.params.id as string
-    const pedido = em.getReference(Pedido, id as any)
+    const pedido = await em.findOneOrFail(Pedido, { id: id as any })
     await em.removeAndFlush(pedido)
     res.status(200).send({ message: 'Pedido eliminado' })
   } catch (error:any) {
+    if (error instanceof NotFoundError) {
+      return res.status(404).json({ message: 'Pedido no encontrado' })
+    }
     res.status(500).send({ message: 'Error al eliminar pedido' });
   }
 }
