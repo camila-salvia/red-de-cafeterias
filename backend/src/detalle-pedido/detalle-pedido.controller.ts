@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from 'express'
 import { orm } from '../shared/database/orm.js'
+import { NotFoundError } from '@mikro-orm/core'
 import { DetallePedido } from './detalle-pedido.entity.js'
+import { Pedido } from '../pedido/pedido.entity.js'
+import { Producto } from '../producto/producto.entity.js'
 
 const em = orm.em
 
@@ -10,9 +13,9 @@ function sanitizeDetallePedidoInput(
     next: NextFunction
 ) {
     req.body.sanitizedInput = {
-        id: req.body.id,
         cantidad: req.body.cantidad,
-        precio_unitario: req.body.precio_unitario,
+        pedido: req.body.pedido,
+        producto: req.body.producto
     }
 
     Object.keys(req.body.sanitizedInput).forEach(key => {
@@ -27,7 +30,7 @@ function sanitizeDetallePedidoInput(
 // obtener todos los detalles de pedido
 async function findAll(req: Request, res: Response) {
   try {
-    const detallePedido = await em.find(DetallePedido, {})
+    const detallePedido = await em.find(DetallePedido, {}, { populate: ['producto', 'pedido'] })
     res.status(200).json({ message: 'Todos los detalles de pedido encontrados', data: detallePedido })
   } catch (error:any) {
     res.status(500).json({ message: 'Error al obtener los detalles de pedido' })
@@ -37,10 +40,29 @@ async function findAll(req: Request, res: Response) {
 // crear nuevo detalle de pedido
 async function add(req: Request, res: Response) {
   try {
-    const detallePedido = em.create(DetallePedido, req.body.sanitizedInput)
+    const input = req.body.sanitizedInput || req.body
+
+    if (!input.producto || !input.pedido) {
+      return res.status(400).json({ message: 'El producto y el pedido son obligatorios para el detalle' })
+    }
+
+    // Buscamos el producto real para extraer su precio inalterable
+    const productoId = typeof input.producto === 'object' ? input.producto.id : input.producto
+    const producto = await em.findOneOrFail(Producto, { id: productoId })
+
+    const pedidoId = typeof input.pedido === 'object' ? input.pedido.id : input.pedido
+    const pedido = await em.findOneOrFail(Pedido, { id: pedidoId })
+
+    const detallePedido = em.create(DetallePedido, {
+      cantidad: input.cantidad,
+      precio_unitario: Number(producto.precio), // El precio sale de la base de datos
+      producto,
+      pedido
+    })
+
     await em.flush()
     res.status(201).json({ message: 'Detalle de pedido creado', data: detallePedido })
-  } catch (error:any) {
+  } catch (error: any) {
     console.error('Error detallado al crear:', error);
     res.status(500).json({ message: 'Error al crear detalle de pedido', detalle: error.message })
   }
@@ -50,32 +72,53 @@ async function add(req: Request, res: Response) {
  async function findOne(req: Request, res: Response) {
   try {
     const id = req.params.id as string
-    const detallePedido = await em.findOneOrFail(DetallePedido, { id })
+    const detallePedido = await em.findOneOrFail(DetallePedido, { id }, { populate: ['producto', 'pedido'] })
     res.status(200).json({ message: 'Detalle de pedido encontrado', data: detallePedido })
   } catch (error:any) {
-    res.status(404).json({ message: 'Detalle de pedido no encontrado' })
+    if (error instanceof NotFoundError) {
+      return res.status(404).json({ message: 'Detalle de pedido no encontrado' })
+    }
+    res.status(500).json({ message: 'Error al buscar el detalle de pedido' })
   }
 }
 
+// actualizar detalle de pedido
 async function update(req: Request, res: Response) {
   try {
       const id = req.params.id as string
-      const detallePedido = em.getReference(DetallePedido,  id)
-      em.assign(detallePedido, req.body.sanitizedInput)
+      const detallePedido = await em.findOneOrFail(DetallePedido, { id })
+      const input = req.body.sanitizedInput || req.body
+      
+      // Si cambian el producto, actualizamos también el precio unitario automáticamente por seguridad
+      if (input.producto) {
+        const productoId = typeof input.producto === 'object' ? input.producto.id : input.producto
+        const producto = await em.findOneOrFail(Producto, { id: productoId })
+        input.producto = producto
+        input.precio_unitario = Number(producto.precio)
+      }
+      
+      em.assign(detallePedido, input)
       await em.flush()
       res.status(200).json({ message: 'Detalle de pedido actualizado', data: detallePedido })
   } catch (error:any) {
+    if (error instanceof NotFoundError) {
+      return res.status(404).json({ message: 'Detalle de pedido no encontrado' })
+    }
     res.status(500).json({ message: 'Error al actualizar detalle de pedido' })
   }
 }
 
+// eliminar detalle de pedido
 async function remove(req: Request, res: Response) {
   try {
     const id = req.params.id as string
-    const detallePedido = em.getReference(DetallePedido, id)
+    const detallePedido = await em.findOneOrFail(DetallePedido, { id })
     await em.removeAndFlush(detallePedido)
     res.status(200).send({ message: 'Detalle de pedido eliminado' })
-  } catch (error) {
+  } catch (error: any) {
+    if (error instanceof NotFoundError) {
+      return res.status(404).json({ message: 'Detalle de pedido no encontrado' })
+    }
     res.status(500).send({ message: 'Error al eliminar detalle de pedido' });
   }
 }
