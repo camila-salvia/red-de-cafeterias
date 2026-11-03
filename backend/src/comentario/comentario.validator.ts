@@ -5,6 +5,8 @@ import { Usuario } from '../usuario/usuario.entity.js';
 const em = orm.em;
 
 export async function validarComentarioInput(req: Request, res: Response, next: NextFunction) {
+  // usa el body ya saneado (donde el usuario viene del token al crear)
+  const input = req.body.sanitizedInput || req.body;
   const { contenido, puntuacion, usuario } = req.body;
   const errores: string[] = [];
 
