@@ -9,9 +9,9 @@ const router = Router();
 router.get('/', findAll);
 router.get('/:id', findOne);
 
-// protegidas
-router.post('/', verificarToken, soloAdmin, validarProductoInput,add);
-router.put('/:id', verificarToken, soloAdmin, validarProductoInput, update);
+// solo admin
+router.post('/', verificarToken, soloAdmin, sanitizeProductoInput, validarProductoInput,add);
+router.put('/:id', verificarToken, soloAdmin, sanitizeProductoInput, validarProductoInput, update);
 router.delete('/:id', verificarToken, soloAdmin, remove);
 // router.patch('/:id', verificarToken, sanitizeProductoInput, update);
 

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import { Producto } from './producto.entity.js'
 import { Categoria } from '../categoria/categoria.entity.js'
 import { orm } from '../shared/database/orm.js'
+import { NotFoundError } from '@mikro-orm/core'
 
 const em = orm.em
 
@@ -11,7 +12,6 @@ function sanitizeProductoInput(
     next: NextFunction
 ) {
     req.body.sanitizedInput = {
-        id: req.body.id,
         nombre: req.body.nombre,
         descripcion: req.body.descripcion,
         precio: req.body.precio,
@@ -101,35 +101,43 @@ async function add(req: Request, res: Response) {
   }
 }
 
+// actualizar producto
 async function update(req: Request, res: Response) {
   try {
       const id = req.params.id as string;
-      // buscar producto 
       const producto = await em.findOneOrFail(Producto, { id });
       const input = req.body.sanitizedInput || req.body;
-      // si el front envió categoria para actualizar, la convertimos en referencia
+
       if (input.categoria) {
         const categoriaId = typeof input.categoria === 'object' ? input.categoria.id : input.categoria;
         input.categoria = em.getReference(Categoria, categoriaId);
       }
-      // asignar datos limpios al prodcucto encontrado
+
       em.assign(producto, input);
       await em.flush();
       res.status(200).json({ message: 'Producto actualizado', data: producto });
   } catch (error:any) {
-      console.error('Detalle del error en update:', error);
-      res.status(500).json({ message: 'Error al actualizar producto', detalle: error.message });
+    if (error instanceof NotFoundError) {
+      return res.status(404).json({ message: 'Producto no encontrado' })
     }
+    console.error('Detalle del error en update:', error);
+    res.status(500).json({ message: 'Error al actualizar producto', detalle: error.message });
+  }
 }
 
+// eliminar producto
 async function remove(req: Request, res: Response) {
   try {
     const id = req.params.id as string
-    const producto = em.getReference(Producto, id)
+    const producto = await em.findOneOrFail(Producto, { id })
     await em.removeAndFlush(producto)
     res.status(200).send({ message: 'Producto eliminado' })
-  } catch (error) {
-    res.status(500).send({ message: 'Error al eliminar producto' });
+  } catch (error: any) {
+    if (error instanceof NotFoundError) {
+      return res.status(404).json({ message: 'Producto no encontrado' })
+    }
+    console.error('Detalle del error en remove:', error);
+    res.status(500).json({ message: 'Error al eliminar producto', detalle: error.message });
   }
 }
 
