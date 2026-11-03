@@ -1,17 +1,24 @@
 import { Router } from 'express';
 import { add, findAll, findOne, update, remove, sanitizeUsuarioInput, login } from './usuario.controller.js';
 import { validarUsuarioInput } from './usuario.validator.js'; // verificar 
+import { verificarToken, soloAdmin, propietarioOAdmin } from '../shared/middleware/auth.middleware.js';
 // verificar que paso con sanitizeUsuarioInput, ahora que se usa validarUsuarioInput
 
 const router = Router();
 
-router.post('/', validarUsuarioInput, sanitizeUsuarioInput, add);
-router.get('/', findAll);
+// públicas
 router.post('/login', login);
-router.get('/:id', findOne);
-router.put('/:id',sanitizeUsuarioInput, update);
-router.delete('/:id', remove);
-router.patch('/:id', sanitizeUsuarioInput, update);
+router.post('/', validarUsuarioInput, sanitizeUsuarioInput, add);
+
+// solo admin
+router.get('/', verificarToken, soloAdmin, findAll);
+router.delete('/:id', verificarToken, soloAdmin, remove);
+
+// usuario propietario o admin
+router.get('/:id', verificarToken, propietarioOAdmin(), findOne);
+router.put('/:id', verificarToken, propietarioOAdmin(), sanitizeUsuarioInput, update);
+router.delete('/:id', verificarToken, propietarioOAdmin(), remove);
+router.patch('/:id', verificarToken, propietarioOAdmin(), sanitizeUsuarioInput, update);
 
 
 export default router;
