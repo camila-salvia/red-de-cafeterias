@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { orm } from '../shared/database/orm.js'
+import { NotFoundError } from '@mikro-orm/core'
 import { Categoria } from './categoria.entity.js'
 
 const em = orm.em
@@ -10,7 +11,6 @@ function sanitizeCategoriaInput(
     next: NextFunction
 ) {
     req.body.sanitizedInput = {
-        id: req.body.id,
         nombre: req.body.nombre,
     }
 
@@ -56,26 +56,36 @@ async function add(req: Request, res: Response) {
   }
 }
 
+// actualizar categoría
 async function update(req: Request, res: Response) {
   try {
       const id = req.params.id as string
-      const categoria = em.getReference(Categoria,  id)
+      const categoria = await em.findOneOrFail(Categoria, { id })
       em.assign(categoria, req.body.sanitizedInput)
       await em.flush()
       res.status(200).json({ message: 'Categoría actualizada', data: categoria })
   } catch (error:any) {
-    res.status(500).json({ message: 'Error al actualizar categoría' })
+    if (error instanceof NotFoundError) {
+      return res.status(404).json({ message: 'Categoría no encontrada' })
+    }
+    console.error('Detalle del error en update:', error);
+    res.status(500).json({ message: 'Error al actualizar categoría', detalle: error.message });
   }
 }
 
+// eliminar categoría
 async function remove(req: Request, res: Response) {
   try {
     const id = req.params.id as string
-    const categoria = em.getReference(Categoria, id)
+    const categoria = await em.findOneOrFail(Categoria, { id })
     await em.removeAndFlush(categoria)
     res.status(200).send({ message: 'Categoría eliminada' })
-  } catch (error) {
-    res.status(500).send({ message: 'Error al eliminar categoría' });
+  } catch (error:any) {
+    if (error instanceof NotFoundError) {
+      return res.status(404).json({ message: 'Categoría no encontrada' })
+    }
+    console.error('Detalle del error en remove:', error);
+    res.status(500).json({ message: 'Error al eliminar categoría', detalle: error.message });
   }
 }
 
