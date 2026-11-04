@@ -17,8 +17,7 @@ router.delete('/:id', verificarToken, soloAdmin, remove);
 // usuario propietario o admin
 router.get('/:id', verificarToken, propietarioOAdmin(), findOne);
 router.put('/:id', verificarToken, propietarioOAdmin(), sanitizeUsuarioInput, update);
-router.delete('/:id', verificarToken, propietarioOAdmin(), remove);
 router.patch('/:id', verificarToken, propietarioOAdmin(), sanitizeUsuarioInput, update);
-
+router.delete('/:id', verificarToken, propietarioOAdmin(), remove);
 
 export default router;
