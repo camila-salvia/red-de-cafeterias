@@ -10,9 +10,9 @@ router.get('/', findAll);
 router.get('/:id', findOne);
 
 // solo admin
-router.post('/', verificarToken, soloAdmin, sanitizeProductoInput, validarProductoInput,add);
-router.put('/:id', verificarToken, soloAdmin, sanitizeProductoInput, validarProductoInput, update);
+router.post('/', verificarToken, soloAdmin, validarProductoInput, sanitizeProductoInput, add);
+router.put('/:id', verificarToken, soloAdmin, validarProductoInput, sanitizeProductoInput, update);
+router.patch('/:id', verificarToken, soloAdmin, validarProductoInput, sanitizeProductoInput, update);
 router.delete('/:id', verificarToken, soloAdmin, remove);
-// router.patch('/:id', verificarToken, sanitizeProductoInput, update);
 
 export default router;
