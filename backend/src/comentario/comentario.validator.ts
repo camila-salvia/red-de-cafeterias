@@ -4,6 +4,7 @@ import { Usuario } from '../usuario/usuario.entity.js';
 
 const em = orm.em;
 
+  // En los validadores se comprueba si los datos cumplen con las reglas de negocio, formatos y tipos esperados
 export async function validarComentarioInput(req: Request, res: Response, next: NextFunction) {
   // usa el body ya saneado (donde el usuario viene del token al crear)
   const input = req.body.sanitizedInput || req.body;

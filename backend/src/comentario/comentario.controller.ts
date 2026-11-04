@@ -5,6 +5,8 @@ import { Comentario } from './comentario.entity.js'
 
 const em = orm.em
 
+// La sanitización se encarga de limpiar, estructurar y recortar el objeto que manda el cliente para quedarse 
+// únicamente con lo que le interesa al servidor, descartando todo lo demás.
 function sanitizeComentarioInput( 
     req: Request, 
     res: Response, 
