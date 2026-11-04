@@ -1,14 +1,18 @@
 import { Router } from 'express';
 import { add, findAll, findOne, update, remove, sanitizeCategoriaInput } from './categoria.controller.js';
 import { validarCategoriaInput } from './categoria.validator.js';
+import { verificarToken, soloAdmin } from '../shared/middleware/auth.middleware.js';
 
 const router = Router();
 
-router.post('/', validarCategoriaInput, add);
+// públicas
 router.get('/', findAll);
 router.get('/:id', findOne);
-router.put('/:id', validarCategoriaInput, update);
-router.delete('/:id', remove);
 
+// solo admin
+router.post('/', verificarToken, soloAdmin, validarCategoriaInput, sanitizeCategoriaInput,add);
+router.put('/:id', verificarToken, soloAdmin, validarCategoriaInput, sanitizeCategoriaInput, update);
+router.patch('/:id', verificarToken, soloAdmin, validarCategoriaInput, sanitizeCategoriaInput, update);
+router.delete('/:id', verificarToken, soloAdmin, remove);
 
 export default router;

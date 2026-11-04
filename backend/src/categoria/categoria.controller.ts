@@ -44,7 +44,6 @@ async function add(req: Request, res: Response) {
   }
 }
 
-
 // obtener categoría por id
  async function findOne(req: Request, res: Response) {
   try {
