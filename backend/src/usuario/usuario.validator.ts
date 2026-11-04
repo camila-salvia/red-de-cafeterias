@@ -8,46 +8,69 @@ const em = orm.em;
 export async function validarUsuarioInput(req: Request, res: Response, next: NextFunction) {
   const { nombre, apellido, email, password, telefono, direccion } = req.body;
   const errores: string[] = [];
+  const esActualizacion = req.method === 'PUT' || req.method === 'PATCH';
 
   // Nombre y Apellido
-  if (!nombre || typeof nombre !== 'string' || nombre.trim().length < 2) {
-    errores.push('El nombre es obligatorio y debe tener al menos 2 caracteres.');
+  // Debe ser texto y tener al menos 2 caracteres
+  if (!esActualizacion || nombre !== undefined) {
+    if (!nombre || typeof nombre !== 'string' || nombre.trim().length < 2) {
+      errores.push('El nombre es obligatorio y debe tener al menos 2 caracteres.');
+    }
   }
-  if (!apellido || typeof apellido !== 'string' || apellido.trim().length < 2) {
-    errores.push('El apellido es obligatorio y debe tener al menos 2 caracteres.');
+  if (!esActualizacion || apellido !== undefined) {
+    if (!apellido || typeof apellido !== 'string' || apellido.trim().length < 2) {
+      errores.push('El apellido es obligatorio y debe tener al menos 2 caracteres.');
+    }
   }
 
-  // Email con expresión regular estándar
+  // Email
+  // Debe tener un formato válido
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email || !emailRegex.test(email)) {
-    errores.push('El correo electrónico tiene un formato inválido.');
+  if (!esActualizacion || email !== undefined) {
+    if (!email || !emailRegex.test(email)) {
+      errores.push('El correo electrónico tiene un formato inválido.');
+    }
   }
 
-  // Password con longitud mínima
-  if (!password || typeof password !== 'string' || password.length < 6) {
-    errores.push('La contraseña debe tener al menos 6 caracteres.');
+  // Password 
+  // Debe cumplir con la longitud mínima
+  if (!esActualizacion || password !== undefined) {
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      errores.push('La contraseña debe tener al menos 6 caracteres.');
+    }
   }
 
-  // Teléfono numérico
+  // Teléfono
+  // Debe ser un número de entre 7 y 15 dígitos
   const telRegex = /^[0-9]{7,15}$/;
-  if (!telefono || !telRegex.test(String(telefono).trim())) {
-    errores.push('El teléfono debe ser un valor numérico entre 7 y 15 dígitos.');
+  if (!esActualizacion || telefono !== undefined) {
+    if (!telefono || !telRegex.test(String(telefono).trim())) {
+      errores.push('El teléfono debe ser un valor numérico entre 7 y 15 dígitos.');
+    }
   }
 
   // Dirección
-  if (!direccion || typeof direccion !== 'string' || direccion.trim().length < 5) {
-    errores.push('La dirección es obligatoria y debe tener al menos 5 caracteres.');
+  // Debe ser texto y tener al menos 5 caracteres
+  if (!esActualizacion || direccion !== undefined) {
+    if (!direccion || typeof direccion !== 'string' || direccion.trim().length < 5) {
+      errores.push('La dirección es obligatoria y debe tener al menos 5 caracteres.');
+    }
   }
-
   if (errores.length > 0) {
     return res.status(400).json({ message: 'Datos de usuario inválidos.', errores});
   }
 
   // Comprobar email duplicado antes de persistir 
   try {
-    const usuarioExistente = await em.findOne(Usuario, { email });
-    if (usuarioExistente) {
-      return res.status(409).json({ message: 'El correo electrónico ya se encuentra registrado.' });
+    if (email) {
+      const filtro: any = { email };
+      if (esActualizacion && req.params.id) {
+        filtro.id = { $ne: req.params.id }; // Excluir el usuario actual en caso de actualización
+      }
+      const usuarioExistente = await em.findOne(Usuario, filtro);
+      if (usuarioExistente) {
+        return res.status(409).json({ message: 'El correo electrónico ya se encuentra registrado.' });
+      } 
     }
   } catch (error: any) {
     return res.status(500).json({ message: 'Error al verificar email duplicado', error: error.message });
