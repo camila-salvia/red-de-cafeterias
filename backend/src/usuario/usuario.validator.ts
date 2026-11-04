@@ -4,6 +4,7 @@ import { Usuario } from './usuario.entity.js';
 
 const em = orm.em;
 
+  // En los validadores se comprueba si los datos cumplen con las reglas de negocio, formatos y tipos esperados
 export async function validarUsuarioInput(req: Request, res: Response, next: NextFunction) {
   const { nombre, apellido, email, password, telefono, direccion } = req.body;
   const errores: string[] = [];

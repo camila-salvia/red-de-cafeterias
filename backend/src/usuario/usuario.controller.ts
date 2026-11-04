@@ -8,6 +8,9 @@ import bcrypt from 'bcrypt'
 
 const em = orm.em
 const SALT_ROUNDS = 10
+
+// La sanitización se encarga de limpiar, estructurar y recortar el objeto que manda el cliente para quedarse 
+// únicamente con lo que le interesa al servidor, descartando todo lo demás.
 function sanitizeUsuarioInput( 
     req: Request, 
     res: Response, 
