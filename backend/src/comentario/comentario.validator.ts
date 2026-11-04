@@ -6,38 +6,33 @@ const em = orm.em;
 
   // En los validadores se comprueba si los datos cumplen con las reglas de negocio, formatos y tipos esperados
 export async function validarComentarioInput(req: Request, res: Response, next: NextFunction) {
-  // usa el body ya saneado (donde el usuario viene del token al crear)
-  const input = req.body.sanitizedInput || req.body;
-  const { contenido, puntuacion, usuario } = req.body;
+  // usa el body ya saneado donde el usuario viene del token al crear
+  const {contenido, puntuacion} = req.body;
   const errores: string[] = [];
+  const esActualizacion = req.method === 'PUT' || req.method === 'PATCH';
+
+  // Como el usuario ya viene seguro por el token, el validador solo debe encargarse de 
+  // revisar que el contenido y la puntuación sean correctos
 
   // Comentario
-  if (!contenido || typeof contenido !== 'string' || contenido.trim().length === 0) {
-    errores.push('El contenido del comentario no puede estar vacío.');
+  // Debe ser texto y no estar vacío
+  if (!esActualizacion || contenido !== undefined) {
+    if (!contenido || typeof contenido !== 'string' || contenido.trim().length === 0) {
+      errores.push('El contenido del comentario no puede estar vacío.');
+    }
   }
+
   // Puntuación
-  const punt = Number(puntuacion);
-  if (isNaN(punt) || !Number.isInteger(punt) || punt < 1 || punt > 5) {
-    errores.push('La puntuación debe ser un número entero entre 1 y 5.');
-  }
-  // Usuario
-  const usuarioId = typeof usuario === 'object' ? usuario?.id : usuario;
-  if (!usuarioId || typeof usuarioId !== 'string') {
-    errores.push('Debe especificar un usuario válido.');
+  // Debe ser un número entero entre 1 y 5
+  if (!esActualizacion || puntuacion !== undefined) {
+    const punt = Number(puntuacion);
+    if (isNaN(punt) || !Number.isInteger(punt) || punt < 1 || punt > 5) {
+      errores.push('La puntuación debe ser un número entero entre 1 y 5.');
+    }
   }
 
   if (errores.length > 0) {
     return res.status(400).json({ message: 'Datos de comentario inválidos', errores });
-  }
-
-  // Verificar usuario existente
-  try {
-    const usuarioExiste = await em.findOne(Usuario, { id: usuarioId });
-    if (!usuarioExiste) {
-      return res.status(404).json({ message: 'El usuario especificado no existe.' });
-    }
-  } catch (error: any) {
-    return res.status(500).json({ message: 'Error al verificar usuario', error: error.message });
   }
 
   next();

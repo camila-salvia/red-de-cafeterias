@@ -9,12 +9,12 @@ const router = Router();
 router.get('/', findAll);
 router.get('/:id', findOne);
 
-// cliente autenticado: comentar
-router.post('/', verificarToken, sanitizeComentarioInput, validarComentarioInput, add);
+// cliente autenticado: puede comentar
+router.post('/', verificarToken, validarComentarioInput, sanitizeComentarioInput, add);
 
-// moderacion: solo admin
-router.put('/:id', verificarToken, soloAdmin, sanitizeComentarioInput, validarComentarioInput, update);
-router.patch('/:id', verificarToken, soloAdmin, sanitizeComentarioInput, validarComentarioInput, update);
+// moderación: solo admin
+router.put('/:id', verificarToken, soloAdmin, validarComentarioInput, sanitizeComentarioInput, update);
+router.patch('/:id', verificarToken, soloAdmin, validarComentarioInput, sanitizeComentarioInput, update);
 router.delete('/:id', verificarToken, soloAdmin, remove);
 
 export default router;

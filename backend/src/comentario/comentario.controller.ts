@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express'
 import { orm } from '../shared/database/orm.js'
 import { NotFoundError } from '@mikro-orm/core'
 import { Comentario } from './comentario.entity.js'
+import { Usuario } from '../usuario/usuario.entity.js'
 
 const em = orm.em
 
@@ -17,8 +18,8 @@ function sanitizeComentarioInput(
     req.body.sanitizedInput = {
         contenido: req.body.contenido,
         fecha_publicacion: esCreacion ? new Date() : req.body.fecha_publicacion,
-        puntuacion: req.body.puntuacion,
-        usuario: esCreacion ? req.usuarioToken?.id : req.body.usuario,
+        puntuacion: req.body.puntuacion ? Number(req.body.puntuacion) : undefined,
+        usuario: esCreacion ? req.usuarioToken?.id : req.body.usuario // Inyectamos el usuario desde el token de forma segura al crear
     }
 
     Object.keys(req.body.sanitizedInput).forEach(key => {
@@ -28,16 +29,6 @@ function sanitizeComentarioInput(
     })
 
     next();
-}
-
-function aVistaPublica(c: Comentario) {
-  return {
-    id: c.id,
-    contenido: c.contenido,
-    fecha_publicacion: c.fecha_publicacion,
-    puntuacion: c.puntuacion,
-    usuario: { id: c.usuario.id, nombre: c.usuario.nombre }
-  }
 }
 
 // obtener todas los comentarios
@@ -53,7 +44,8 @@ async function findAll(req: Request, res: Response) {
 // crear nuevo comentario
 async function add(req: Request, res: Response) {
   try {
-    const comentario = em.create(Comentario, req.body.sanitizedInput)
+    const input = req.body.sanitizedInput;
+    const comentario = em.create(Comentario, {...input, usuario: em.getReference (Usuario, input.usuario)})
     await em.flush()
     res.status(201).json({ message: 'Comentario creado', data: comentario })
   } catch (error:any) {
