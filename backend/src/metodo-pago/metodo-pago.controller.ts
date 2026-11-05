@@ -10,9 +10,11 @@ function sanitizeMetodoPagoInput(
     res: Response, 
     next: NextFunction
 ) {
+    const esCreacion = req.method === 'POST';
+
     req.body.sanitizedInput = {
         nombre: req.body.nombre,
-        activo: req.body.activo,
+        activo: req.body.activo !== undefined ? Boolean(req.body.activo) : (esCreacion ? true : undefined)
     }
 
     Object.keys(req.body.sanitizedInput).forEach(key => {
