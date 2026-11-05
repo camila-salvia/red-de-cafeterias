@@ -4,6 +4,8 @@ import { NotFoundError } from '@mikro-orm/core'
 import { Pedido } from '../pedido/pedido.entity.js'
 import { Producto } from '../producto/producto.entity.js'
 import { DetallePedido } from '../detalle-pedido/detalle-pedido.entity.js'
+import { Usuario } from '../usuario/usuario.entity.js'
+import { MetodoPago } from '../metodo-pago/metodo-pago.entity.js'
 
 const em = orm.em
 
@@ -52,9 +54,8 @@ async function findByUsuario(req: Request, res: Response) {
   try {
     const usuarioId = req.params.usuarioId as string
     
-    // Un usuario común solo debería poder ver sus propios pedidos (a menos que sea admin)
     if (usuarioId !== req.usuarioToken?.id && !req.usuarioToken?.esAdmin) {
-      return res.status(403).json({ message: 'Acceso denegado' });
+      return res.status(403).json({ message: 'Acceso denegado' });  // Un usuario común solo debería poder ver sus propios pedidos
     }
 
     const pedidos = await em.find(
@@ -72,7 +73,6 @@ async function findByUsuario(req: Request, res: Response) {
 }
 
 // crear nuevo pedido
-// Al crear, el usuario sale del token
 async function add(req: Request, res: Response) {
   try {
     const { items } = req.body; // Array de { productoId, cantidad } que viene del carrito
@@ -81,11 +81,23 @@ async function add(req: Request, res: Response) {
       return res.status(400).json({ message: 'El pedido debe contener al menos un producto' });
     }
 
-    const pedido = em.create(Pedido, req.body.sanitizedInput)
+    const input = req.body.sanitizedInput;
+
+    // Convertir IDs a referencias de MikroORM para las relaciones
+    if (input.metodo_pago) {
+      const mpId = typeof input.metodo_pago === 'object' ? input.metodo_pago.id : input.metodo_pago;
+      input.metodo_pago = em.getReference(MetodoPago, mpId);
+    }
+    if (input.usuario) {
+      const userId = typeof input.usuario === 'object' ? input.usuario.id : input.usuario;
+      input.usuario = em.getReference(Usuario, userId);
+    }
+
+    const pedido = em.create(Pedido, input)
     let totalCalculado = 0
 
     for (const item of items) {
-      const prodId = item.productoId || item.producto?.id
+      const prodId = item.productoId || item.producto?.id || item.producto;
       const producto = await em.findOneOrFail(Producto, { id: prodId })
 
       const precioUnitario = Number(producto.precio)

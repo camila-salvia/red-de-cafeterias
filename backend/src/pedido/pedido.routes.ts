@@ -6,7 +6,7 @@ import { verificarToken, soloAdmin, propietarioOAdmin } from '../shared/middlewa
 const router = Router();
 
 // cliente autenticado
-router.post('/', verificarToken, sanitizePedidoInput, validarPedidoInput, add);
+router.post('/', verificarToken, validarPedidoInput, sanitizePedidoInput, add);
 
 // para "mis pedidos" o admin
 router.get('/usuario/:usuarioId', verificarToken, propietarioOAdmin('usuarioId'), findByUsuario); 
