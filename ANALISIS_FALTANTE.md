@@ -1,386 +1,97 @@
-# Análisis de Requisitos - Red de Cafeterías ✓ vs ✗
+# Análisis del estado actual y plan de acción
 
-## 👥 Grupo (3 integrantes)
+**Revisión:** 6 de noviembre de 2026
+**Alcance:** código fuente de `backend/` y `frontend/`, configuración y pruebas existentes. No se verificaron flujos contra una base de datos o un servidor en ejecución.
 
-- Vivas Martin
-- Salvia Camila
-- Marianela Leonardelli
+## Resumen ejecutivo
 
----
+El documento anterior describía como pendientes varias funciones que ya están implementadas. El backend cuenta con CRUDs, validadores y controles de autenticación y propiedad para las rutas principales; el frontend permite gestionar productos, operar un carrito y consultar un listado básico de pedidos. Sin embargo, quedan defectos de autorización en la navegación del panel, integración incompleta de comentarios, vistas de detalle/filtros que faltan, cobertura automatizada insuficiente y dos fallos reproducibles de validación local (pruebas y build frontend).
 
-## ✅ LO QUE YA ESTÁ IMPLEMENTADO
+## Estado comprobado
 
-### Backend - Infraestructura
+### Implementado
 
-- ✅ TypeScript configurado (tsconfig.json)
-- ✅ Express como framework web
-- ✅ MikroORM como mapper (ORM)
-- ✅ MySQL como BD persistente externa
-- ✅ dotenv configurado (.env con credenciales)
-- ✅ Arquitectura en capas (controller, entity, routes, validator, middleware)
-- ✅ Middlewares implementados (CORS, RequestContext)
-- ✅ API REST con rutas estándar
-- ✅ Autenticación JWT implementada
-- ✅ 2 niveles de acceso: usuario y admin (esAdmin boolean)
-- ✅ Middleware de autenticación (verificarToken, soloAdmin)
-- ✅ Validadores de usuario, categoría, producto, pedido y comentario implementados
-- ⚠️ Persisten validaciones de autorización, propiedad y manejo uniforme de errores
+- **Backend:** módulos de usuarios, categorías, productos, pedidos, detalles, comentarios y métodos de pago; validación de entradas y relaciones.
+- **Autorización backend:** las escrituras del catálogo y los métodos de pago requieren administrador; las operaciones de pedidos y usuarios restringen acceso según rol/propiedad. El detalle de pedido verifica propiedad también en GET y al asociarlo a un pedido en POST.
+- **Pedidos:** el usuario se toma del token al crear el pedido; el servidor obtiene precios vigentes y calcula el total. La consulta por usuario y por ID comprueba propietario/admin.
+- **Usuarios:** altas y cambios de contraseña usan bcrypt; el campo `password` está marcado como oculto en la entidad.
+- **Frontend:** autenticación JWT, catálogo, carrito/checkout, CRUD de productos en el panel y listado básico de “Mis pedidos”.
+- **Build backend:** `cd backend; npm run build` finaliza correctamente.
 
-### Backend - Entidades
+### Pendientes confirmados (priorizados)
 
-- ✅ Usuario (CRUD simple - Integrante 1)
-- ✅ Categoría (CRUD simple - Integrante 2)
-- ✅ Producto (CRUD dependiente - depende de Categoría)
-- ✅ Pedido (CRUD dependiente - depende de Usuario y MetodoPago)
-- ✅ DetallePedido (CRUD dependiente - depende de Pedido y Producto)
-- ✅ Comentario (CRUD dependiente - depende de Usuario)
-- ✅ MetodoPago (entidad de apoyo)
-- ✅ Relaciones ORM correctas (OneToMany, ManyToOne)
+#### P0 — Corregir acceso al panel de administración
 
-### Backend - Funcionalidad
+`frontend/src/app/app.routes.ts` declara dos rutas `admin`. La primera usa solamente `authGuard` y aparece antes de la ruta con `adminGuard`; por tanto, un usuario autenticado no administrador puede entrar a la vista del panel. Los endpoints de escritura siguen protegidos por el backend, pero la interfaz administrativa no queda restringida correctamente.
 
-- ✅ Listado de productos CON FILTRO por categoría
-- ✅ Obtener pedidos por usuario (mis pedidos; falta proteger la consulta por propietario)
-- ✅ Login con JWT
-- ✅ Compilación TypeScript verificada con `npm run build`
+**Acción:** dejar una única ruta `/admin` con el guard de administrador (y conservar la redirección/experiencia adecuada para usuarios no autorizados). Probar usuario anónimo, usuario normal y administrador. El control frontend no sustituye al backend.
 
-### Frontend - Infraestructura
+#### P0 — Restablecer una suite de pruebas ejecutable
 
-- ✅ Angular como framework
-- ✅ TypeScript configurado
-- ✅ Bootstrap para estilos (CSS)
-- ✅ SCSS configurado
-- ✅ Componentes standalone
-- ✅ Rutas protegidas con authGuard
-- ✅ Interceptor de autenticación (token en headers)
-- ✅ Ambientes configurados (environment.ts y environment.development.ts)
+- `backend/package.json` conserva un script `test` que siempre falla con “no test specified”; en `backend/src/tests/` solo existe `debug-db.ts`, no una suite automatizada.
+- Hay especificaciones frontend, pero `cd frontend; npm test -- --watch=false` falla al compilar: `comentarios.spec.ts`, `login.spec.ts` y `mis-pedidos.spec.ts` importan `Comentarios`, `Login` y `MisPedidos`, símbolos que no exportan sus módulos actuales.
+- Los specs existentes se limitan mayormente a comprobar que el componente se crea; no cubren comportamiento sustancial. No se encontró una suite e2e.
 
-### Frontend - Componentes
+**Acción:** corregir imports/configuración de pruebas frontend y añadir pruebas de comportamiento; configurar pruebas backend para validadores, autorización y cálculos de pedidos; agregar un flujo de integración pedido y e2e si forma parte de los requisitos de entrega.
 
-- ✅ App con rutas
-- ✅ Header
-- ✅ Footer
-- ✅ Boton
-- ✅ TarjetaProducto (Input/Output Properties ✓)
-- ✅ FormularioLogin
-- ✅ Login (página)
-- ✅ Inicio (página con listado de productos)
-- ✅ Pedidos (página)
-- ⚠️ AdminDashboard (página existente, pero CRUD incompleto)
-- ✅ Comentarios (página)
-- ✅ MisPedidos (página)
-- ✅ VerPedido (página)
+#### P1 — Conectar comentarios con la API
 
-### Frontend - Servicios
+`frontend/src/app/pages/comentarios/comentarios.ts` usa reseñas locales de ejemplo, agrega comentarios solo en memoria y simula moderación en el cliente. No carga ni persiste los comentarios con la API. El backend sí expone lectura y creación autenticada, y asigna el usuario desde el token.
 
-- ✅ ApiService (calls al backend)
-- ✅ AuthService (manejo de localStorage y signals)
-- ✅ CartService (carrito de compras)
+**Acción:** cargar comentarios reales, integrar creación mediante el servicio API y presentar errores/estados de carga. Mantener la asignación del usuario exclusivamente en el servidor.
 
-### Frontend - Pruebas
+#### P1 — Completar navegación y vistas de detalle
 
-- ✅ Estructura de tests con Vitest (angular testing setup)
+- El listado de `MisPedidos` muestra fecha, estado, productos y total, pero no ofrece filtro por estado ni navegación a un detalle individual.
+- `ver-pedido` es la vista de carrito/checkout y confirmación; no es una página de detalle de un pedido histórico identificado por ID.
+- Existe GET de producto por ID en el backend, pero no se encontró ruta/página frontend de detalle de producto.
 
----
+**Acción:** agregar filtro de pedidos y una ruta de detalle con carga por ID (protegida por la validación de propietario/admin existente); crear vista/ruta de producto si sigue siendo requisito funcional.
 
-## ❌ LO QUE FALTA HACER
+#### P1 — Validar cantidades como enteros en pedidos
 
-### 🔴 **CRÍTICO - Backend (DEBE COMPLETARSE)**
+`pedido.validator.ts` y `pedido.controller.ts` rechazan cantidades no numéricas o menores/iguales a cero, pero no aplican `Number.isInteger`. Así, cantidades decimales pueden superar la validación pese a que el mensaje exige enteros.
 
-#### 1. **Tests Automatizados - FALTA COMPLETAMENTE** ⚠️
+**Acción:** validar que cada cantidad sea un entero positivo y cubrir límites y valores inválidos con pruebas.
 
-**Requisito**: 1 test por integrante (3 tests) + 1 test de integración
+#### P1 — Retirar compatibilidad con contraseñas en texto plano
 
-**Tareas**:
+El login de `usuario.controller.ts` todavía compara contraseñas en texto plano para cuentas antiguas y las convierte a bcrypt tras un acceso exitoso. Las altas y cambios nuevos sí hashean las contraseñas.
 
-- [ ] Configurar testing framework en backend (vitest, jest o similar) y reemplazar el script `test` placeholder de `backend/package.json`; solo existe `debug-db.ts`
-- [ ] Test 1 - Integrante Vivas Martin: Test unitario de Usuario (crear, obtener, validar)
-- [ ] Test 2 - Integrante Salvia Camila: Test unitario de Producto (crear con categoría, filtrar)
-- [ ] Test 3 - Integrante Marianela Leonardelli: Test unitario de Comentario (crear, validar relación)
-- [ ] Test integración: Flujo completo de Pedido (crear usuario → seleccionar producto → crear pedido)
+**Acción:** definir y ejecutar una migración controlada de cuentas antiguas; luego eliminar la comparación en texto plano y probar el flujo de login y migración.
 
-**Archivo a crear**: `backend/src/tests/` con archivos .test.ts
+#### P1 — Corregir la carga de “Mis pedidos” sin ID de usuario
 
-#### 2. **Validaciones Completas - INCOMPLETAS**
+`mis-pedidos.ts` usa `localStorage.getItem('usuario_id') || 1`. El valor de respaldo puede provocar una consulta para un usuario incorrecto y un `403`; no representa la sesión real.
 
-**Requisito**: Validar entrada de datos, manejar e informar errores apropiadaamente
+**Acción:** obtener el ID del usuario autenticado y manejar explícitamente su ausencia, sin un ID por defecto.
 
-**Tareas**:
+#### P2 — Hacer que el build frontend vuelva a pasar
 
-- [x] Usuario: validar email, password, teléfono y email duplicado
-- [x] Categoría: validar nombre no vacío y no duplicado
-- [x] Producto: validar nombre no vacío y precio > 0
-- [ ] Producto: confirmar que la categoría exista; el controlador todavía crea una referencia ORM sin validarla previamente
-- [x] Comentario: validar contenido no vacío, puntuación 1-5 y usuario existente
-- [x] Pedido: validar items no vacío, usuario, productos y método de pago existentes
-- [ ] Manejo uniforme de errores: algunos errores de persistencia todavía pueden terminar como 500 en vez de 400/404/409
+`cd frontend; npm run build` falla porque el presupuesto de `frontend/src/app/app.scss` es 8 kB y el archivo alcanza aproximadamente 227 kB. También se reportan advertencias por el bundle inicial (637 kB frente a 500 kB) y por `ver-pedido.scss`.
 
-**Archivos a completar/crear**:
+**Acción:** revisar estilos globales, separar estilos/componentes cuando corresponda y ajustar el tamaño real sin elevar presupuestos como sustituto de optimización. Repetir build y verificar los presupuestos.
 
-- Revisar `backend/src/producto/producto.controller.ts` para validar explícitamente la categoría
-- Unificar el manejo de errores de persistencia en controllers
+#### P2 — Preparar configuración de backend para producción
 
-#### 3. **Protección de Rutas - INCOMPLETA** 🔓
+`backend/src/app.ts` ejecuta `syncSchema()` al iniciar, aunque el propio código advierte que no debe hacerse en producción; `orm.ts` también habilita `debug: true`. Además, varios errores 500 responden con `error.message`/`detalle`, mientras otros devuelven mensajes genéricos.
 
-**Requisito**: Proteger rutas según nivel de acceso
+**Acción:** desactivar sincronización automática del esquema y debug en producción, usar migraciones controladas y uniformar respuestas de error para no exponer detalles internos.
 
-**Problemas encontrados**:
+## Plan de acción sugerido
 
-- [ ] Categoría: POST/PUT/DELETE **NO protegido** - deben requerir `verificarToken` y `soloAdmin`; los GET pueden ser públicos
-- [ ] Comentario: POST/PUT/DELETE **NO protegido** - deben requerir `verificarToken` y validar propietario/admin
-- [ ] MetodoPago: POST/PUT/DELETE **NO protegido** - deben requerir `verificarToken` y `soloAdmin`
-- [ ] DetallePedido: todas las operaciones **NO protegidas** - debe restringirse a usuarios autenticados/admin según la operación
-- [ ] Pedido: listado general **NO protegido** - debe requerir `soloAdmin`
-- [ ] Pedido: GET por usuario, detalle, PUT/PATCH y DELETE **NO protegidos** - deben validar autenticación y propietario/admin
-- [ ] Usuario: PUT/PATCH/DELETE **NO protegidos** - deben verificar que sea el mismo usuario o admin
-- [ ] Producto: sus operaciones de escritura ya requieren `verificarToken` y `soloAdmin`
+1. **Cerrar el acceso al panel** y verificar los tres perfiles (anónimo, usuario, administrador).
+2. **Recuperar pruebas ejecutables:** corregir los tres imports frontend; agregar cobertura de autorización, cantidades, precios/totales y propietario en backend.
+3. **Completar los flujos funcionales:** integrar comentarios con API; añadir filtro y detalle de pedidos; añadir detalle de producto si está en el alcance.
+4. **Resolver los defectos restantes:** eliminar el ID de respaldo de pedidos y planificar la migración de contraseñas heredadas.
+5. **Asegurar la entrega:** conseguir build frontend limpio y separar sincronización del esquema/configuración debug del arranque de producción.
+6. **Validación final:** ejecutar builds de backend y frontend, suite frontend/backend y pruebas de integración; comprobar manualmente los permisos y flujos completos.
 
-**Archivos a modificar**:
+## Verificaciones ejecutadas en esta revisión
 
-- `backend/src/categoria/categoria.routes.ts`
-- `backend/src/comentario/comentario.routes.ts`
-- `backend/src/metodo-pago/metodo-pago.routes.ts`
-- `backend/src/usuario/usuario.routes.ts`
-- `backend/src/pedido/pedido.routes.ts`
-- `backend/src/detalle-pedido/detalle-pedido.routes.ts`
-
-#### 4. **Control de propiedad y seguridad de credenciales - FALTA**
-
-- [ ] Usar el usuario autenticado (`req.usuarioToken.id`) al crear pedidos, sin confiar en el `usuario` enviado por el cliente
-- [ ] Impedir que un usuario consulte o modifique pedidos, comentarios o datos de otros usuarios
-- [ ] Agregar middleware que permita acceso al propio recurso o a un administrador
-- [ ] Hashear siempre las contraseñas nuevas con bcrypt antes de guardarlas
-- [ ] Eliminar el fallback que compara contraseñas en texto plano durante el login
-
----
-
-### 🔴 **CRÍTICO - Frontend (DEBE COMPLETARSE)**
-
-#### 1. **Login frontend - PARCIALMENTE RESUELTO** ⚠️
-
-**Requisito**: Login con autenticación propia usando API
-
-**Problema**:
-
-- ✅ El frontend usa el endpoint `/api/usuario/login`
-- ✅ `AuthService` guarda el token JWT, los datos del usuario y permite cerrar sesión
-- ✅ El interceptor envía el token en los headers
-
-**Tareas**:
-
-- [x] Modificar login.ts para usar `apiService.login(...)`
-- [x] Actualizar AuthService.login() para recibir token JWT del backend
-- [x] Validar que token JWT se guarda y se envía en requests
-- [x] Implementar logout con limpieza de localStorage
-
-**Archivo**: `frontend/src/app/pages/login/login.ts`
-
-#### 2. **Tests - INCOMPLETOS**
-
-**Requisito**: 1 test unitario de componente + 1 test e2e
-
-**Tareas**:
-
-- [ ] Escribir test real de TarjetaProductoComponent (no solo "should create")
-  - Probar que recibe @Input producto
-  - Probar que emite @Output al hacer click en "Agregar"
-  - Mock del servicio de carrito
-- [ ] Escribir test real de FormularioLoginComponent
-- [ ] Crear test e2e: flujo login → ver productos → agregar carrito → crear pedido
-- [ ] Configurar e2e testing (cypress o protractor)
-
-**Archivos**:
-
-- `frontend/src/app/components/tarjeta-producto/tarjeta-producto.spec.ts` (mejorar)
-- `frontend/src/app/components/formulario-login/formulario-login.spec.ts` (mejorar)
-- `frontend/e2e/` (CREAR)
-
-#### 3. **AdminDashboard - INCOMPLETO** ⚠️
-
-**Requisito**: Admin debe poder gestionar productos (CRUD de productos)
-
-**Tareas**:
-
-- [ ] Agregar listado de productos con opciones de editar/eliminar
-- [x] Formulario para agregar producto
-- [x] Listado y creación de categorías
-- [ ] Corregir la ruta duplicada `/admin`: actualmente existe una entrada con `authGuard` que permite acceso a cualquier usuario autenticado antes de `adminGuard`
-
-**Archivo**:
-
-- `frontend/src/app/pages/admin-dashboard/admin-dashboard.ts`
-- `frontend/src/app/guards/admin.guard.ts` (ya existe)
-
----
-
-### 🟡 **IMPORTANTE - Frontend (FUNCIONALIDAD)**
-
-#### 1. **Detalle de Producto - FALTA**
-
-**Requisito**: Al seleccionar un producto en listado, mostrar detalle
-
-**Tareas**:
-
-- [ ] Crear ruta `/producto/:id` o modal con detalle
-- [ ] Mostrar: nombre, descripción, precio, categoría
-- [ ] Botón para agregar al carrito
-
-#### 2. **Detalle de Pedido - INCOMPLETO**
-
-**Requisito**: Al seleccionar un pedido, mostrar detalle
-
-**Archivo existente**: `ver-pedido.ts` (necesita verificar que está funcional)
-
-- [ ] Mostrar fecha, estado, costo total, cliente, dirección envío
-- [ ] Listar productos dentro del pedido (detalles)
-
-#### 3. **Mis Pedidos - INCOMPLETO**
-
-**Requisito**: Usuario autenticado puede ver su historial de pedidos
-
-**Archivo existente**: `mis-pedidos.ts`
-
-- [x] Cargar pedidos del usuario usando `apiService.obtenerMisPedidos(usuarioId)`
-- [ ] Mostrar listado filtrable por estado
-- [ ] Click en pedido → ver detalle (ver-pedido)
-
-#### 4. **Carrito de Compras - FALTA CONECTAR**
-
-**Requisito**: Agregar productos al carrito y crear pedido
-
-**Tareas**:
-
-- [ ] Mostrar carrito en UI (header o página dedicada)
-- [ ] Endpoint POST `/api/pedido` ya existe, completar integración
-- [ ] Validar que usuario esté autenticado antes de crear pedido
-- [ ] Limpiar carrito después de crear pedido exitosamente
-
-#### 5. **Comentarios - SOLO LOCAL**
-
-**Requisito**: Usuarios pueden dejar comentarios en pedidos
-
-**Archivo existente**: `comentarios.ts`
-
-- [ ] Listar comentarios desde la API; actualmente usa datos locales de ejemplo
-- [ ] Formulario para crear comentario mediante el backend y asociarlo al usuario actual
-- [ ] Protección: solo usuarios autenticados pueden comentar
-
----
-
-### 🟡 **IMPORTANTE - Backend (FUNCIONALIDAD)**
-
-#### 1. **Validador de Comentario - IMPLEMENTADO** ✅
-
-**Archivo existente**: `backend/src/comentario/comentario.validator.ts`
-
-```typescript
-// Debe validar:
-- contenido: string no vacío
-- puntuacion: número entre 1-5
-- usuario: UUID válido
-- Return 400 si hay errores
-```
-
-#### 2. **Mejorar Manejador de Errores**
-
-- Devolver error details en desarrollo
-- Errores genéricos en producción
-- Códigos HTTP correctos (400, 401, 403, 404, 500)
-
-#### 3. **Seed de Datos - COMENTADO** (opcional pero útil)
-
-**Archivo**: `backend/src/app.ts` - tiene seed comentado
-
-- [ ] Descomentar para datos de prueba
-- Útil para development
-
----
-
-### 🟢 **BONUS - Requisitos Opcionales**
-
-#### 1. **Notificaciones** (VOLUNTARIO)
-
-- Toast/alert cuando se crea un pedido
-- Confirmación de login exitoso
-
-#### 2. **Más niveles de acceso** (VOLUNTARIO)
-
-- Actualmente: usuario, admin
-- Podría haber: gerente (ver reportes), delivery (asignar pedidos)
-
-#### 3. **Reportes de Admin** (VOLUNTARIO)
-
-- Total de pedidos por día
-- Productos más vendidos
-- Ingresos totales
-
-#### 4. **Búsqueda avanzada** (VOLUNTARIO)
-
-- Buscar productos por nombre
-- Filtrar pedidos por rango de fechas
-
----
-
-## 📋 RESUMEN DE TAREAS CRÍTICAS POR INTEGRANTE
-
-### **Vivas Martin**
-
-- [ ] Implementar 1 test unitario de Usuario (backend)
-- [x] Mejorar validación de Usuario
-- [ ] Proteger rutas de Usuario que faltan
-
-### **Salvia Camila**
-
-- [ ] Implementar 1 test unitario de Producto (backend)
-- [x] Crear y validar Comentario validator
-- [ ] Completar AdminDashboard (frontend)
-
-### **Marianela Leonardelli**
-
-- [ ] Implementar 1 test unitario de Comentario (backend)
-- [x] Arreglar login del frontend (usar JWT correctamente)
-- [ ] Completar MisPedidos y conectar Comentarios con la API
-
-### **Todos**
-
-- [ ] Implementar 1 test de integración (flujo completo: pedido)
-- [ ] Configurar testing en frontend (e2e)
-- [ ] Code review de protecciones de rutas
-- [ ] Validar mobile-first CSS en 3 breakpoints (SM, MD, LG)
-
----
-
-## 🎯 FUNCIONAL - VERIFICACIÓN FINAL
-
-### Funcionales requeridos (3 integrantes):
-
-- ✅ CRUDs simples: Usuario, Categoría y MetodoPago
-- ✅ CRUDs dependientes: Producto(Categoría), Pedido(Usuario/MetodoPago), DetallePedido(Pedido/Producto), Comentario(Usuario)
-- ❌ Listados con filtro: existe Productos por categoría y Pedidos por usuario; falta filtro de Pedidos por estado
-- ❌ Detalle para cada listado: FALTA completar
-- ✅ Casos de uso (mínimo 3, al menos 2 relacionados):
-  1. "Realizar un pedido" (Usuario → Producto → Pedido → DetallePedido)
-  2. "Dejar una reseña" (Usuario → Comentario)
-  3. "Agregar producto al catálogo" (Admin → Producto)
-
-  Relacionados: (1) y (2) - datos de Pedido sirven para comentar
-
----
-
-## 📝 PRÓXIMOS PASOS RECOMENDADOS
-
-1. **Urgente**: Arreglar login frontend (semana 1)
-2. **Urgente**: Implementar tests (semana 1-2)
-3. **Importante**: Proteger rutas faltantes (semana 1)
-4. **Importante**: Completar validaciones (semana 1-2)
-5. **Normal**: Implementar detalles y completar UI (semana 2-3)
-6. **Nice to have**: Tests e2e y bonus (semana 3+)
-
----
-
-## 📚 REFERENCIAS
-
-- Requisitos: `requisitos-backend.md` (en proyecto)
-- Propuesta: `Propsal DSW.md` (en proyecto)
-- Backend: `/backend/src/`
-- Frontend: `/frontend/src/`
+| Comando | Resultado |
+|---|---|
+| `cd backend; npm run build` | Correcto |
+| `cd frontend; npm run build` | Falla por presupuesto excedido en `app.scss` |
+| `cd frontend; npm test -- --watch=false` | Falla al compilar por imports inexistentes en tres specs |
+| Revisión de `backend/src/tests/` | Solo `debug-db.ts`; no hay suite automatizada |
