@@ -6,7 +6,7 @@ import { Pedido } from '../pedido/pedido.entity.js';
 const em = orm.em;
 
 export async function validarDetallePedidoInput(req: Request, res: Response, next: NextFunction) {
-  const input = req.body;
+  const input = req.body.sanitizedInput || req.body;
   const errores: string[] = [];
   const esActualizacion = req.method === 'PUT' || req.method === 'PATCH';
 
@@ -22,7 +22,7 @@ export async function validarDetallePedidoInput(req: Request, res: Response, nex
   let productoId: string | undefined;
   if (!esActualizacion || input.producto !== undefined) {
     productoId = typeof input.producto === 'object' ? input.producto?.id : input.producto;
-    if (!productoId || typeof productoId !== 'string' || productoId.trim().length === 0) {
+    if (!productoId || typeof productoId !== 'string') {
       errores.push('Debe especificar un ID de producto válido.');
     }
   }
@@ -31,7 +31,7 @@ export async function validarDetallePedidoInput(req: Request, res: Response, nex
   let pedidoId: string | undefined;
   if (!esActualizacion || input.pedido !== undefined) {
     pedidoId = typeof input.pedido === 'object' ? input.pedido?.id : input.pedido;
-    if (!pedidoId || typeof pedidoId !== 'string' || pedidoId.trim().length === 0) {
+    if (!pedidoId || typeof pedidoId !== 'string') {
       errores.push('Debe especificar un ID de pedido válido.');
     }
   }
@@ -50,13 +50,17 @@ export async function validarDetallePedidoInput(req: Request, res: Response, nex
     }
 
     if (pedidoId) {
-      const pedidoExiste = await em.findOne(Pedido, { id: pedidoId });
+      const pedidoExiste = await em.findOne(Pedido, { id: pedidoId }, { populate: ['usuario'] });
       if (!pedidoExiste) {
         return res.status(404).json({ message: 'El pedido especificado no existe.' });
       }
+      const esDuenioPedido = pedidoExiste.usuario.id === req.usuarioToken?.id;
+      if (!esDuenioPedido && !req.usuarioToken?.esAdmin) {
+        return res.status(403).json({ message: 'No puedes asociar un detalle a un pedido que no te pertenece.' });
+      }
     }
   } catch (error: any) {
-    return res.status(500).json({ message: 'Error al verificar las relaciones del detalle', error: error.message });
+    return res.status(500).json({ message: 'Error al validar dependencias del detalle', error: error.message });
   }
 
   next();

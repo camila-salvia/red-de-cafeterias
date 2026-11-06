@@ -13,7 +13,7 @@ function sanitizeDetallePedidoInput(
     next: NextFunction
 ) {
     req.body.sanitizedInput = {
-        cantidad: req.body.cantidad,
+        cantidad: req.body.cantidad ? Number(req.body.cantidad) : undefined,
         pedido: req.body.pedido,
         producto: req.body.producto
     }
@@ -30,7 +30,7 @@ function sanitizeDetallePedidoInput(
 // obtener todos los detalles de pedido
 async function findAll(req: Request, res: Response) {
   try {
-    const detallePedido = await em.find(DetallePedido, {}, { populate: ['producto', 'pedido'] })
+    const detallePedido = await em.find(DetallePedido, {}, { populate: ['producto', 'pedido.usuario'] })
     res.status(200).json({ message: 'Todos los detalles de pedido encontrados', data: detallePedido })
   } catch (error:any) {
     res.status(500).json({ message: 'Error al obtener los detalles de pedido' })
@@ -40,11 +40,7 @@ async function findAll(req: Request, res: Response) {
 // crear nuevo detalle de pedido
 async function add(req: Request, res: Response) {
   try {
-    const input = req.body.sanitizedInput || req.body
-
-    if (!input.producto || !input.pedido) {
-      return res.status(400).json({ message: 'El producto y el pedido son obligatorios para el detalle' })
-    }
+    const input = req.body.sanitizedInput
 
     // Buscamos el producto real para extraer su precio inalterable
     const productoId = typeof input.producto === 'object' ? input.producto.id : input.producto
@@ -68,11 +64,18 @@ async function add(req: Request, res: Response) {
   }
 }
 
-// obtener detalle de pedido por id
+// obtener detalle de pedido por id, verificando propiedad en cascada
  async function findOne(req: Request, res: Response) {
   try {
     const id = req.params.id as string
-    const detallePedido = await em.findOneOrFail(DetallePedido, { id }, { populate: ['producto', 'pedido'] })
+    const detallePedido = await em.findOneOrFail(DetallePedido, { id }, { populate: ['producto', 'pedido.usuario'] })
+    
+    // Validar si el usuario logueado es el dueño del pedido al que pertenece este detalle o es admin
+    const esDuenio = detallePedido.pedido.usuario.id === req.usuarioToken?.id
+    if (!esDuenio && !req.usuarioToken?.esAdmin) {
+      return res.status(403).json({ message: 'Acceso denegado: este detalle de pedido no te pertenece.' })
+    }
+    
     res.status(200).json({ message: 'Detalle de pedido encontrado', data: detallePedido })
   } catch (error:any) {
     if (error instanceof NotFoundError) {
@@ -86,8 +89,8 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
       const id = req.params.id as string
-      const detallePedido = await em.findOneOrFail(DetallePedido, { id })
-      const input = req.body.sanitizedInput || req.body
+      const detallePedido = await em.findOneOrFail(DetallePedido, { id }, { populate: ['pedido.usuario'] })
+      const input = req.body.sanitizedInput
       
       // Si cambian el producto, actualizamos también el precio unitario automáticamente por seguridad
       if (input.producto) {
