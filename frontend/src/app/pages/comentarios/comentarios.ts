@@ -1,7 +1,8 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Comentario } from '../../models/comentario.interface';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-comentarios',
@@ -11,13 +12,16 @@ import { Comentario } from '../../models/comentario.interface';
   styleUrls: ['./comentarios.scss']
 })
 export class ComentariosComponent {
+  private authService = inject(AuthService);
+
   // Lista de reseñas iniciales para mostrar en la página
   resenas = signal<Comentario[]>([
     { id: 1, usuario: 'María G.', puntuacion: 5, contenido: '¡El mejor café de la ciudad!', fecha_publicacion: new Date('2026-08-30') },
     { id: 2, usuario: 'Carlos T.', puntuacion: 3, contenido: '', fecha_publicacion: new Date('2026-09-01') }
   ]);
 
-  sesionIniciada = signal<boolean>(!!localStorage.getItem('token_cafeteria'));
+  // se actualiza sola al iniciar o cerrar sesión
+  sesionIniciada = this.authService.isLoggedIn;
   puntajeSeleccionado = signal<number>(0);
   textoComentario = signal<string>('');
   mostrarPopup = signal<boolean>(false);

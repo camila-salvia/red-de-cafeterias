@@ -2,7 +2,8 @@ import { Component, inject, signal, computed } from '@angular/core';
 // import { JsonPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { ApiService } from '../../services/api'; 
-import { CartService } from '../../services/cart.js';
+import { AuthService } from '../../services/auth';
+import { CartService } from '../../services/cart';
 import { TarjetaProductoComponent } from '../../components/tarjeta-producto/tarjeta-producto';
 import { Producto } from '../../models/producto.interface';
 
@@ -18,6 +19,7 @@ export class InicioComponent {
   private apiService = inject(ApiService);
   private router = inject(Router);
   private cartService = inject(CartService);
+  private authService = inject(AuthService);
 
   // Lista directa desde el backend
   productos = signal<any[]>([]); 
@@ -46,8 +48,7 @@ export class InicioComponent {
   }
 
   manejarAgregado(productoSeleccionado: any) {
-    const token = localStorage.getItem('token_cafeteria');
-    if (token) {
+    if (this.authService.estaAutenticado()) {
       this.cartService.agregarProducto(productoSeleccionado);
     } else {
       alert('Debes iniciar sesión para agregar productos al carrito.');

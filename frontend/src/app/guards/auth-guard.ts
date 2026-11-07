@@ -1,14 +1,18 @@
 import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
+import { AuthService } from '../services/auth';
 
-export const authGuard: CanActivateFn = (route, state) => {
+export const authGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
   const router = inject(Router);
-  const token = localStorage.getItem('token_cafeteria');
-  if(token) {
+
+  if (authService.estaAutenticado()) {
     return true;
-  } else {
-    alert('Debes iniciar sesión para acceder a esta sección');
-    router.navigate(['/login']);
-    return false;
   }
+
+  // si la sesión venció, estaAutenticado() ya dejó ese mensaje; si no, es que nunca inició sesión
+  if (!authService.mensajeSesion()) {
+    authService.mensajeSesion.set('Iniciá sesión para acceder a esta sección.');
+  }
+  return router.createUrlTree(['/login']);
 };

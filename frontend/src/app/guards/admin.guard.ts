@@ -5,11 +5,15 @@ import { AuthService } from '../services/auth';
 export const adminGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
-
-  if (authService.isLoggedIn() && authService.esAdmin()) {
-    return true;
+  
+  // sin sesión (o con token vencido)
+  if (!authService.estaAutenticado()) {
+    if (!authService.mensajeSesion()) {
+      authService.mensajeSesion.set('Iniciá sesión para acceder a esta sección.');
+    }
+    return router.createUrlTree(['/login']);
   }
 
-  router.navigate(['/']);
-  return false;
+  // con sesión pero sin rol de administrador: al inicio
+  return authService.esAdmin() ? true : router.createUrlTree(['/']);
 };

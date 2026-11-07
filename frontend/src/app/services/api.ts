@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpParams, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError, catchError } from 'rxjs';
 import { Producto } from '../models/producto.interface';
 import { environment } from '../../environments/environment';
@@ -12,6 +12,7 @@ export class ApiService {
   private http = inject(HttpClient);
   // Base común: 'http://localhost:3000/api'
   private apiUrl = environment.apiUrl;
+  // El header Authorization lo agrega authInterceptor en todas las llamadas a la API.
 
   // autenticación
   login(credenciales: { email: string; password: string }): Observable<any> {
@@ -34,12 +35,12 @@ export class ApiService {
   }
 
   eliminarProducto(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/producto/${id}`, this.getHeaders())
+    return this.http.delete(`${this.apiUrl}/producto/${id}`)
       .pipe(catchError(this.manejarError));
   }
 
   actualizarProducto(id: string, producto: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/producto/${id}`, producto, this.getHeaders())
+    return this.http.put(`${this.apiUrl}/producto/${id}`, producto)
       .pipe(catchError(this.manejarError));
   }
 
@@ -55,7 +56,7 @@ export class ApiService {
   }
 
   eliminarCategoria(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/categoria/${id}`, this.getHeaders())
+    return this.http.delete(`${this.apiUrl}/categoria/${id}`)
       .pipe(catchError(this.manejarError));
   }
 
@@ -72,12 +73,12 @@ export class ApiService {
 
   // pedido
   crearPedido(pedidoData: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/pedido`, pedidoData, this.getHeaders())
+    return this.http.post<any>(`${this.apiUrl}/pedido`, pedidoData)
       .pipe(catchError(this.manejarError));
   }
 
   crearDetallePedido(detalleData: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/detalle-pedido`, detalleData, this.getHeaders())
+    return this.http.post<any>(`${this.apiUrl}/detalle-pedido`, detalleData)
       .pipe(catchError(this.manejarError));
   }
 
@@ -94,18 +95,8 @@ export class ApiService {
     let mensajeAmigable = 'Ocurrió un error inesperado al procesar tu solicitud.';
     if (error.status === 404) mensajeAmigable = 'No pudimos encontrar el recurso solicitado.';
     if (error.status === 500) mensajeAmigable = 'Problema en el servidor. Intenta más tarde.';
-    
-    return throwError(() => new Error(mensajeAmigable));
-  }
 
-  // admin
-  private getHeaders() {
-    const token = localStorage.getItem('token_cafeteria');
-    return {
-      headers: new HttpHeaders({
-        'Authorization': `Bearer ${token}`
-      })
-    };
+    return throwError(() => new Error(mensajeAmigable));
   }
 
   // pago

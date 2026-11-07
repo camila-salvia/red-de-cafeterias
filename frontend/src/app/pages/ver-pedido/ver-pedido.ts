@@ -17,6 +17,7 @@ import { firstValueFrom } from 'rxjs';
 
 export class VerPedidoComponent {
   cartService = inject(CartService);
+  private authService = inject(AuthService);
   private apiService = inject(ApiService);
   private router = inject(Router);
 
@@ -57,8 +58,8 @@ export class VerPedidoComponent {
   async confirmarPedido() {
     // validar carrito vacio
     if (this.cartService.items().length === 0) return;
-    // validar usuario logueado
-    const usuarioId = localStorage.getItem('usuario_id');
+    // validar usuario logueado (el id sale del token)
+    const usuarioId = this.authService.usuarioIdActual();
     if (!usuarioId) {
       alert('Debes iniciar sesión.');
       this.router.navigate(['/login']);

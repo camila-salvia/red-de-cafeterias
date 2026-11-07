@@ -5,14 +5,20 @@
     <!-- VISTA INICIO DE SESIÓN -->
     <div class="login-content">
       <h2 class="text-center mb-4">Bienvenido</h2>
-      <form class="login-form">
-        <!-- Agregamos name y [(ngModel)] a los inputs -->
-        <input type="email" name="email" [(ngModel)]="email" class="form-control custom-input mb-3" placeholder="email">
-        <input type="password" name="password" [(ngModel)]="password" class="form-control custom-input mb-3" placeholder="password">
+
+      <!-- Aviso previo: sesión vencida, hay que iniciar sesión, etc. -->
+      @if (mensajeSesion()) {
+        <div class="text-secondary small text-center mb-3 fw-bold" role="status">{{ mensajeSesion() }}</div>
+      }
+
+      <!-- (ngSubmit): permite enviar con Enter -->
+      <form class="login-form" (ngSubmit)="iniciarSesion()">
+        <input type="email" name="email" [(ngModel)]="email" (input)="limpiarError()" autocomplete="email" aria-label="Email" class="form-control custom-input mb-3" placeholder="email">
+        <input type="password" name="password" [(ngModel)]="password" (input)="limpiarError()" autocomplete="current-password" aria-label="Contraseña" class="form-control custom-input mb-3" placeholder="password">
 
         <!-- Renderizado de errores -->
         @if (mensajeError()) {
-          <div class="text-danger small text-center mb-3 fw-bold">{{ mensajeError() }}</div>
+          <div class="text-danger small text-center mb-3 fw-bold" role="alert">{{ mensajeError() }}</div>
         }
 
         <div class="d-flex align-items-center justify-content-center mb-3 ps-1 checkbox-row">
@@ -25,15 +31,16 @@
         </div>
 
         <div class="text-center">
-          <!-- Agregamos el evento (click) al botón -->
-          <button type="button" class="btn custom-btn px-5 mb-4" (click)="iniciarSesion()">INGRESAR</button>
+          <button type="submit" class="btn custom-btn px-5 mb-4" [disabled]="cargando()">
+            {{ cargando() ? 'INGRESANDO...' : 'INGRESAR' }}
+          </button>
         </div>
       </form>
     </div>
     <div class="text-end mt-2">
       <a href="javascript:void(0)" (click)="toggleVista()" class="text-dark text-decoration-none small d-block">Crear cuenta</a>
     </div>
-       
+
     } @else {
       <!-- VISTA CREAR CUENTA -->
       <h2 class="text-center mb-4">Crear cuenta</h2>

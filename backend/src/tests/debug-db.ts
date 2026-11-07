@@ -12,35 +12,35 @@ async function debugDB() {
   try {
     console.log('=== CATEGORÍAS ===');
     const categorias = await em.find(Categoria, {});
-    categorias.forEach((cat) => {
+    categorias.forEach((cat: Categoria) => {
       console.log(`- ${cat.nombre} (ID: ${cat.id})`);
     });
 
     console.log('\n=== PRODUCTOS ===');
     const productos = await em.find(Producto, {}, { populate: ['categoria'] });
-    productos.forEach((prod) => {
+    productos.forEach((prod: Producto) => {
       console.log(`- ${prod.nombre} → ${prod.categoria.nombre}`);
     });
 
     console.log('\n=== PRODUCTOS DUPLICADOS ===');
-    const nombres = productos.map((p) => p.nombre);
-    const duplicados = nombres.filter((n, i) => nombres.indexOf(n) !== i);
+    const nombres = productos.map((p: Producto) => p.nombre);
+    const duplicados = nombres.filter((n: string, i: number) => nombres.indexOf(n) !== i);
     if (duplicados.length === 0) {
       console.log('✓ No hay duplicados');
     } else {
-      duplicados.forEach((nombre) => {
-        console.log(`✗ ${nombre} aparece ${nombres.filter((n) => n === nombre).length} veces`);
+      duplicados.forEach((nombre: string) => {
+        console.log(`✗ ${nombre} aparece ${nombres.filter((n: string) => n === nombre).length} veces`);
       });
     }
 
     console.log('\n=== BÚSQUEDA: lemon pie ===');
     const lemonPie = productos.filter(
-      (p) => p.nombre.toLowerCase().includes('lemon') || p.nombre.toLowerCase().includes('pie')
+      (p: Producto) => p.nombre.toLowerCase().includes('lemon') || p.nombre.toLowerCase().includes('pie')
     );
     if (lemonPie.length === 0) {
       console.log('✗ No encontrado');
     } else {
-      lemonPie.forEach((prod) => {
+      lemonPie.forEach((prod: Producto) => {
         console.log(`✓ ${prod.nombre} → ${prod.categoria.nombre}`);
       });
     }
@@ -49,12 +49,12 @@ async function debugDB() {
     const catsComidas = await em.find(Categoria, {
       nombre: { $like: '%comidas%' }
     });
-    console.log(`Categorías encontradas con LIKE %comidas%:`, catsComidas.map((c) => c.nombre));
+    console.log(`Categorías encontradas con LIKE %comidas%:`, catsComidas.map((c: Categoria) => c.nombre));
 
     if (catsComidas.length > 0) {
       const prodsComidas = await em.find(Producto, { categoria: { $in: catsComidas } });
       console.log(`Productos en esas categorías:`);
-      prodsComidas.forEach((p) => console.log(`  - ${p.nombre}`));
+      prodsComidas.forEach((p: Producto) => console.log(`  - ${p.nombre}`));
     }
 
     await orm.close();

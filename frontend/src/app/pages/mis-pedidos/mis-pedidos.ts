@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../services/api';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-mis-pedidos',
@@ -12,6 +13,7 @@ import { ApiService } from '../../services/api';
 })
 export class MisPedidosComponent implements OnInit {
   private apiService = inject(ApiService);
+  private authService = inject(AuthService);
   pedidos = signal<any[]>([]);
   cargando = signal<boolean>(true);
 
@@ -20,7 +22,12 @@ export class MisPedidosComponent implements OnInit {
   }
 
   cargarPedidos() {
-    const usuarioId = localStorage.getItem('usuario_id') || 1;
+    // El id sale del token: el backend solo deja ver los pedidos propios (o a un admin)
+    const usuarioId = this.authService.usuarioIdActual();
+    if (!usuarioId) {
+      this.cargando.set(false);
+      return;
+    }
 
     this.apiService.obtenerMisPedidos(usuarioId).subscribe({
       next: (res: any) => {
