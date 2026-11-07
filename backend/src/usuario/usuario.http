@@ -1,3 +1,34 @@
+### 1. Crear el primer Administrador
+POST http://localhost:3000/api/usuario
+Content-Type: application/json
+
+{
+    "nombre": "Admin",
+    "apellido": "Principal",
+    "telefono": "123456789",
+    "direccion": "Cafeteria",
+    "email": "admin@cafeteria.com",
+    "password": "password123",
+    "esAdmin": true
+}
+
+### 2. Iniciar sesión y capturar el Token
+# @name loginAdmin
+POST http://localhost:3000/api/usuario/login
+Content-Type: application/json
+
+{
+  "email": "admin@cafeteria.com",
+  "password": "password123"
+}
+
+### Guardamos el token devuelto en una variable global
+@token = {{loginAdmin.response.body.data.token}}
+
+### 3. GET all usuarios (¡Ahora sí tienes permiso!)
+GET http://localhost:3000/api/usuario
+Authorization: Bearer {{token}}
+
 ### GET all usuarios
 http://localhost:3000/api/usuario
 
