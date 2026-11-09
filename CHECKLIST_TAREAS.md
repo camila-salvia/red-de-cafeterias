@@ -51,7 +51,7 @@
 
 ### Salvia Camila (49373)
 
-- [ ] Corregir `frontend/src/app/app.routes.ts`: dejar una sola ruta `/admin` protegida por `adminGuard`; confirmar comportamiento para anónimo, usuario y administrador.
+- [ hecho ] Corregir `frontend/src/app/app.routes.ts`: dejar una sola ruta `/admin` protegida por `adminGuard`; confirmar comportamiento para anónimo, usuario y administrador.
 - [ hecho ] Implementar el test automatizado backend de Producto: categoría existente, categoría inexistente, precio inválido y filtro por categoría.
 - [ ] Añadir cobertura de regresión para la autorización de DetallePedido recientemente revisada: GET de detalle y POST asociado a pedido propio/ajeno, incluyendo administrador. Aprovechar el setup de Vitest de Martin.
 - [ ] Corregir los imports/configuración de pruebas frontend de Comentarios, Login y MisPedidos para que la suite compile.
