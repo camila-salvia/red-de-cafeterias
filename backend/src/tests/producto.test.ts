@@ -114,10 +114,10 @@ describe('Producto - Tests unitarios', () => {
       sanitizeProductoInput(req, comoRes(crearRes()), next);
 
       expect(req.body.sanitizedInput).toEqual({
-        nombre: 'Café Expresso',
-        descripcion: 'Café negro fuerte',
-        precio: 3500,
-        categoria: 'cat-1',
+        nombre: productoValido.nombre,
+        descripcion: productoValido.descripcion,
+        precio: productoValido.precio,
+        categoria: productoValido.categoria,
       });
       expect(next).toHaveBeenCalledOnce();
     });
