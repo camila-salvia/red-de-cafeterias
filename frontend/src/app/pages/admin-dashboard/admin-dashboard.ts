@@ -48,12 +48,12 @@ export class AdminDashboard {
   }
 
   cargarProductos() {
-    this.apiService.getProductos().subscribe({
+    this.apiService.getProductosAdmin().subscribe({
       next: (res: any) => {
         const data = res.data ? res.data : res;
         this.productos.set(Array.isArray(data) ? data : []);
       },
-      error: (err) => this.error.set('Error al traer productos:')
+      error: (err) => this.error.set('Error al traer productos (admin):')
     });
   }
 
@@ -123,20 +123,22 @@ export class AdminDashboard {
     this.productoEnEdicionId.set(null);
   }
        
-  eliminarProducto(id: string) {
+  cambiarEstadoProducto(id: string, activoActual: boolean) {
     this.limpiarMensajes();
-    if (confirm('¿Seguro que deseas eliminar este producto?')) {
-      this.apiService.eliminarProducto(id).subscribe({
-        next: () => {
-          this.mensaje.set('Producto eliminado exitosamente.');
-          this.cargarProductos(); // Recarga la tabla de productos
+    const accion = activoActual ? 'desactivar' : 'activar';
+    
+    if (confirm(`¿Seguro que deseas ${accion} este producto?`)) {
+      this.apiService.cambiarEstadoProducto(id).subscribe({
+        next: (res: any) => {
+          this.mensaje.set(res.message || 'Estado del producto actualizado exitosamente.');
+          this.cargarProductos(); // Recarga la tabla completa para ver el nuevo estado
         },
         error: (err) => {
-          this.error.set('Error al eliminar producto.');
+          this.error.set('Error al cambiar el estado del producto.');
         }
       });
     }
-  }    
+  }
   
   cargarParaEditar(producto: any) {
     this.nuevoProducto = {

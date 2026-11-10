@@ -61,6 +61,27 @@ async function findAll(req: Request, res: Response) {
   }
 }
 
+// obtener todos los productos para administradores (activos e inactivos)
+async function findAllAdmin(req: Request, res: Response) {
+  try {
+    const productos = await em.find(     // Sin el filtro de activo
+      Producto, 
+      {}, 
+      { populate: ['categoria'] }
+    )
+    return res.status(200).json({ 
+      message: 'Listado completo de productos (admin)', 
+      data: productos 
+    })
+  } catch (error: any) {
+    console.error('Error en findAllAdmin:', error)
+    return res.status(500).json({ 
+      message: 'Error al obtener productos', 
+      error: error.message 
+    })
+  }
+}
+
 // crear nuevo producto
 async function add(req: Request, res: Response) {
   try {
@@ -142,4 +163,24 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export {sanitizeProductoInput, findAll, add, findOne, update, remove}
+// cambiar el estado activo/inactivo de un producto
+async function cambiarEstadoProducto(req: Request, res: Response) {
+  try {
+    const id = req.params.id as string
+    const producto = await em.findOneOrFail(Producto, { id }, { populate: ['categoria'] })
+    producto.activo = !producto.activo
+    await em.flush()
+    const estadoTexto = producto.activo ? 'activado' : 'desactivado'
+    return res.status(200).json({ 
+      message: `Producto ${estadoTexto} correctamente`, 
+      data: producto 
+    })
+  } catch (error: any) {
+    return res.status(404).json({ 
+      message: 'Producto no encontrado', 
+      error: error.message 
+    })
+  }
+}
+
+export {sanitizeProductoInput, findAll, add, findOne, update, remove, findAllAdmin, cambiarEstadoProducto}

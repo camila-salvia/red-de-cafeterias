@@ -24,7 +24,7 @@
 
     <!-- Panel Nuevo Producto -->
     <section class="card">
-      <h3>Crear Producto</h3>
+      <h3>Crear / Editar Producto</h3>
       <form (ngSubmit)="guardarProducto()">
         <div class="campo">
           <label>Nombre del Producto</label>
@@ -35,8 +35,7 @@
         <div class="campo">
           <label>Descripción</label>
           <textarea placeholder="Breve detalle del producto..." [(ngModel)]="nuevoProducto.descripcion"
-            name="descripcion">
-          </textarea>
+            name="descripcion"></textarea>
         </div>
 
         <div class="campo">
@@ -54,13 +53,15 @@
           </select>
         </div>
 
-        <button type="submit" class="btn-guardar">Guardar Producto</button>
+        <button type="submit" class="btn-guardar">
+          {{ productoEnEdicionId() ? 'Actualizar Producto' : 'Guardar Producto' }}
+        </button>
       </form>
     </section>
   </div>
 
   <div class="grid-paneles listas-admin">
-    <!-- Tabla de categorias -->
+    <!-- Tabla de categorías -->
     <section class="tabla-admin">
       <h3>Lista de Categorías</h3>
       <table class="tabla-admin">
@@ -71,20 +72,20 @@
           </tr>
         </thead>
         <tbody>
-          @for (cat of categorias();track cat.id) {
-            <tr>
-              <td>{{ cat.nombre }}</td>
-              <td>
-                <button type="button" class="btn-eliminar" (click)="eliminarCategoria(cat.id)">Borrar</button>
-              </td>
-            </tr>
+          @for (cat of categorias(); track cat.id) {
+          <tr>
+            <td>{{ cat.nombre }}</td>
+            <td>
+              <button type="button" class="btn-eliminar" (click)="eliminarCategoria(cat.id)">Borrar</button>
+            </td>
+          </tr>
           }
         </tbody>
       </table>
-    </section> 
+    </section>
 
     <!-- Tabla de productos -->
-     <section class="card">
+    <section class="card">
       <h3>Lista de Productos</h3>
       <table class="tabla-admin">
         <thead>
@@ -93,24 +94,44 @@
             <th>Descripción</th>
             <th>Precio</th>
             <th>Categoría</th>
+            <th>Estado</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           @for (prod of productos(); track prod.id) {
-            <tr>
-              <td>{{ prod.nombre }}</td>
-              <td>{{ prod.descripcion }}</td>
-              <td>{{ prod.precio | currency:'ARS' }}</td>
-              <td>{{ prod.categoria.nombre }}</td>
-              <td>
-                <button type="button" class="btn-editar" (click)="cargarParaEditar(prod)">Editar</button>
-                <button type="button" class="btn-eliminar" (click)="eliminarProducto(prod.id)">Borrar</button>
-              </td>
-            </tr>
+          <!-- Aplicamos clase condicional si el producto no está activo -->
+          <tr [class.fila-inactiva]="!prod.activo">
+            <td>{{ prod.nombre }}</td>
+            <td>{{ prod.descripcion }}</td>
+            <td>{{ prod.precio | currency:'ARS' }}</td>
+            <td>{{ prod.categoria?.nombre || 'Sin categoría' }}</td>
+
+            <!-- Columna de Estado con Badge -->
+            <td>
+              <span class="badge" [ngClass]="prod.activo ? 'badge-activo' : 'badge-inactivo'">
+                {{ prod.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+
+            <!-- Columna de Acciones Actualizada -->
+            <td>
+              <button type="button" class="btn-editar" (click)="cargarParaEditar(prod)">Editar</button>
+
+              <!-- Botón dinámico para activar/desactivar en lugar de borrado físico -->
+              <button type="button" class="btn-accion" [ngClass]="prod.activo ? 'btn-desactivar' : 'btn-activar'"
+                (click)="cambiarEstadoProducto(prod.id, prod.activo)">
+                {{ prod.activo ? 'Desactivar' : 'Activar' }}
+              </button>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="6" class="text-center">No hay productos registrados.</td>
+          </tr>
           }
         </tbody>
       </table>
-     </section>
+    </section>
   </div>
 </div>

@@ -29,6 +29,11 @@ export class ApiService {
       .pipe(catchError(this.manejarError));
   }
 
+  getProductosAdmin(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/productos/admin`)
+      .pipe(catchError(this.manejarError));
+  }
+
   crearProducto(producto: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/producto`, producto)
       .pipe(catchError(this.manejarError));
@@ -41,6 +46,11 @@ export class ApiService {
 
   actualizarProducto(id: string, producto: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/producto/${id}`, producto)
+      .pipe(catchError(this.manejarError));
+  }
+
+  cambiarEstadoProducto(id: string): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/producto/${id}/estado`, {})
       .pipe(catchError(this.manejarError));
   }
 
