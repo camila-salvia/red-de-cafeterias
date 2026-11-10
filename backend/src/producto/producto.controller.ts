@@ -34,7 +34,7 @@ async function findAll(req: Request, res: Response) {
 
     // devolvemos todos
     if (!categoria || categoria === 'TODO') {
-      const productos = await em.find(Producto, {}, { populate: ['categoria'] })
+      const productos = await em.find(Producto, { activo: true }, { populate: ['categoria'] })
       return res.status(200).json({ message: 'Todos los productos', data: productos })
     }
 
@@ -50,7 +50,7 @@ async function findAll(req: Request, res: Response) {
     // traemos los productos asociados a esas categorías encontradas
     const productos = await em.find(
       Producto,
-      { categoria: { $in: cats } },
+      { categoria: { $in: cats }, activo: true },
       { populate: ['categoria'] }
     )
 
@@ -92,7 +92,7 @@ async function add(req: Request, res: Response) {
     const id = req.params.id as string
     const producto = await em.findOneOrFail(
         Producto, 
-        { id },
+        { id, activo: true},
         { populate: ['categoria']}
     )
     res.status(200).json({ message: 'Producto encontrado', data: producto })
@@ -130,7 +130,8 @@ async function remove(req: Request, res: Response) {
   try {
     const id = req.params.id as string
     const producto = await em.findOneOrFail(Producto, { id })
-    await em.removeAndFlush(producto)
+    producto.activo = false
+    await em.flush()
     res.status(200).send({ message: 'Producto eliminado' })
   } catch (error: any) {
     if (error instanceof NotFoundError) {

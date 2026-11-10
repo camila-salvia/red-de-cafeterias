@@ -12,6 +12,9 @@ export class Producto extends BaseEntity {
     @Property({nullable: false})
     nombre!: string
 
+    @Property({ default: true })
+    activo: boolean = true
+
     @ManyToOne(() => Categoria, { nullable: false})
     categoria!: Rel<Categoria>
 
