@@ -91,7 +91,7 @@ describe('Producto - Tests unitarios', () => {
     });
 
     // Caso 3 - Precio inválido. Debe retornar 400.
-    it.each([0, -500, 'abc', undefined, null])('rechaza con 400 un precio inválido (%s)', async (precioInvalido) => {
+    it.each([0, -500, 'abc', undefined, null])('Rechaza con 400 un precio inválido (%s)', async (precioInvalido) => {
       const res = crearRes();
       const next = vi.fn();
 
