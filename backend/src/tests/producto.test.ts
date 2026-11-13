@@ -387,6 +387,19 @@ describe('Read - findAll', () => {
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ message: 'Producto no encontrado' });
     });
+
+    it('Responde 500 ante un error inesperado', async () => {
+      em.findOneOrFail.mockRejectedValueOnce(new Error('db caída'));
+      const res = crearRes();
+
+      await findOne(crearReq({}, {}, { id: 'prod-1' }), comoRes(res));
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Error al obtener producto',
+        detalle: 'db caída',
+      });
+    });
   });
 
 // UPDATE 
@@ -554,5 +567,19 @@ describe('Read - findAll', () => {
         expect.objectContaining({ message: 'Producto no encontrado' })
       );
       expect(em.flush).not.toHaveBeenCalled();
+    });
+
+    it('Responde 500 ante un error inesperado', async () => {
+      em.findOneOrFail.mockResolvedValueOnce({ id: 'prod-1', activo: true });
+      em.flush.mockRejectedValueOnce(new Error('db caída'));
+      const res = crearRes();
+
+      await cambiarEstadoProducto(crearReq({}, {}, { id: 'prod-1' }), comoRes(res));
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Error al cambiar el estado del producto',
+        detalle: 'db caída',
+      });
     });
   }); 
