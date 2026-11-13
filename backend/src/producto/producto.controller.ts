@@ -116,9 +116,13 @@ async function add(req: Request, res: Response) {
         { id, activo: true},
         { populate: ['categoria']}
     )
-    res.status(200).json({ message: 'Producto encontrado', data: producto })
+    return res.status(200).json({ message: 'Producto encontrado', data: producto })
   } catch (error:any) {
-    res.status(404).json({ message: 'Producto no encontrado' })
+    if (error instanceof NotFoundError) {
+      return res.status(404).json({ message: 'Producto no encontrado' })
+    }
+    console.error('Detalle del error en findOne:', error)
+    return res.status(500).json({ message: 'Error al obtener producto', detalle: error.message })
   }
 }
 
@@ -136,13 +140,13 @@ async function update(req: Request, res: Response) {
 
       em.assign(producto, input);
       await em.flush();
-      res.status(200).json({ message: 'Producto actualizado', data: producto });
+      return res.status(200).json({ message: 'Producto actualizado', data: producto });
   } catch (error:any) {
     if (error instanceof NotFoundError) {
       return res.status(404).json({ message: 'Producto no encontrado' })
     }
     console.error('Detalle del error en update:', error);
-    res.status(500).json({ message: 'Error al actualizar producto', detalle: error.message });
+    return res.status(500).json({ message: 'Error al actualizar producto', detalle: error.message });
   }
 }
 
@@ -153,13 +157,13 @@ async function remove(req: Request, res: Response) {
     const producto = await em.findOneOrFail(Producto, { id })
     producto.activo = false
     await em.flush()
-    res.status(200).send({ message: 'Producto eliminado' })
+    return res.status(200).send({ message: 'Producto eliminado' })
   } catch (error: any) {
     if (error instanceof NotFoundError) {
       return res.status(404).json({ message: 'Producto no encontrado' })
     }
     console.error('Detalle del error en remove:', error);
-    res.status(500).json({ message: 'Error al eliminar producto', detalle: error.message });
+    return res.status(500).json({ message: 'Error al eliminar producto', detalle: error.message });
   }
 }
 
@@ -176,10 +180,11 @@ async function cambiarEstadoProducto(req: Request, res: Response) {
       data: producto 
     })
   } catch (error: any) {
-    return res.status(404).json({ 
-      message: 'Producto no encontrado', 
-      error: error.message 
-    })
+    if (error instanceof NotFoundError) {
+      return res.status(404).json({ message: 'Producto no encontrado' })
+    }
+    console.error('Detalle del error en cambiarEstadoProducto:', error)
+    return res.status(500).json({ message: 'Error al cambiar el estado del producto', detalle: error.message })
   }
 }
 
