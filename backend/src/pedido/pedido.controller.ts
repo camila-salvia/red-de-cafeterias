@@ -43,9 +43,9 @@ async function findAll(req: Request, res: Response) {
     const pedidos = await em.find(Pedido, 
       {}, 
       { populate: ['detalles.producto', 'usuario', 'metodo_pago'] })
-    res.status(200).json({ message: 'Todos los pedidos encontrados', data: pedidos })
+    return res.status(200).json({ message: 'Todos los pedidos encontrados', data: pedidos })
   } catch (error:any) {
-    res.status(500).json({ message: 'Error al obtener los pedidos' })
+    return res.status(500).json({ message: 'Error al obtener los pedidos' })
   }
 }
 
@@ -66,9 +66,9 @@ async function findByUsuario(req: Request, res: Response) {
         orderBy: { fecha_pedido: 'DESC' }
       }
     )
-    res.status(200).json({ message: 'Pedidos del usuario encontrados', data: pedidos })
+    return res.status(200).json({ message: 'Pedidos del usuario encontrados', data: pedidos })
   } catch (error: any) {
-    res.status(500).json({ message: 'Error al obtener los pedidos del usuario', error: error.message })
+    return res.status(500).json({ message: 'Error al obtener los pedidos del usuario', error: error.message })
   }
 }
 
@@ -124,10 +124,10 @@ async function add(req: Request, res: Response) {
 
     await em.flush()
 
-    res.status(201).json({ message: 'Pedido creado exitosamente', data: pedido })
+    return res.status(201).json({ message: 'Pedido creado exitosamente', data: pedido })
   } catch (error: any) {
     console.error('Error detallado al crear:', error)
-    res.status(500).json({ message: 'Error al crear pedido', detalle: error.message })
+    return res.status(500).json({ message: 'Error al crear pedido', detalle: error.message })
   }
 }
 
@@ -145,12 +145,12 @@ async function add(req: Request, res: Response) {
       return res.status(403).json({ message: 'Acceso denegado: este pedido pertenece a otro usuario' })
     }
 
-    res.status(200).json({ message: 'Pedido encontrado', data: pedido })
+    return res.status(200).json({ message: 'Pedido encontrado', data: pedido })
   } catch (error:any) {
   if (error instanceof NotFoundError) {
       return res.status(404).json({ message: 'Pedido no encontrado' })
     }
-    res.status(500).json({ message: 'Error al buscar el pedido' })
+    return res.status(500).json({ message: 'Error al buscar el pedido' })
   }
 }
 
@@ -161,12 +161,12 @@ async function update(req: Request, res: Response) {
       const pedido = await em.findOneOrFail(Pedido, { id: id as any })
       em.assign(pedido, req.body.sanitizedInput)
       await em.flush()
-      res.status(200).json({ message: 'Pedido actualizado', data: pedido })
+      return res.status(200).json({ message: 'Pedido actualizado', data: pedido })
   } catch (error:any) {
     if (error instanceof NotFoundError) {
       return res.status(404).json({ message: 'Pedido no encontrado' })
     }
-    res.status(500).json({ message: 'Error al actualizar pedido' })
+    return res.status(500).json({ message: 'Error al actualizar pedido' })
   }
 }
 
@@ -176,12 +176,12 @@ async function remove(req: Request, res: Response) {
     const id = req.params.id as string
     const pedido = await em.findOneOrFail(Pedido, { id: id as any })
     await em.removeAndFlush(pedido)
-    res.status(200).send({ message: 'Pedido eliminado' })
+    return res.status(200).send({ message: 'Pedido eliminado' })
   } catch (error:any) {
     if (error instanceof NotFoundError) {
       return res.status(404).json({ message: 'Pedido no encontrado' })
     }
-    res.status(500).send({ message: 'Error al eliminar pedido' });
+    return res.status(500).send({ message: 'Error al eliminar pedido' });
   }
 }
 

@@ -35,9 +35,9 @@ function sanitizeComentarioInput(
 async function findAll(req: Request, res: Response) {
   try {
     const comentarios = await em.find(Comentario, {}, { populate: ['usuario'] })
-    res.status(200).json({ message: 'Todos los comentarios encontrados', data: comentarios })
+    return res.status(200).json({ message: 'Todos los comentarios encontrados', data: comentarios })
   } catch (error:any) {
-    res.status(500).json({ message: 'Error al obtener comentarios' })
+    return res.status(500).json({ message: 'Error al obtener comentarios' })
   }
 }
 
@@ -47,10 +47,10 @@ async function add(req: Request, res: Response) {
     const input = req.body.sanitizedInput;
     const comentario = em.create(Comentario, {...input, usuario: em.getReference (Usuario, input.usuario)})
     await em.flush()
-    res.status(201).json({ message: 'Comentario creado', data: comentario })
+    return res.status(201).json({ message: 'Comentario creado', data: comentario })
   } catch (error:any) {
     console.error('Error detallado al crear:', error);
-    res.status(500).json({ message: 'Error al crear comentario', detalle: error.message })
+    return res.status(500).json({ message: 'Error al crear comentario', detalle: error.message })
   }
 }
 
@@ -59,9 +59,9 @@ async function add(req: Request, res: Response) {
   try {
     const id = req.params.id as string
     const comentario = await em.findOneOrFail(Comentario, { id }, { populate: ['usuario'] })
-    res.status(200).json({ message: 'Comentario encontrado', data: comentario })
+    return res.status(200).json({ message: 'Comentario encontrado', data: comentario })
   } catch (error:any) {
-    res.status(404).json({ message: 'Comentario no encontrado' })
+    return res.status(404).json({ message: 'Comentario no encontrado' })
   }
 }
 
@@ -72,13 +72,13 @@ async function update(req: Request, res: Response) {
       const comentario = await em.findOneOrFail(Comentario, { id })
       em.assign(comentario, req.body.sanitizedInput)
       await em.flush()
-      res.status(200).json({ message: 'Comentario actualizado', data: comentario })
+      return res.status(200).json({ message: 'Comentario actualizado', data: comentario })
   } catch (error:any) {
     if (error instanceof NotFoundError) {
       return res.status(404).json({ message: 'Comentario no encontrado' })
     }
     console.error('Detalle del error en update:', error);
-    res.status(500).json({ message: 'Error al actualizar comentario', detalle: error.message });
+    return res.status(500).json({ message: 'Error al actualizar comentario', detalle: error.message });
   }
 }
 
@@ -88,13 +88,13 @@ async function remove(req: Request, res: Response) {
     const id = req.params.id as string
     const comentario = await em.findOneOrFail(Comentario, { id })
     await em.removeAndFlush(comentario)
-    res.status(200).send({ message: 'Comentario eliminado' })
+    return res.status(200).send({ message: 'Comentario eliminado' })
   } catch (error:any) {
     if (error instanceof NotFoundError) {
       return res.status(404).json({ message: 'Comentario no encontrado' })
     }
     console.error('Detalle del error en remove:', error);
-    res.status(500).json({ message: 'Error al eliminar comentario', detalle: error.message });
+    return res.status(500).json({ message: 'Error al eliminar comentario', detalle: error.message });
   }
 }
 

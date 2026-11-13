@@ -31,9 +31,9 @@ function sanitizeDetallePedidoInput(
 async function findAll(req: Request, res: Response) {
   try {
     const detallePedido = await em.find(DetallePedido, {}, { populate: ['producto', 'pedido.usuario'] })
-    res.status(200).json({ message: 'Todos los detalles de pedido encontrados', data: detallePedido })
+    return res.status(200).json({ message: 'Todos los detalles de pedido encontrados', data: detallePedido })
   } catch (error:any) {
-    res.status(500).json({ message: 'Error al obtener los detalles de pedido' })
+    return res.status(500).json({ message: 'Error al obtener los detalles de pedido' })
   }
 }
 
@@ -57,10 +57,10 @@ async function add(req: Request, res: Response) {
     })
 
     await em.flush()
-    res.status(201).json({ message: 'Detalle de pedido creado', data: detallePedido })
+    return res.status(201).json({ message: 'Detalle de pedido creado', data: detallePedido })
   } catch (error: any) {
     console.error('Error detallado al crear:', error);
-    res.status(500).json({ message: 'Error al crear detalle de pedido', detalle: error.message })
+    return res.status(500).json({ message: 'Error al crear detalle de pedido', detalle: error.message })
   }
 }
 
@@ -76,12 +76,12 @@ async function add(req: Request, res: Response) {
       return res.status(403).json({ message: 'Acceso denegado: este detalle de pedido no te pertenece.' })
     }
     
-    res.status(200).json({ message: 'Detalle de pedido encontrado', data: detallePedido })
+    return res.status(200).json({ message: 'Detalle de pedido encontrado', data: detallePedido })
   } catch (error:any) {
     if (error instanceof NotFoundError) {
       return res.status(404).json({ message: 'Detalle de pedido no encontrado' })
     }
-    res.status(500).json({ message: 'Error al buscar el detalle de pedido' })
+    return res.status(500).json({ message: 'Error al buscar el detalle de pedido' })
   }
 }
 
@@ -102,12 +102,12 @@ async function update(req: Request, res: Response) {
       
       em.assign(detallePedido, input)
       await em.flush()
-      res.status(200).json({ message: 'Detalle de pedido actualizado', data: detallePedido })
+      return res.status(200).json({ message: 'Detalle de pedido actualizado', data: detallePedido })
   } catch (error:any) {
     if (error instanceof NotFoundError) {
       return res.status(404).json({ message: 'Detalle de pedido no encontrado' })
     }
-    res.status(500).json({ message: 'Error al actualizar detalle de pedido' })
+    return res.status(500).json({ message: 'Error al actualizar detalle de pedido' })
   }
 }
 
@@ -117,12 +117,12 @@ async function remove(req: Request, res: Response) {
     const id = req.params.id as string
     const detallePedido = await em.findOneOrFail(DetallePedido, { id })
     await em.removeAndFlush(detallePedido)
-    res.status(200).send({ message: 'Detalle de pedido eliminado' })
+    return res.status(200).send({ message: 'Detalle de pedido eliminado' })
   } catch (error: any) {
     if (error instanceof NotFoundError) {
       return res.status(404).json({ message: 'Detalle de pedido no encontrado' })
     }
-    res.status(500).send({ message: 'Error al eliminar detalle de pedido' });
+    return res.status(500).send({ message: 'Error al eliminar detalle de pedido' });
   }
 }
 
