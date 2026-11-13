@@ -30,7 +30,7 @@ export class ApiService {
   }
 
   getProductosAdmin(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/productos/admin`)
+    return this.http.get<any>(`${this.apiUrl}/producto/admin/productos`)
       .pipe(catchError(this.manejarError));
   }
 
