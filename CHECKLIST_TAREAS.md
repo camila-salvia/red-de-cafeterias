@@ -11,10 +11,10 @@
 - [x] Hay login JWT y roles de usuario/administrador; existen controles de autenticación y propiedad en rutas backend.
 - [x] Existen CRUD para Usuario, Categoría, Método de Pago y entidades dependientes.
 - [x] Existen listados de productos por categoría y pedidos por usuario.
-- [ ] La suite de pruebas backend todavía no está configurada: `backend` solo contiene `debug-db.ts` y el script `test` es un placeholder.
+- [ ] Vitest ya está configurado y hay tests de Producto y Comentario. El test de Producto pasa (55 pruebas); el de Comentario falla (12 pruebas, con mocks del ORM/entidades que no se aplican). Aún faltan los tests de Usuario y de integración de Pedido. Verificado el 14/11/2026 con `cd backend; npm test -- --run`.
 - [ ] Las pruebas frontend no compilan por imports desactualizados en specs de Comentarios, Login y MisPedidos.
 - [ ] El build frontend falla por exceder el presupuesto de `app.scss`.
-- [ ] El panel admin tiene dos rutas `/admin`; la primera solo exige autenticación y puede dejar pasar a un usuario no administrador.
+- [x] El panel admin tiene una única ruta `/admin` protegida por `adminGuard`; falta verificar el comportamiento de los tres perfiles (ver tareas abajo).
 - [ ] La interfaz de comentarios usa datos locales; faltan detalle de producto, detalle de pedido histórico y filtro de pedidos por estado.
 
 ## Requisitos de entrega y criterio de aceptación
@@ -51,14 +51,15 @@
 
 ### Salvia Camila (49373)
 
-- [ hecho ] Corregir `frontend/src/app/app.routes.ts`: dejar una sola ruta `/admin` protegida por `adminGuard`; confirmar comportamiento para anónimo, usuario y administrador.
-- [ hecho ] Implementar el test automatizado backend de Producto: categoría existente, categoría inexistente, precio inválido y filtro por categoría.
+- [x] Corregir `frontend/src/app/app.routes.ts`: dejar una sola ruta `/admin` protegida por `adminGuard`.
+- [ ] Verificar el comportamiento de `/admin` para anónimo, usuario y administrador.
+- [x] Implementar y ejecutar el test automatizado backend de Producto: categoría existente, categoría inexistente, precio inválido y filtro por categoría.
 - [ ] Añadir cobertura de regresión para la autorización de DetallePedido recientemente revisada: GET de detalle y POST asociado a pedido propio/ajeno, incluyendo administrador. Aprovechar el setup de Vitest de Martin.
 - [ ] Corregir los imports/configuración de pruebas frontend de Comentarios, Login y MisPedidos para que la suite compile.
 
 ### Marianela Leonardelli (51337)
 
-- [ ] Implementar el test automatizado backend de Comentario: creación válida, puntuación fuera de rango y asociación a usuario.
+- [ ] Corregir y ejecutar el test automatizado backend de Comentario: los casos están escritos, pero actualmente fallan por la configuración de mocks; completar creación válida, puntuación fuera de rango y asociación a usuario.
 - [ ] Auditar el login frontend contra el endpoint JWT existente: persistencia del token, interceptor, logout y manejo de credenciales inválidas.
 - [ ] Definir los estados de carga, error y vacío que necesita la conexión de Comentarios con el backend.
 

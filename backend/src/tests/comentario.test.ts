@@ -12,9 +12,9 @@ const em = vi.hoisted(() => ({
   flush: vi.fn(),
 }));
 
-vi.mock('../src/shared/database/orm.js', () => ({ orm: { em } }));
-vi.mock('../src/usuario/usuario.entity.js', () => ({ Usuario: class Usuario {} }));
-vi.mock('../src/comentario/comentario.entity.js', () => ({ Comentario: class Comentario {} }));
+vi.mock('../shared/database/orm.js', () => ({ orm: { em } }));
+vi.mock('../usuario/usuario.entity.js', () => ({ Usuario: class Usuario {} }));
+vi.mock('../comentario/comentario.entity.js', () => ({ Comentario: class Comentario {} }));
 
 import { validarComentarioInput } from '../comentario/comentario.validator.js';
 import { add, sanitizeComentarioInput } from '../comentario/comentario.controller.js';
