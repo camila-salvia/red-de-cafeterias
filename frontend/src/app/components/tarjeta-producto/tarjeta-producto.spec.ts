@@ -13,6 +13,13 @@ describe('TarjetaProducto', () => {
 
     fixture = TestBed.createComponent(TarjetaProductoComponent);
     component = fixture.componentInstance;
+    component.producto = {
+      id: 'producto-1',
+      nombre: 'Café de prueba',
+      descripcion: 'Descripción de prueba',
+      precio: 1200,
+    };
+    fixture.detectChanges();
     await fixture.whenStable();
   });
 

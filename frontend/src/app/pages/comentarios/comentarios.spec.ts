@@ -1,18 +1,23 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { AuthService } from '../../services/auth';
+import { ComentariosComponent } from './comentarios';
 
-import { Comentarios } from './comentarios';
-
-describe('Comentarios', () => {
-  let component: Comentarios;
-  let fixture: ComponentFixture<Comentarios>;
+describe('ComentariosComponent', () => {
+  let component: ComentariosComponent;
+  let fixture: ComponentFixture<ComentariosComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Comentarios],
+      imports: [ComentariosComponent],
+      providers: [
+        { provide: AuthService, useValue: { isLoggedIn: signal(false) } },
+      ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Comentarios);
+    fixture = TestBed.createComponent(ComentariosComponent);
     component = fixture.componentInstance;
+    fixture.detectChanges();
     await fixture.whenStable();
   });
 

@@ -1,18 +1,26 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { ApiService } from '../../services/api';
+import { AuthService } from '../../services/auth';
+import { MisPedidosComponent } from './mis-pedidos';
 
-import { MisPedidos } from './mis-pedidos';
-
-describe('MisPedidos', () => {
-  let component: MisPedidos;
-  let fixture: ComponentFixture<MisPedidos>;
+describe('MisPedidosComponent', () => {
+  let component: MisPedidosComponent;
+  let fixture: ComponentFixture<MisPedidosComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MisPedidos],
+      imports: [MisPedidosComponent],
+      providers: [
+        provideRouter([]),
+        { provide: ApiService, useValue: { obtenerMisPedidos: () => undefined } },
+        { provide: AuthService, useValue: { usuarioIdActual: () => null } },
+      ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(MisPedidos);
+    fixture = TestBed.createComponent(MisPedidosComponent);
     component = fixture.componentInstance;
+    fixture.detectChanges();
     await fixture.whenStable();
   });
 

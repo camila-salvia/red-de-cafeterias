@@ -11,11 +11,11 @@
 - [x] Hay login JWT y roles de usuario/administrador; existen controles de autenticación y propiedad en rutas backend.
 - [x] Existen CRUD para Usuario, Categoría, Método de Pago y entidades dependientes.
 - [x] Existen listados de productos por categoría y pedidos por usuario.
-- [ ] Vitest ya está configurado y hay tests de Producto y Comentario. El test de Producto pasa (55 pruebas); el de Comentario falla (12 pruebas, con mocks del ORM/entidades que no se aplican). Aún faltan los tests de Usuario y de integración de Pedido. Verificado el 14/11/2026 con `cd backend; npm test -- --run`.
-- [ ] Las pruebas frontend no compilan por imports desactualizados en specs de Comentarios, Login y MisPedidos.
-- [ ] El build frontend falla por exceder el presupuesto de `app.scss`.
+- [x] Vitest está configurado y los tests de Producto y Comentario pasan: 67 pruebas en total. Aún faltan los tests de Usuario y de integración de Pedido. Verificado el 14/11/2026 con `cd backend; npm test -- --run`.
+- [x] La suite frontend compila y pasa: 15 archivos, 16 pruebas. Verificado el 14/11/2026 con `cd frontend; npm test -- --watch=false`.
+- [ ] El build frontend termina, pero excede el presupuesto del bundle inicial y de `ver-pedido.scss`; falta optimizar esos tamaños.
 - [x] El panel admin tiene una única ruta `/admin` protegida por `adminGuard`; falta verificar el comportamiento de los tres perfiles (ver tareas abajo).
-- [ ] La interfaz de comentarios usa datos locales; faltan detalle de producto, detalle de pedido histórico y filtro de pedidos por estado.
+- [ ] La interfaz de comentarios todavía usa datos locales; faltan detalle de producto y detalle de pedido histórico. El filtro de pedidos por estado ya está en MisPedidos; queda pendiente confirmar el filtro en API.
 
 ## Requisitos de entrega y criterio de aceptación
 
@@ -55,13 +55,13 @@
 - [ ] Verificar el comportamiento de `/admin` para anónimo, usuario y administrador.
 - [x] Implementar y ejecutar el test automatizado backend de Producto: categoría existente, categoría inexistente, precio inválido y filtro por categoría.
 - [ ] Añadir cobertura de regresión para la autorización de DetallePedido recientemente revisada: GET de detalle y POST asociado a pedido propio/ajeno, incluyendo administrador. Aprovechar el setup de Vitest de Martin.
-- [ ] Corregir los imports/configuración de pruebas frontend de Comentarios, Login y MisPedidos para que la suite compile.
+- [x] Corregir los imports/configuración de pruebas frontend de Comentarios, Login y MisPedidos para que la suite compile; los tres specs pasan individualmente y la suite completa pasa.
 
 ### Marianela Leonardelli (51337)
 
-- [ ] Corregir y ejecutar el test automatizado backend de Comentario: los casos están escritos, pero actualmente fallan por la configuración de mocks; completar creación válida, puntuación fuera de rango y asociación a usuario.
-- [ ] Auditar el login frontend contra el endpoint JWT existente: persistencia del token, interceptor, logout y manejo de credenciales inválidas.
-- [ ] Definir los estados de carga, error y vacío que necesita la conexión de Comentarios con el backend.
+- [x] Corregir y ejecutar el test automatizado backend de Comentario: validar creación, puntuación fuera de rango y asociación a usuario (31 pruebas pasan).
+- [x] Auditar el login frontend contra el endpoint JWT existente: persiste el token, el interceptor lo envía a la API, logout limpia la sesión y las credenciales inválidas muestran un mensaje amigable.
+- [x] Definir los estados de carga, error y vacío para Comentarios: carga del listado, error de lectura con reintento, listado vacío y vacío por filtros; envío en progreso, éxito y error. La implementación queda para la tarea de integración con la API de Semana 2.
 
 ### Trabajo conjunto
 
@@ -88,7 +88,7 @@
 
 - [ ] Conectar la página de Comentarios con la API: listar comentarios persistidos y crear mediante endpoint autenticado. El servidor debe decidir el usuario; quitar dependencia de reseñas de ejemplo como fuente principal.
 - [ ] Enviar y mostrar la asociación entre reseña y pedido; manejar estados de carga, error y vacío.
-- [ ] Completar MisPedidos: quitar el ID de usuario de respaldo `|| 1`, manejar ausencia de sesión y agregar filtro por estado.
+- [x] Completar MisPedidos: quitar el ID de usuario de respaldo `|| 1`, manejar ausencia de sesión y agregar filtro por estado. Verificado con build frontend y suite de pruebas el 14/11/2026.
 - [ ] Agregar navegación desde el listado a un detalle de pedido histórico con fecha, estado, dirección, cliente, productos y total.
 - [ ] Verificar flujo de carrito y pedido con JWT; mostrar errores y limpiar el carrito solo después de una creación exitosa.
 
@@ -109,7 +109,8 @@
 
 ### Salvia Camila (49373)
 
-- [ ] Verificar que build y pruebas frontend pasan; comprobar guards de admin y regresiones de propiedad de DetallePedido.
+- [x] Ejecutar build frontend y suite de pruebas: build completado con advertencias de presupuesto; 15 archivos y 16 pruebas pasan.
+- [ ] Comprobar guards de admin y regresiones de propiedad de DetallePedido.
 - [ ] Completar/verificar las pruebas de comportamiento de TarjetaProducto y el flujo de detalle de producto → carrito.
 - [ ] Revisar estilos responsive en 320 px, 768 px y 1024 px; corregir defectos visibles en las pantallas modificadas.
 
