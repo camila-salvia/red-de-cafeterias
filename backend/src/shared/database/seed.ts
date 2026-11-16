@@ -16,6 +16,15 @@ const ADMIN = {
   password: 'password123',
 }
 
+const USUARIO_PRUEBA = {
+  nombre: 'Usuario',
+  apellido: 'Prueba',
+  telefono: 1100000001,
+  direccion: 'Calle de prueba 123',
+  email: 'usuario@cafeteria.com',
+  password: 'password123',
+}
+
 // Crea los datos iniciales solo si no existen. No borra ni modifica datos existentes,
 export async function seedInitialData() {
   const em = orm.em.fork()
@@ -36,6 +45,15 @@ export async function seedInitialData() {
       ...ADMIN,
       password: await bcrypt.hash(ADMIN.password, 10),
       esAdmin: true,
+    })
+  }
+
+  const usuarioPruebaExiste = await em.findOne(Usuario, { email: USUARIO_PRUEBA.email })
+  if (!usuarioPruebaExiste) {
+    em.create(Usuario, {
+      ...USUARIO_PRUEBA,
+      password: await bcrypt.hash(USUARIO_PRUEBA.password, 10),
+      esAdmin: false,
     })
   }
 

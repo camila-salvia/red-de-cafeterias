@@ -9,9 +9,11 @@
     <p class="producto-descripcion">{{ producto.descripcion }}</p>
     <p class="producto-precio">${{ producto.precio | number:'1.0-0' }}</p>
 
-    <button class="btn custom-btn" type="button" (click)="agregarAlCarrito()">
-      AGREGAR
-    </button>
+    @if (permitirAgregar) {
+      <button class="btn custom-btn" type="button" (click)="agregarAlCarrito()">
+        AGREGAR
+      </button>
+    }
   </div>
   <!-- Notificación de producto agregado al carrito -->
   @if (notificacionCarrito()) {

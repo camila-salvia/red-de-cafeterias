@@ -41,8 +41,11 @@ function sanitizePedidoInput(
 async function findAll(req: Request, res: Response) {
   try {
     const pedidos = await em.find(Pedido, 
-      {}, 
-      { populate: ['detalles.producto', 'usuario', 'metodo_pago'] })
+      { usuario: { esAdmin: false } },
+      {
+        populate: ['detalles.producto', 'usuario', 'metodo_pago'],
+        orderBy: { fecha_pedido: 'DESC' },
+      })
     return res.status(200).json({ message: 'Todos los pedidos encontrados', data: pedidos })
   } catch (error:any) {
     return res.status(500).json({ message: 'Error al obtener los pedidos' })
@@ -74,6 +77,10 @@ async function findByUsuario(req: Request, res: Response) {
 
 // crear nuevo pedido
 async function add(req: Request, res: Response) {
+  if (req.usuarioToken?.esAdmin) {
+    return res.status(403).json({ message: 'Los administradores no pueden crear pedidos.' })
+  }
+
   try {
     const { items } = req.body; // Array de { productoId, cantidad } que viene del carrito
 
@@ -131,6 +138,28 @@ async function add(req: Request, res: Response) {
   }
 }
 
+// Confirmar un pedido pendiente (solo admins por ruta)
+async function confirmar(req: Request, res: Response) {
+  try {
+    const id = req.params.id as string
+    const pedido = await em.findOneOrFail(Pedido, { id })
+
+    if (pedido.estado_pago !== 'Pendiente') {
+      return res.status(409).json({ message: 'Solo se pueden confirmar pedidos pendientes.' })
+    }
+
+    pedido.estado_pago = 'Confirmado'
+    await em.flush()
+    return res.status(200).json({ message: 'Pedido confirmado', data: pedido })
+  } catch (error: any) {
+    if (error instanceof NotFoundError) {
+      return res.status(404).json({ message: 'Pedido no encontrado' })
+    }
+    console.error('Error al confirmar el pedido:', error)
+    return res.status(500).json({ message: 'Error al confirmar el pedido' })
+  }
+}
+
 // obtener pedido por id (solo el propietario o el admin)
  async function findOne(req: Request, res: Response) {
   try {
@@ -159,7 +188,11 @@ async function update(req: Request, res: Response) {
   try {
       const id = req.params.id as string
       const pedido = await em.findOneOrFail(Pedido, { id: id as any })
-      em.assign(pedido, req.body.sanitizedInput)
+      const input = req.body.sanitizedInput
+      if (input.estado_pago !== undefined) {
+        return res.status(400).json({ message: 'Use la acción de confirmar para cambiar el estado del pedido.' })
+      }
+      em.assign(pedido, input)
       await em.flush()
       return res.status(200).json({ message: 'Pedido actualizado', data: pedido })
   } catch (error:any) {
@@ -185,4 +218,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export {sanitizePedidoInput, findAll, findByUsuario, add, findOne, update, remove}
+export {sanitizePedidoInput, findAll, findByUsuario, add, confirmar, findOne, update, remove}

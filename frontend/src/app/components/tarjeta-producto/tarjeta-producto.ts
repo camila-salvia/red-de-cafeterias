@@ -13,6 +13,7 @@ import { urlImagenProducto } from '../../utils/imagen-url';
 
 export class TarjetaProductoComponent {
   @Input() producto!: Producto; 
+  @Input() permitirAgregar = true;
   @Output() productoAgregado = new EventEmitter<Producto>();
   notificacionCarrito = signal<string | null>(null); 
 

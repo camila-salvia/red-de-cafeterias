@@ -21,6 +21,8 @@ export class InicioComponent {
   private cartService = inject(CartService);
   private authService = inject(AuthService);
 
+  puedeAgregarAlCarrito = computed(() => !this.authService.esAdmin());
+
   // Lista directa desde el backend
   productos = signal<any[]>([]); 
   errorMsg = signal<string | null>(null);
@@ -48,6 +50,8 @@ export class InicioComponent {
   }
 
   manejarAgregado(productoSeleccionado: any) {
+    if (this.authService.esAdmin()) return;
+
     if (this.authService.estaAutenticado()) {
       this.cartService.agregarProducto(productoSeleccionado);
     } else {

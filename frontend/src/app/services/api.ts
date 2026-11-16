@@ -98,6 +98,16 @@ export class ApiService {
       .pipe(catchError(this.manejarError));
   }
 
+  obtenerPedidosClientes(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/pedido`)
+      .pipe(catchError(this.manejarError));
+  }
+
+  confirmarPedido(id: string): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/pedido/${id}/confirmar`, {})
+      .pipe(catchError(this.manejarError));
+  }
+
   // comentario
   getComentarios(): Observable<ComentariosResponse> {
     return this.http.get<ComentariosResponse>(`${this.apiUrl}/comentario`)

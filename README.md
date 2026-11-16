@@ -200,11 +200,11 @@ Otros scripts disponibles en `frontend/`:
 
 ## Credenciales de la aplicación
 
-Usuarios de prueba para ingresar a la aplicación deployada:
+Usuarios de prueba creados por el seed del backend local:
 
 | Rol | Email | Contraseña |
 |:-|:-|:-|
 | Administrador | `admin@cafeteria.com` | `password123` |
-| Cliente | ⚠️ COMPLETAR | ⚠️ COMPLETAR |
+| Cliente | `usuario@cafeteria.com` | `password123` |
 
 El administrador accede al **Panel Admin** (alta, edición y baja de categorías y productos). El cliente puede explorar productos, armar el carrito, confirmar pedidos y ver su historial.

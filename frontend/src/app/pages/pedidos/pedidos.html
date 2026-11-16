@@ -1,1 +1,68 @@
-<p>pedidos works!</p>
+<main class="pedidos-admin">
+  <h2>Pedidos de clientes</h2>
+
+  @if (mensaje()) {
+  <div class="aviso exito" role="status">{{ mensaje() }}</div>
+  }
+  @if (error()) {
+  <div class="aviso error" role="alert">{{ error() }}</div>
+  }
+  @if (cargando()) {
+  <p class="estado-pagina">Cargando pedidos...</p>
+  } @else if (pedidos().length === 0) {
+  <p class="estado-pagina">Todavía no hay pedidos de clientes.</p>
+  } @else {
+  <div class="lista-pedidos">
+    @for (pedido of pedidos(); track pedido.id) {
+    <article class="pedido-card">
+      <header class="pedido-cabecera">
+        <div>
+          <h3>Pedido #{{ pedido.id }}</h3>
+          <p>{{ pedido.fecha_pedido | date:'dd/MM/yyyy' }}</p>
+        </div>
+        <span
+          class="estado-badge"
+          [class.pendiente]="pedido.estado_pago === 'Pendiente'"
+          [class.confirmado]="pedido.estado_pago === 'Confirmado'"
+        >
+          {{ pedido.estado_pago }}
+        </span>
+      </header>
+
+      <div class="datos-cliente">
+        <p><strong>Cliente:</strong> {{ pedido.usuario?.nombre }} {{ pedido.usuario?.apellido }}</p>
+        <p><strong>Email:</strong> {{ pedido.usuario?.email || 'No disponible' }}</p>
+        <p><strong>Método de pago:</strong> {{ pedido.metodo_pago?.nombre || 'No disponible' }}</p>
+        <p><strong>Entrega:</strong> {{ pedido.direccion_envio || 'No especificada' }}</p>
+      </div>
+
+      <h4>Productos</h4>
+      <ul class="detalle-pedido">
+        @for (detalle of (pedido.detalles ?? []); track detalle.id ?? $index) {
+        <li>
+          <span>{{ detalle.cantidad }} × {{ detalle.producto?.nombre || 'Producto' }}</span>
+          <span>{{ detalle.cantidad * detalle.precio_unitario | currency:'ARS' }}</span>
+        </li>
+        } @empty {
+        <li>El pedido no tiene productos disponibles.</li>
+        }
+      </ul>
+
+      <footer class="pedido-pie">
+        <strong>Total: {{ pedido.costo_total | currency:'ARS' }}</strong>
+        @if (pedido.estado_pago === 'Pendiente') {
+        <button
+          type="button"
+          class="btn-confirmar"
+          [disabled]="pedidoConfirmandoId() !== null"
+          (click)="confirmarPedido(pedido)"
+        >
+          {{ pedidoConfirmandoId() === pedido.id ? 'Confirmando...' : 'Confirmar pedido' }}
+        </button>
+        }
+      </footer>
+    </article>
+    }
+  </div>
+  }
+</main>

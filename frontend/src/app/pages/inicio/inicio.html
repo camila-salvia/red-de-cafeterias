@@ -21,7 +21,11 @@
         <div class="row g-3 g-md-4 justify-content-center">
           @for (producto of productos(); track producto.id) {
             <div class="col-6 col-sm-4 col-md-4 col-lg-3 d-flex justify-content-center">
-              <app-tarjeta-producto [producto]="producto" (productoAgregado)="manejarAgregado($event)"></app-tarjeta-producto>
+              <app-tarjeta-producto
+                [producto]="producto"
+                [permitirAgregar]="puedeAgregarAlCarrito()"
+                (productoAgregado)="manejarAgregado($event)"
+              ></app-tarjeta-producto>
             </div>
           }
         </div>

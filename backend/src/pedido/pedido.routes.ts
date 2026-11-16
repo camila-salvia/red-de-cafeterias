@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { add, findAll, findByUsuario, findOne, update, remove, sanitizePedidoInput } from './pedido.controller.js';
+import { add, confirmar, findAll, findByUsuario, findOne, update, remove, sanitizePedidoInput } from './pedido.controller.js';
 import { validarPedidoInput } from './pedido.validator.js';
 import { verificarToken, soloAdmin, propietarioOAdmin } from '../shared/middleware/auth.middleware.js'; //verificar
 
@@ -14,6 +14,7 @@ router.get('/:id', verificarToken, findOne);
 
 // solo admin
 router.get('/', verificarToken, soloAdmin, findAll);
+router.patch('/:id/confirmar', verificarToken, soloAdmin, confirmar);
 router.patch('/:id', verificarToken, soloAdmin, sanitizePedidoInput, update);
 router.put('/:id', verificarToken, soloAdmin, sanitizePedidoInput, update);
 router.delete('/:id', verificarToken, soloAdmin, remove);
