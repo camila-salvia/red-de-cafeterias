@@ -35,7 +35,8 @@
 
             <!-- Autocompletado IA -->
             <textarea 
-              [(ngModel)]="textoComentario" 
+              [ngModel]="textoComentario()"
+              (ngModelChange)="textoComentario.set($event)"
               class="form-control mb-2 custom-textarea" 
               rows="3" 
               placeholder="Escribe tu comentario (Opcional)..."
@@ -51,7 +52,9 @@
               <div class="text-danger small text-center mb-2">{{ mensajeError() }}</div>
             }
 
-            <button class="btn btn-marron w-100" (click)="enviarResena()">PUBLICAR RESEÑA</button>
+            <button class="btn btn-marron w-100" [disabled]="enviando()" (click)="enviarResena()">
+              {{ enviando() ? 'PUBLICANDO...' : 'PUBLICAR RESEÑA' }}
+            </button>
           } @else {
             <div class="text-center">
               <p class="text-muted">Inicia sesión para calificar y comentar.</p>
@@ -84,12 +87,20 @@
 
       <!-- Columna Derecha: Lista de Reseñas -->
       <div class="col-12 col-md-8">
+        @if (cargando()) {
+          <div class="text-center p-5 text-muted">Cargando reseñas...</div>
+        } @else if (errorCarga()) {
+          <div class="text-center p-5 text-danger">
+            <p>{{ errorCarga() }}</p>
+            <button type="button" class="btn btn-outline-secondary" (click)="cargarResenas()">Reintentar</button>
+          </div>
+        } @else {
         <div class="row g-3">
           @for (resena of resenasFiltradas(); track resena.id) {
             <div class="col-12">
               <div class="card resena-card shadow-sm p-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                  <h6 class="fw-bold m-0">{{ resena.usuario }}</h6>
+                  <h6 class="fw-bold m-0">{{ resena.usuario.nombre }}</h6>
                   <span class="text-muted small">{{ resena.fecha_publicacion | date:'dd/MM/yyyy' }}</span>
                 </div>
                 
@@ -112,6 +123,7 @@
             </div>
           }
         </div>
+        }
       </div>
 
     </div>

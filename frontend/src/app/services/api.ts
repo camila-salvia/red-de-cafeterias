@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, throwError, catchError } from 'rxjs';
 import { Producto } from '../models/producto.interface';
+import { ComentarioApi, ComentarioResponse, ComentariosResponse } from '../models/comentario.interface';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -94,6 +95,18 @@ export class ApiService {
 
   obtenerMisPedidos(usuarioId: string | number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/pedido/usuario/${usuarioId}`)
+      .pipe(catchError(this.manejarError));
+  }
+
+  // comentario
+  getComentarios(): Observable<ComentariosResponse> {
+    return this.http.get<ComentariosResponse>(`${this.apiUrl}/comentario`)
+      .pipe(catchError(this.manejarError));
+  }
+
+  // El usuario NO se envía: el backend lo toma del token
+  crearComentario(comentario: Pick<ComentarioApi, 'puntuacion' | 'contenido'>): Observable<ComentarioResponse> {
+    return this.http.post<ComentarioResponse>(`${this.apiUrl}/comentario`, comentario)
       .pipe(catchError(this.manejarError));
   }
 

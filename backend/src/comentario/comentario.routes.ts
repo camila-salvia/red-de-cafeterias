@@ -10,11 +10,12 @@ router.get('/', findAll);
 router.get('/:id', findOne);
 
 // cliente autenticado: puede comentar
-router.post('/', verificarToken, validarComentarioInput, sanitizeComentarioInput, add);
+// sanitize va antes que validar porque sanitize inyecta el usuario desde el token - el cliente no lo envia
+router.post('/', verificarToken, sanitizeComentarioInput, validarComentarioInput, add);
 
 // moderación: solo admin
-router.put('/:id', verificarToken, soloAdmin, validarComentarioInput, sanitizeComentarioInput, update);
-router.patch('/:id', verificarToken, soloAdmin, validarComentarioInput, sanitizeComentarioInput, update);
+router.put('/:id', verificarToken, soloAdmin, sanitizeComentarioInput, validarComentarioInput, update);
+router.patch('/:id', verificarToken, soloAdmin, sanitizeComentarioInput, validarComentarioInput, update);
 router.delete('/:id', verificarToken, soloAdmin, remove);
 
 export default router;

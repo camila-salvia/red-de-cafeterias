@@ -1,97 +1,159 @@
-# Análisis del estado actual y plan de acción
+# Análisis del proyecto — estado actual, avances y pendientes
 
-**Revisión:** 6 de noviembre de 2026
-**Alcance:** código fuente de `backend/` y `frontend/`, configuración y pruebas existentes. No se verificaron flujos contra una base de datos o un servidor en ejecución.
+**Revisión:** 16 de noviembre de 2026
+**Proyecto:** Red de Cafeterías
+**Repositorio:** `camila-salvia/red-de-cafeterias`
+**Alcance:** backend (`backend/`), frontend (`frontend/`), documentación de entrega y validaciones reportadas en el repositorio.
 
 ## Resumen ejecutivo
 
-El documento anterior describía como pendientes varias funciones que ya están implementadas. El backend cuenta con CRUDs, validadores y controles de autenticación y propiedad para las rutas principales; el frontend permite gestionar productos, operar un carrito y consultar un listado básico de pedidos. Sin embargo, quedan defectos de autorización en la navegación del panel, integración incompleta de comentarios, vistas de detalle/filtros que faltan, cobertura automatizada insuficiente y dos fallos reproducibles de validación local (pruebas y build frontend).
+El proyecto ya tiene una base funcional sólida y una estructura de monorepo consistente: backend con Express + MikroORM + MySQL y frontend con Angular. El trabajo realizado incluye entidades principales, autenticación JWT, permisos de acceso, CRUDs clave, catálogo de productos, flujo de pedidos e integración de lectura y creación de comentarios con la API. Además, la documentación del repositorio refleja que varias tareas de testing y correcciones ya fueron completadas o parcialmente cerradas.
 
-## Estado comprobado
+Sin embargo, aún quedan tareas de cierre y de robustez antes de considerar la entrega final como estable: cerrar detalles de flujo y navegación, revisar algunos ajustes de producción, y verificar que la configuración de build y la suite de tests se mantengan estables en una instalación limpia.
 
-### Implementado
+## Qué está hecho
 
-- **Backend:** módulos de usuarios, categorías, productos, pedidos, detalles, comentarios y métodos de pago; validación de entradas y relaciones.
-- **Autorización backend:** las escrituras del catálogo y los métodos de pago requieren administrador; las operaciones de pedidos y usuarios restringen acceso según rol/propiedad. El detalle de pedido verifica propiedad también en GET y al asociarlo a un pedido en POST.
-- **Pedidos:** el usuario se toma del token al crear el pedido; el servidor obtiene precios vigentes y calcula el total. La consulta por usuario y por ID comprueba propietario/admin.
-- **Usuarios:** altas y cambios de contraseña usan bcrypt; el campo `password` está marcado como oculto en la entidad.
-- **Frontend:** autenticación JWT, catálogo, carrito/checkout, CRUD de productos en el panel y listado básico de “Mis pedidos”.
-- **Build backend:** `cd backend; npm run build` finaliza correctamente.
+### 1) Backend funcional y estructurado
 
-### Pendientes confirmados (priorizados)
+La base del backend ya está implementada:
 
-#### P0 — Corregir acceso al panel de administración
+- API REST en Express.
+- Persistencia con MikroORM y MySQL.
+- Separación por capas y entidades principales.
+- CRUD de Usuario, Categoría, Producto, Pedido, DetallePedido, Comentario y Método de Pago.
+- Validación de entradas y gestión de relaciones entre entidades.
+- Control de autenticación por JWT.
+- Control de autorización por rol y por propiedad en rutas sensibles.
+- Cálculo del total del pedido con precios vigentes.
+- Consulta de pedidos por usuario y validación de propietario/admin.
 
-`frontend/src/app/app.routes.ts` declara dos rutas `admin`. La primera usa solamente `authGuard` y aparece antes de la ruta con `adminGuard`; por tanto, un usuario autenticado no administrador puede entrar a la vista del panel. Los endpoints de escritura siguen protegidos por el backend, pero la interfaz administrativa no queda restringida correctamente.
+### 2) Frontend funcional para flujo principal
 
-**Acción:** dejar una única ruta `/admin` con el guard de administrador (y conservar la redirección/experiencia adecuada para usuarios no autorizados). Probar usuario anónimo, usuario normal y administrador. El control frontend no sustituye al backend.
+El frontend ya cubre la mayor parte del uso principal de la aplicación:
 
-#### P0 — Restablecer una suite de pruebas ejecutable
+- Login con token JWT.
+- Interceptor que agrega el token a las solicitudes autenticadas.
+- Catálogo de productos y filtros por categoría.
+- Carrito y checkout.
+- CRUD de productos en el panel administrativo.
+- Listado de “Mis pedidos” y manejo de sesión.
+- Rutas principales para navegación del cliente y administración.
 
-- `backend/package.json` conserva un script `test` que siempre falla con “no test specified”; en `backend/src/tests/` solo existe `debug-db.ts`, no una suite automatizada.
-- Hay especificaciones frontend, pero `cd frontend; npm test -- --watch=false` falla al compilar: `comentarios.spec.ts`, `login.spec.ts` y `mis-pedidos.spec.ts` importan `Comentarios`, `Login` y `MisPedidos`, símbolos que no exportan sus módulos actuales.
-- Los specs existentes se limitan mayormente a comprobar que el componente se crea; no cubren comportamiento sustancial. No se encontró una suite e2e.
+### 3) Autorización y roles
 
-**Acción:** corregir imports/configuración de pruebas frontend y añadir pruebas de comportamiento; configurar pruebas backend para validadores, autorización y cálculos de pedidos; agregar un flujo de integración pedido y e2e si forma parte de los requisitos de entrega.
+Se documenta que ya hubo trabajo de corrección sobre permisos:
 
-#### P1 — Conectar comentarios con la API
+- El panel de administración fue ajustado para tener una única ruta `/admin` protegida por `adminGuard`.
+- El backend mantiene controles de acceso por rol y por propiedad en endpoints clave.
+- La documentación del proyecto marca la verificación de permisos como tarea de cierre, pero deja claro que la capa backend sigue siendo la autoridad final.
 
-`frontend/src/app/pages/comentarios/comentarios.ts` usa reseñas locales de ejemplo, agrega comentarios solo en memoria y simula moderación en el cliente. No carga ni persiste los comentarios con la API. El backend sí expone lectura y creación autenticada, y asigna el usuario desde el token.
+### 4) Testing y validación
 
-**Acción:** cargar comentarios reales, integrar creación mediante el servicio API y presentar errores/estados de carga. Mantener la asignación del usuario exclusivamente en el servidor.
+La documentación del proyecto indica que se avanzó bastante en esta área:
 
-#### P1 — Completar navegación y vistas de detalle
+- Backend con suite de tests configurada y ejecutándose.
+- Tests de Producto y Comentario documentados como funcionando.
+- Tests frontend compilando y pasando: 15 archivos y 19 pruebas, verificado el 16/11/2026.
+- Tests backend compilando y pasando: 2 archivos y 68 pruebas, verificado el 16/11/2026.
+- Build backend correcto.
 
-- El listado de `MisPedidos` muestra fecha, estado, productos y total, pero no ofrece filtro por estado ni navegación a un detalle individual.
-- `ver-pedido` es la vista de carrito/checkout y confirmación; no es una página de detalle de un pedido histórico identificado por ID.
-- Existe GET de producto por ID en el backend, pero no se encontró ruta/página frontend de detalle de producto.
+El estado oficial del repositorio refleja que, para esta etapa, al menos parte de la validación ya fue realizada y verificada por la propia documentacion del equipo.
 
-**Acción:** agregar filtro de pedidos y una ruta de detalle con carga por ID (protegida por la validación de propietario/admin existente); crear vista/ruta de producto si sigue siendo requisito funcional.
+### Alcance de las reseñas
 
-#### P1 — Validar cantidades como enteros en pedidos
+Las reseñas son independientes de los pedidos. Cualquier usuario autenticado puede publicar una, haya comprado o no mediante la aplicación. La página ya consulta y publica reseñas persistidas por API; el backend toma el usuario del token. No se requiere ni debe agregarse una relación Comentario–Pedido.
 
-`pedido.validator.ts` y `pedido.controller.ts` rechazan cantidades no numéricas o menores/iguales a cero, pero no aplican `Number.isInteger`. Así, cantidades decimales pueden superar la validación pese a que el mensaje exige enteros.
+## Qué todavía falta o está pendiente
 
-**Acción:** validar que cada cantidad sea un entero positivo y cubrir límites y valores inválidos con pruebas.
+### P0 / críticas de entrega
 
-#### P1 — Retirar compatibilidad con contraseñas en texto plano
+#### 1) Validar y cerrar detalles del flujo de pedidos
 
-El login de `usuario.controller.ts` todavía compara contraseñas en texto plano para cuentas antiguas y las convierte a bcrypt tras un acceso exitoso. Las altas y cambios nuevos sí hashean las contraseñas.
+Entre los pendientes documentados aparecen:
 
-**Acción:** definir y ejecutar una migración controlada de cuentas antiguas; luego eliminar la comparación en texto plano y probar el flujo de login y migración.
+- Filtro de pedidos por estado.
+- Navegación desde el listado a detalle de pedido histórico.
+- Detalle de producto desde la vista del catálogo.
+- Verificación de acceso de propietario/admin en todas las rutas relevantes.
 
-#### P1 — Corregir la carga de “Mis pedidos” sin ID de usuario
+#### 2) Producción y configuración de entorno
 
-`mis-pedidos.ts` usa `localStorage.getItem('usuario_id') || 1`. El valor de respaldo puede provocar una consulta para un usuario incorrecto y un `403`; no representa la sesión real.
+Quedan tareas explícitas para afinar la configuración de producción:
 
-**Acción:** obtener el ID del usuario autenticado y manejar explícitamente su ausencia, sin un ID por defecto.
+- Evitar `syncSchema()` automático al arrancar en producción.
+- Desactivar `debug` de ORM en producción.
+- Uniformar respuestas de error para no exponer detalles internos.
+- Documentar adecuadamente el uso de `.env` y los datos iniciales necesarios.
 
-#### P2 — Hacer que el build frontend vuelva a pasar
+### P1 / mejoras de estabilidad
 
-`cd frontend; npm run build` falla porque el presupuesto de `frontend/src/app/app.scss` es 8 kB y el archivo alcanza aproximadamente 227 kB. También se reportan advertencias por el bundle inicial (637 kB frente a 500 kB) y por `ver-pedido.scss`.
+#### 3) Revisión de debugging y validación de negocio
 
-**Acción:** revisar estilos globales, separar estilos/componentes cuando corresponda y ajustar el tamaño real sin elevar presupuestos como sustituto de optimización. Repetir build y verificar los presupuestos.
+Queda pendiente:
 
-#### P2 — Preparar configuración de backend para producción
+- Verificar uso de contraseñas heredadas en texto plano y decidir una migración segura.
+- Revisar validación de cantidades enteras en pedidos.
+- Asegurar cumplimiento del criterio de aceptación final con pruebas integradas de pedido, comentario y permisos.
 
-`backend/src/app.ts` ejecuta `syncSchema()` al iniciar, aunque el propio código advierte que no debe hacerse en producción; `orm.ts` también habilita `debug: true`. Además, varios errores 500 responden con `error.message`/`detalle`, mientras otros devuelven mensajes genéricos.
+#### 4) Build y rendimiento frontend
 
-**Acción:** desactivar sincronización automática del esquema y debug en producción, usar migraciones controladas y uniformar respuestas de error para no exponer detalles internos.
+La documentación del repo indica que el build frontend no queda completamente limpio por exceder presupuestos de bundle y estilos:
 
-## Plan de acción sugerido
+- `app.scss` supera el presupuesto.
+- `ver-pedido.scss` requiere revisión.
+- No basta con subir el presupuesto; se debe optimizar la organización real de estilos y assets.
 
-1. **Cerrar el acceso al panel** y verificar los tres perfiles (anónimo, usuario, administrador).
-2. **Recuperar pruebas ejecutables:** corregir los tres imports frontend; agregar cobertura de autorización, cantidades, precios/totales y propietario en backend.
-3. **Completar los flujos funcionales:** integrar comentarios con API; añadir filtro y detalle de pedidos; añadir detalle de producto si está en el alcance.
-4. **Resolver los defectos restantes:** eliminar el ID de respaldo de pedidos y planificar la migración de contraseñas heredadas.
-5. **Asegurar la entrega:** conseguir build frontend limpio y separar sincronización del esquema/configuración debug del arranque de producción.
-6. **Validación final:** ejecutar builds de backend y frontend, suite frontend/backend y pruebas de integración; comprobar manualmente los permisos y flujos completos.
+#### 5) Cobertura de pruebas y regresiones
 
-## Verificaciones ejecutadas en esta revisión
+Si bien hay avances, la checklist del equipo deja explícito que aún faltan pruebas de integración y validaciones críticas:
 
-| Comando | Resultado |
-|---|---|
-| `cd backend; npm run build` | Correcto |
-| `cd frontend; npm run build` | Falla por presupuesto excedido en `app.scss` |
-| `cd frontend; npm test -- --watch=false` | Falla al compilar por imports inexistentes en tres specs |
-| Revisión de `backend/src/tests/` | Solo `debug-db.ts`; no hay suite automatizada |
+- Test de integración de pedido.
+- Pruebas de permisos anónimo/usuario/admin.
+- Validación de propiedad en detalle de pedido.
+- Validación final de permisos de publicación de reseñas autenticadas.
+
+## Estado verificado documentado por el equipo
+
+### Completado según la checklist interna
+
+- Backend organizado por capas y compilando.
+- Autenticación JWT y roles implementados.
+- CRUD principal del sistema funcional.
+- Productos por categoría y pedidos por usuario funcionando.
+- Panel admin con una única ruta `/admin` protegida por guard.
+- Suite frontend compilando y pasando.
+- Suite backend de tests con casos importantes ejecutados.
+- Ajuste de `MisPedidos` para manejar la sesión sin fallback fijo de usuario.
+
+### Pendiente por verificar o cerrar
+
+- Filtro de pedidos por estado y detalle de pedido.
+- Detalle de producto completo.
+- Configuración de producción segura.
+- Optimización de estilos + build final limpio.
+- Pruebas de integración y de permisos final.
+
+## Archivos clave del proyecto
+
+- `README.md` — descripción general, stack, ejecución local y alcance funcional.
+- `CHECKLIST_TAREAS.md` — seguimiento de tareas, avances y pendientes por semana.
+- `DIAGRAMA_ESTADO.md` — mapa de módulos, permisos y estado general del proyecto.
+- `INDICE.md` — índice de estructura de archivos y módulos.
+- `backend/` — API, entidades, validadores, rutas, controladores y pruebas.
+- `frontend/` — aplicación Angular, rutas, componentes, servicios y guards.
+
+## Decisiones técnicas relevantes
+
+1. El backend es la capa autorizante definitiva; el guard frontend mejora navegación, pero no reemplaza validación del servidor.
+2. El proyecto usa autenticación por JWT y sesiones persistidas en el almacenamiento local del frontend.
+3. La documentación reconoce que la corrección de producción es tan importante como la funcionalidad: no basta con que el sistema “funcione” en desarrollo.
+4. El alcance del entregable final no es solo “hacer que compile”, sino dejar la app validada con permisos, pruebas y flujo de negocio.
+
+## Plan recomendado para continuar
+
+1. Verificar los flujos independientes de pedido y reseña, incluida la publicación autenticada de reseñas sin exigir una compra web.
+2. Completar detalle de pedido y detalle de producto.
+3. Revisar filtros y permisos del flujo de pedidos.
+4. Resolver la optimización de estilos y build frontend.
+5. Dejar producción segura: `syncSchema`, debug y manejo de errores.
+6. Ejecutar validación final con pruebas de backend/frontend, integración y permisos reales.

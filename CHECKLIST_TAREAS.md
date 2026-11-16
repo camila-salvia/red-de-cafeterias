@@ -38,7 +38,7 @@
 - [ ] Demostrar login propio con JWT y al menos dos niveles de acceso.
 - [ ] Verificar permisos de todas las rutas sensibles con casos anónimo, usuario y administrador.
 - [ ] Definir y documentar el ambiente de ejecución mediante `.env` y configuración del proyecto.
-- [ ] Completar tres casos de uso con valor de negocio: realizar pedido, dejar reseña asociada a un pedido y agregar producto al catálogo. Mantener relacionados los casos de pedido y reseña según el alcance funcional.
+- [ ] Completar tres casos de uso con valor de negocio: realizar pedido, dejar una reseña independiente del pedido y agregar producto al catálogo. Para reseñar no debe ser necesario haber comprado por la aplicación.
 
 ## Semana 1 — 6 al 12 de noviembre
 
@@ -75,7 +75,7 @@
 - [ ] Completar el test de integración de Pedido; incluir usuario autenticado, método de pago, producto(s), detalles y total calculado.
 - [ ] Verificar controles backend de autenticación, roles y propiedad en rutas de Usuario, Pedido, Comentario y DetallePedido; corregir cualquier brecha encontrada.
 - [ ] Implementar el filtro de pedidos por estado en el listado/API y comprobar que conserva los permisos de acceso.
-- [ ] Asociar comentarios a pedidos según la propuesta y validar que solo el propietario del pedido pueda dejar una reseña; cubrir la relación con pruebas.
+- [x] Confirmar que las reseñas no dependen de los pedidos: cualquier usuario autenticado puede publicar una, haya comprado o no mediante la aplicación.
 - [ ] Separar el arranque de producción de `syncSchema()` y del debug de ORM; documentar migración/sincronización para desarrollo sin ejecutar cambios de esquema automáticamente en producción.
 
 ### Salvia Camila (49373)
@@ -86,8 +86,8 @@
 
 ### Marianela Leonardelli (51337)
 
-- [ ] Conectar la página de Comentarios con la API: listar comentarios persistidos y crear mediante endpoint autenticado. El servidor debe decidir el usuario; quitar dependencia de reseñas de ejemplo como fuente principal.
-- [ ] Enviar y mostrar la asociación entre reseña y pedido; manejar estados de carga, error y vacío.
+- [x] Conectar la página de Comentarios con la API: listar comentarios persistidos y crear mediante endpoint autenticado. El servidor decide el usuario; se quitaron las reseñas de ejemplo. Verificado con las suites frontend (19 pruebas) y backend (68 pruebas) el 16/11/2026.
+- [x] Mantener las reseñas independientes de los pedidos. El endpoint requiere autenticación y el servidor asigna el usuario desde el token; no se exige una compra web.
 - [x] Completar MisPedidos: quitar el ID de usuario de respaldo `|| 1`, manejar ausencia de sesión y agregar filtro por estado. Verificado con build frontend y suite de pruebas el 14/11/2026.
 - [ ] Agregar navegación desde el listado a un detalle de pedido histórico con fecha, estado, dirección, cliente, productos y total.
 - [ ] Verificar flujo de carrito y pedido con JWT; mostrar errores y limpiar el carrito solo después de una creación exitosa.
@@ -105,7 +105,7 @@
 - [ ] Ejecutar la suite backend desde una instalación limpia y corregir cualquier fallo reproducible.
 - [ ] Confirmar que dependencias de runtime, desarrollo y test están declaradas y que las instrucciones de configuración de `.env` son completas, sin valores secretos.
 - [ ] Resolver el fallback de login con contraseñas en texto plano mediante una migración segura antes de eliminarlo, o documentar una decisión de transición aprobada.
-- [ ] Participar en la prueba final de permisos y flujo pedido → reseña.
+- [ ] Participar en la prueba final de permisos y probar por separado los flujos de pedido y reseñas.
 
 ### Salvia Camila (49373)
 
@@ -126,7 +126,7 @@
 - [ ] Demostrar en vivo login JWT con usuario y admin, acceso permitido/denegado a rutas protegidas y CRUD administrativo.
 - [ ] Demostrar CRUDs requeridos y relaciones dependientes con persistencia real.
 - [ ] Demostrar listados filtrados por categoría y estado, detalle de producto y detalle de pedido.
-- [ ] Demostrar tres casos de uso: realizar pedido, dejar reseña asociada a ese pedido y agregar producto al catálogo.
+- [ ] Demostrar tres casos de uso independientes: realizar pedido, dejar una reseña (con o sin pedido web) y agregar producto al catálogo.
 - [ ] Revisar consola, errores HTTP, configuración de ambiente y responsive antes de entregar.
 
 ## Fuera del alcance obligatorio (solo si terminan los requisitos)

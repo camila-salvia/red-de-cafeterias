@@ -5,7 +5,7 @@ import { Comentario } from './comentario.entity.js'
 const em = orm.em
 
 // La sanitización se encarga de limpiar, estructurar y recortar el objeto que manda el cliente para quedarse 
-// únicamente con lo que le interesa al servidor, descartando todo lo demás.
+// únicamente con lo que le interesa al servidor, descartando todo lo demás
 function sanitizeComentarioInput( 
     req: Request, 
     res: Response, 
@@ -19,6 +19,7 @@ function sanitizeComentarioInput(
         contenido: esCreacion ? (contenido ?? '') : contenido,
         fecha_publicacion: esCreacion ? new Date() : req.body.fecha_publicacion,
         puntuacion: req.body.puntuacion,
+        // al crear, el usuario lo decide el servidor (token). se ignora lo que mande el cliente
         usuario: esCreacion ? req.usuarioToken?.id : req.body.usuario // Inyectamos el usuario desde el token de forma segura al crear
     }
 
@@ -42,10 +43,14 @@ function aVistaPublica(c: Comentario) {
   }
 }
 
-// obtener todas los comentarios
+// obtener todos los comentarios
 async function findAll(req: Request, res: Response) {
   try {
-    const comentarios = await em.find(Comentario, {}, { populate: ['usuario'] })
+    const comentarios = await em.find(
+      Comentario,
+      {},
+      { populate: ['usuario'], orderBy: { fecha_publicacion: 'DESC' } }
+    )
     return res.status(200).json({ message: 'Todos los comentarios encontrados', data: comentarios.map(aVistaPublica) })
   } catch (error:any) {
     res.status(500).json({ message: 'Error al obtener comentarios' })
@@ -57,9 +62,11 @@ async function add(req: Request, res: Response) {
   try {
     const comentario = em.create(Comentario, req.body.sanitizedInput)
     await em.flush()
-    res.status(201).json({ message: 'Comentario creado', data: comentario })
+    // cargar usuario para devolver misma vista pública que el listado
+    await em.populate(comentario, ['usuario'])
+    res.status(201).json({ message: 'Comentario creado', data: aVistaPublica(comentario) })
   } catch (error:any) {
-    console.error('Error detallado al crear:', error);
+    console.error('Error detallado al crear: ', error);
     res.status(500).json({ message: 'Error al crear comentario', detalle: error.message })
   }
 }

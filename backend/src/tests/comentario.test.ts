@@ -10,6 +10,7 @@ const em = vi.hoisted(() => ({
   findOne: vi.fn(),
   create: vi.fn(),
   flush: vi.fn(),
+  populate: vi.fn(),
 }));
 
 vi.mock('../shared/database/orm.js', () => ({ orm: { em } }));
@@ -83,9 +84,14 @@ describe('Comentario (backend)', () => {
         puntuacion: 4,
         usuario: 'user-1',
       };
-      const creado = { id: 'comentario-1', ...input };
+      const creado = {
+        id: 'comentario-1',
+        ...input,
+        usuario: { id: 'user-1', nombre: 'Camila' },
+      };
       em.create.mockReturnValue(creado);
       em.flush.mockResolvedValue(undefined);
+      em.populate.mockResolvedValue(undefined);
       const req = { body: { sanitizedInput: input } } as unknown as Request;
       const res = crearRes();
 
@@ -95,8 +101,18 @@ describe('Comentario (backend)', () => {
       expect(em.flush).toHaveBeenCalledOnce();
       // primero se crea la entidad y después se hace flush a la base
       expect(em.create.mock.invocationCallOrder[0]).toBeLessThan(em.flush.mock.invocationCallOrder[0]);
+      expect(em.populate).toHaveBeenCalledWith(creado, ['usuario']);
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Comentario creado', data: creado });
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Comentario creado',
+        data: {
+          id: 'comentario-1',
+          contenido: input.contenido,
+          fecha_publicacion: input.fecha_publicacion,
+          puntuacion: 4,
+          usuario: { id: 'user-1', nombre: 'Camila' },
+        },
+      });
     });
   });
 
@@ -295,6 +311,24 @@ describe('Comentario (backend)', () => {
       expect(req.body.sanitizedInput.usuario).toBe('user-1');
       expect(req.body.sanitizedInput.fecha_publicacion).toBeInstanceOf(Date);
       expect(next).toHaveBeenCalledOnce();
+    });
+
+    it('valida la identidad inyectada por el token sin requerir usuario en el body', async () => {
+      const req = {
+        method: 'POST',
+        body: { puntuacion: 5, contenido: 'Buen café', usuario: 'otro-usuario' },
+        usuarioToken: { id: 'user-1', email: 'cliente@mail.com', esAdmin: false },
+      } as unknown as Request;
+      const res = crearRes();
+      const next = vi.fn();
+      em.findOne.mockResolvedValue({ id: 'user-1' });
+
+      sanitizeComentarioInput(req, comoRes(res), vi.fn());
+      await validarComentarioInput(req, comoRes(res), next);
+
+      expect(em.findOne).toHaveBeenCalledWith(Usuario, { id: 'user-1' });
+      expect(next).toHaveBeenCalledOnce();
+      expect(res.status).not.toHaveBeenCalled();
     });
   });
 });

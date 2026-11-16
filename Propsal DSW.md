@@ -15,7 +15,7 @@ Repositorios
 ## Tema
 
 Descripción:  
-Es la aplicación web de una cafetería, los usuarios van a poder registrarse, realizar pedidos y agregar comentarios a dichos pedidos.
+Es la aplicación web de una cafetería. Los usuarios pueden registrarse y realizar pedidos, además de dejar reseñas sobre su experiencia en el local, hayan realizado o no un pedido a través de la aplicación.
 
 Modelo:   
 Link: [https://drive.google.com/file/d/1pX8mOUXs5Atuw59P-m_Qa1YiaA_OYwKt/view]
