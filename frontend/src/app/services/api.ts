@@ -108,6 +108,11 @@ export class ApiService {
       .pipe(catchError(this.manejarError));
   }
 
+  cancelarPedido(id: string): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/pedido/${id}/cancelar`, {})
+      .pipe(catchError(this.manejarError));
+  }
+
   // comentario
   getComentarios(): Observable<ComentariosResponse> {
     return this.http.get<ComentariosResponse>(`${this.apiUrl}/comentario`)

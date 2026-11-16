@@ -1,6 +1,12 @@
 <div class="pedidos-container">
-  <h2>Mis Pedidos Confirmados</h2>
+  <h2>Mis Pedidos</h2>
 
+  @if (mensaje()) {
+  <p class="aviso exito" role="status">{{ mensaje() }}</p>
+  }
+  @if (error()) {
+  <p class="aviso error" role="alert">{{ error() }}</p>
+  }
   @if (cargando()) {
   <p class="mensaje-estado">Cargando tus pedidos... </p>
   } @else if (pedidos().length === 0) {
@@ -34,7 +40,14 @@
             <span class="numero-pedido">Pedido #{{ pedido.id }}</span>
             <span class="fecha-pedido">{{ pedido.fecha_pedido | date:'dd/MM/yyyy HH:mm' }}</span>
           </div>
-          <span class="estado-badge">{{ pedido.estado_pago }}</span>
+          <span
+            class="estado-badge"
+            [class.pendiente]="pedido.estado_pago === 'Pendiente'"
+            [class.confirmado]="pedido.estado_pago === 'Confirmado'"
+            [class.cancelado]="pedido.estado_pago === 'Cancelado'"
+          >
+            {{ pedido.estado_pago }}
+          </span>
         </div>
 
         <div class="detalles-productos">
@@ -47,8 +60,18 @@
         </div>
 
         <div class="pie-pedido">
-          <span>Total abonado:</span>
+          <span>Total:</span>
           <strong>${{ pedido.costo_total }}</strong>
+          @if (pedido.estado_pago === 'Pendiente') {
+          <button
+            type="button"
+            class="btn-cancelar"
+            [disabled]="pedidoCancelandoId() !== null"
+            (click)="cancelarPedido(pedido)"
+          >
+            {{ pedidoCancelandoId() === pedido.id ? 'Cancelando...' : 'Cancelar pedido' }}
+          </button>
+          }
         </div>
       </div>
     }

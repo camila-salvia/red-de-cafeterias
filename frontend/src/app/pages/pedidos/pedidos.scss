@@ -15,6 +15,16 @@
   gap: 1rem;
 }
 
+.filtro-estado {
+  max-width: 320px;
+  margin: 0 0 1.25rem auto;
+
+  label {
+    display: block;
+    margin-bottom: 0.35rem;
+  }
+}
+
 .pedido-card {
   padding: 1.25rem;
   border-radius: 10px;
@@ -100,6 +110,11 @@
   &.confirmado {
     background: #d1e7dd;
     color: #0f5132;
+  }
+
+  &.cancelado {
+    background: #f8d7da;
+    color: #842029;
   }
 }
 

@@ -12,8 +12,26 @@
   } @else if (pedidos().length === 0) {
   <p class="estado-pagina">Todavía no hay pedidos de clientes.</p>
   } @else {
+  <div class="filtro-estado">
+    <label for="filtro-estado">Filtrar por estado:</label>
+    <select
+      id="filtro-estado"
+      class="form-select"
+      [ngModel]="estadoSeleccionado()"
+      (ngModelChange)="estadoSeleccionado.set($event)"
+    >
+      <option value="Todos">Todos los estados</option>
+      @for (estado of estadosPedidos; track estado) {
+      <option [value]="estado">{{ estado }}</option>
+      }
+    </select>
+  </div>
+
+  @if (pedidosFiltrados().length === 0) {
+  <p class="estado-pagina">No hay pedidos para este estado.</p>
+  } @else {
   <div class="lista-pedidos">
-    @for (pedido of pedidos(); track pedido.id) {
+    @for (pedido of pedidosFiltrados(); track pedido.id) {
     <article class="pedido-card">
       <header class="pedido-cabecera">
         <div>
@@ -24,6 +42,7 @@
           class="estado-badge"
           [class.pendiente]="pedido.estado_pago === 'Pendiente'"
           [class.confirmado]="pedido.estado_pago === 'Confirmado'"
+          [class.cancelado]="pedido.estado_pago === 'Cancelado'"
         >
           {{ pedido.estado_pago }}
         </span>
@@ -64,5 +83,6 @@
     </article>
     }
   </div>
+  }
   }
 </main>

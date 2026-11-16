@@ -18,7 +18,7 @@ Trabajo Práctico de Desarrollo de Software (DSW).
 
 ### Descripción
 
-Aplicación web de una cafetería. Los usuarios pueden registrarse, explorar el catálogo de productos por categoría, realizar pedidos y dejar reseñas. Los administradores gestionan categorías y productos desde un panel de administración.
+Aplicación web de una cafetería. Los usuarios pueden registrarse, explorar el catálogo de productos por categoría, realizar pedidos y dejar reseñas. Los administradores gestionan categorías y productos, y consultan y confirman los pedidos de los clientes.
 
 ### Modelo
 
@@ -207,4 +207,4 @@ Usuarios de prueba creados por el seed del backend local:
 | Administrador | `admin@cafeteria.com` | `password123` |
 | Cliente | `usuario@cafeteria.com` | `password123` |
 
-El administrador accede al **Panel Admin** (alta, edición y baja de categorías y productos). El cliente puede explorar productos, armar el carrito, confirmar pedidos y ver su historial.
+El administrador accede al **Panel Admin** (alta, edición y baja de categorías y productos) y a **Pedidos de clientes** para consultar y confirmar pedidos pendientes. El cliente puede explorar productos, armar el carrito, cancelar pedidos pendientes y ver su historial.

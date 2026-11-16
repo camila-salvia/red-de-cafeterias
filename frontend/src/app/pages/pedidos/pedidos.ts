@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api';
 
 @Component({
   selector: 'app-pedidos',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './pedidos.html',
   styleUrl: './pedidos.scss',
 })
@@ -17,6 +18,14 @@ export class Pedidos {
   error = signal<string | null>(null);
   mensaje = signal<string | null>(null);
   pedidoConfirmandoId = signal<string | null>(null);
+  estadoSeleccionado = signal('Todos');
+  estadosPedidos = ['Pendiente', 'Confirmado', 'Cancelado'];
+  pedidosFiltrados = computed(() => {
+    const estado = this.estadoSeleccionado();
+    return estado === 'Todos'
+      ? this.pedidos()
+      : this.pedidos().filter(pedido => pedido.estado_pago === estado);
+  });
 
   constructor() {
     this.cargarPedidos();

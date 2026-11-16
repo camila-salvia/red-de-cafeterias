@@ -160,6 +160,36 @@ async function confirmar(req: Request, res: Response) {
   }
 }
 
+// Cancelar un pedido propio que siga pendiente
+async function cancelar(req: Request, res: Response) {
+  if (req.usuarioToken?.esAdmin) {
+    return res.status(403).json({ message: 'Los administradores no pueden cancelar pedidos de clientes.' })
+  }
+
+  try {
+    const id = req.params.id as string
+    const pedido = await em.findOneOrFail(Pedido, { id })
+
+    if (pedido.usuario.id !== req.usuarioToken?.id) {
+      return res.status(403).json({ message: 'Solo puedes cancelar tus propios pedidos.' })
+    }
+
+    if (pedido.estado_pago !== 'Pendiente') {
+      return res.status(409).json({ message: 'Solo se pueden cancelar pedidos pendientes.' })
+    }
+
+    pedido.estado_pago = 'Cancelado'
+    await em.flush()
+    return res.status(200).json({ message: 'Pedido cancelado', data: pedido })
+  } catch (error: any) {
+    if (error instanceof NotFoundError) {
+      return res.status(404).json({ message: 'Pedido no encontrado' })
+    }
+    console.error('Error al cancelar el pedido:', error)
+    return res.status(500).json({ message: 'Error al cancelar el pedido' })
+  }
+}
+
 // obtener pedido por id (solo el propietario o el admin)
  async function findOne(req: Request, res: Response) {
   try {
@@ -218,4 +248,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export {sanitizePedidoInput, findAll, findByUsuario, add, confirmar, findOne, update, remove}
+export {sanitizePedidoInput, findAll, findByUsuario, add, confirmar, cancelar, findOne, update, remove}
