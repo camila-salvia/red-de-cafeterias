@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Producto } from '../../models/producto.interface';
+import { urlImagenProducto } from '../../utils/imagen-url';
 
 @Component({
   selector: 'app-tarjeta-producto',
@@ -16,6 +17,9 @@ export class TarjetaProductoComponent {
   notificacionCarrito = signal<string | null>(null); 
 
   getBackgroundImage(): string {
+    const imagenProducto = urlImagenProducto(this.producto?.imagen);
+    if (imagenProducto) return `url("${imagenProducto}")`;
+
     const nombre = (this.producto?.nombre || '').toLowerCase();
 
     if (nombre.includes('cafe') || nombre.includes('café')) {

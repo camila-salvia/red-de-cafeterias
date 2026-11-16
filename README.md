@@ -156,6 +156,8 @@ Compila TypeScript en modo watch y levanta el servidor con `node ./dist/app.js`.
 
 El backend queda disponible en **http://localhost:3000** y expone la API bajo `/api` (por ejemplo `http://localhost:3000/api/producto`).
 
+Las imágenes de productos se guardan en `backend/uploads/productos/` y se sirven bajo `/uploads/productos/`. Se aceptan JPG, PNG y WebP de hasta 5 MB. En despliegues, ese directorio debe estar en almacenamiento persistente para conservar las imágenes.
+
 Otros scripts disponibles en `backend/`:
 
 | Script | Descripción |

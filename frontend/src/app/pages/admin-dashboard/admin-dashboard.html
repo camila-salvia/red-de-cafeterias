@@ -8,130 +8,138 @@
   <div class="alerta error">{{ error() }}</div>
   }
 
-  <div class="grid-paneles">
-    <!-- Panel Nueva Categoría -->
-    <section class="card">
-      <h3>Crear Categoría</h3>
-      <form (ngSubmit)="guardarCategoria()">
-        <div class="campo">
-          <label>Nombre de la Categoría</label>
-          <input type="text" placeholder="Ej: Cafetería, Pastelería" [(ngModel)]="nuevaCategoriaNombre" name="catNombre"
-            required />
-        </div>
-        <button type="submit" class="btn-guardar">Agregar Categoría</button>
-      </form>
-    </section>
+  <div class="admin-layout">
+    <div class="admin-columna">
+      <section class="card categoria-form">
+        <h3>Crear Categoría</h3>
+        <form (ngSubmit)="guardarCategoria()">
+          <div class="campo">
+            <label>Nombre de la Categoría</label>
+            <input type="text" placeholder="Ej: Cafetería, Pastelería" [(ngModel)]="nuevaCategoriaNombre" name="catNombre"
+              required />
+          </div>
+          <button type="submit" class="btn-guardar">Agregar Categoría</button>
+        </form>
+      </section>
 
-    <!-- Panel Nuevo Producto -->
-    <section class="card">
-      <h3>Crear / Editar Producto</h3>
-      <form (ngSubmit)="guardarProducto()">
-        <div class="campo">
-          <label>Nombre del Producto</label>
-          <input type="text" placeholder="Ej: Espresso Doble" [(ngModel)]="nuevoProducto.nombre" name="nombre"
-            required />
-        </div>
-
-        <div class="campo">
-          <label>Descripción</label>
-          <textarea placeholder="Breve detalle del producto..." [(ngModel)]="nuevoProducto.descripcion"
-            name="descripcion"></textarea>
-        </div>
-
-        <div class="campo">
-          <label>Precio ($)</label>
-          <input type="number" placeholder="0.00" [(ngModel)]="nuevoProducto.precio" name="precio" min="1" required />
-        </div>
-
-        <div class="campo">
-          <label>Categoría</label>
-          <select [(ngModel)]="nuevoProducto.categoria" name="categoria" required>
-            <option value="" disabled selected>Seleccione una categoría</option>
+      <section class="card lista-categorias">
+        <h3>Lista de Categorías</h3>
+        <table class="tabla-admin">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
             @for (cat of categorias(); track cat.id) {
-            <option [value]="cat.id">{{ cat.nombre }}</option>
+            <tr>
+              <td>{{ cat.nombre }}</td>
+              <td>
+                <button type="button" class="btn-accion btn-desactivar" (click)="eliminarCategoria(cat.id)">Borrar</button>
+              </td>
+            </tr>
             }
-          </select>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <div class="admin-columna">
+      <section class="card producto-form">
+        <h3>Crear Producto</h3>
+        <form (ngSubmit)="guardarProducto()">
+          <div class="campo">
+            <label>Nombre del Producto</label>
+            <input type="text" placeholder="Ej: Espresso Doble" [(ngModel)]="nuevoProducto.nombre" name="nombre"
+              required />
+          </div>
+
+          <div class="campo">
+            <label>Descripción</label>
+            <textarea placeholder="Breve detalle del producto..." [(ngModel)]="nuevoProducto.descripcion"
+              name="descripcion"></textarea>
+          </div>
+
+          <div class="campo">
+            <label>Precio ($)</label>
+            <input type="number" placeholder="0.00" [(ngModel)]="nuevoProducto.precio" name="precio" min="1" required />
+          </div>
+
+          <div class="campo">
+            <label>Categoría</label>
+            <select [(ngModel)]="nuevoProducto.categoria" name="categoria" required>
+              <option value="" disabled selected>Seleccione una categoría</option>
+              @for (cat of categorias(); track cat.id) {
+              <option [value]="cat.id">{{ cat.nombre }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="imagen-producto">Imagen</label>
+            <input
+              #imagenInput
+              id="imagen-producto"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              (change)="seleccionarImagen($event)"
+            />
+            <small>JPG, PNG o WebP. Tamaño máximo: 5 MB.</small>
+            @if (vistaPreviaImagen()) {
+            <img class="vista-previa-imagen" [src]="vistaPreviaImagen()" alt="Vista previa del producto" />
+            }
+          </div>
+
+          <button type="submit" class="btn-guardar">
+            {{ productoEnEdicionId() ? 'Actualizar Producto' : 'Guardar Producto' }}
+          </button>
+        </form>
+      </section>
+
+      <section class="card lista-productos">
+        <h3>Lista de Productos</h3>
+        <div class="tabla-scroll">
+          <table class="tabla-admin tabla-productos">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Categoría</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (prod of productos(); track prod.id) {
+              <tr [class.fila-inactiva]="!prod.activo">
+                <td>{{ prod.nombre }}</td>
+                <td>{{ prod.descripcion }}</td>
+                <td>{{ prod.precio | currency:'ARS' }}</td>
+                <td>{{ prod.categoria?.nombre || 'Sin categoría' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="prod.activo ? 'badge-activo' : 'badge-inactivo'">
+                    {{ prod.activo ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td>
+                  <button type="button" class="btn-editar" (click)="cargarParaEditar(prod)">Editar</button>
+                  <button type="button" class="btn-accion" [ngClass]="prod.activo ? 'btn-desactivar' : 'btn-activar'"
+                    (click)="cambiarEstadoProducto(prod.id, prod.activo)">
+                    {{ prod.activo ? 'Desactivar' : 'Activar' }}
+                  </button>
+                </td>
+              </tr>
+              } @empty {
+              <tr>
+                <td colspan="6" class="text-center">No hay productos registrados.</td>
+              </tr>
+              }
+            </tbody>
+          </table>
         </div>
-
-        <button type="submit" class="btn-guardar">
-          {{ productoEnEdicionId() ? 'Actualizar Producto' : 'Guardar Producto' }}
-        </button>
-      </form>
-    </section>
-  </div>
-
-  <div class="grid-paneles listas-admin">
-    <!-- Tabla de categorías -->
-    <section class="tabla-admin">
-      <h3>Lista de Categorías</h3>
-      <table class="tabla-admin">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (cat of categorias(); track cat.id) {
-          <tr>
-            <td>{{ cat.nombre }}</td>
-            <td>
-              <button type="button" class="btn-eliminar" (click)="eliminarCategoria(cat.id)">Borrar</button>
-            </td>
-          </tr>
-          }
-        </tbody>
-      </table>
-    </section>
-
-    <!-- Tabla de productos -->
-    <section class="card">
-      <h3>Lista de Productos</h3>
-      <table class="tabla-admin">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Precio</th>
-            <th>Categoría</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (prod of productos(); track prod.id) {
-          <!-- Aplicamos clase condicional si el producto no está activo -->
-          <tr [class.fila-inactiva]="!prod.activo">
-            <td>{{ prod.nombre }}</td>
-            <td>{{ prod.descripcion }}</td>
-            <td>{{ prod.precio | currency:'ARS' }}</td>
-            <td>{{ prod.categoria?.nombre || 'Sin categoría' }}</td>
-
-            <!-- Columna de Estado con Badge -->
-            <td>
-              <span class="badge" [ngClass]="prod.activo ? 'badge-activo' : 'badge-inactivo'">
-                {{ prod.activo ? 'Activo' : 'Inactivo' }}
-              </span>
-            </td>
-
-            <!-- Columna de Acciones Actualizada -->
-            <td>
-              <button type="button" class="btn-editar" (click)="cargarParaEditar(prod)">Editar</button>
-
-              <!-- Botón dinámico para activar/desactivar en lugar de borrado físico -->
-              <button type="button" class="btn-accion" [ngClass]="prod.activo ? 'btn-desactivar' : 'btn-activar'"
-                (click)="cambiarEstadoProducto(prod.id, prod.activo)">
-                {{ prod.activo ? 'Desactivar' : 'Activar' }}
-              </button>
-            </td>
-          </tr>
-          } @empty {
-          <tr>
-            <td colspan="6" class="text-center">No hay productos registrados.</td>
-          </tr>
-          }
-        </tbody>
-      </table>
-    </section>
+      </section>
+    </div>
   </div>
 </div>

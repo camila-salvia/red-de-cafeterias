@@ -3,6 +3,9 @@ import { Producto } from './producto.entity.js'
 import { Categoria } from '../categoria/categoria.entity.js'
 import { orm } from '../shared/database/orm.js'
 import { NotFoundError } from '@mikro-orm/core'
+import { writeFile, unlink } from 'node:fs/promises'
+import { basename, join } from 'node:path'
+import { directorioImagenesProducto } from './producto.upload.js'
 
 const em = orm.em
 
@@ -15,7 +18,8 @@ function sanitizeProductoInput(
         nombre: req.body.nombre,
         descripcion: req.body.descripcion,
         precio: req.body.precio,
-        categoria: req.body.categoria
+        categoria: req.body.categoria,
+        imagen: req.file ? `/uploads/productos/${req.file.filename}` : undefined
     }
 
     Object.keys(req.body.sanitizedInput).forEach(key => {
@@ -25,6 +29,27 @@ function sanitizeProductoInput(
     })
 
     next();
+}
+
+async function limpiarArchivoImagen(ruta: string) {
+  try {
+    await unlink(ruta)
+  } catch (error) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
+      return
+    }
+    console.error('No se pudo limpiar el archivo de imagen:', error)
+  }
+}
+
+function obtenerRutaImagen(imagen?: string | null) {
+  const prefijo = '/uploads/productos/'
+  if (!imagen?.startsWith(prefijo)) return undefined
+
+  const nombreArchivo = imagen.slice(prefijo.length)
+  if (!nombreArchivo || basename(nombreArchivo) !== nombreArchivo) return undefined
+
+  return join(directorioImagenesProducto, nombreArchivo)
 }
 
 // obtener todas los productos
@@ -84,6 +109,7 @@ async function findAllAdmin(req: Request, res: Response) {
 
 // crear nuevo producto
 async function add(req: Request, res: Response) {
+  let rutaImagenGuardada: string | undefined
   try {
     const input = req.body.sanitizedInput || req.body;
     if (!input.categoria) {
@@ -94,6 +120,10 @@ async function add(req: Request, res: Response) {
     if (!categoriaId) {
       return res.status(400).json({ message: 'El ID de la categoría es inválido o no fue proporcionado' });
     }
+    if (req.file) {
+      rutaImagenGuardada = join(directorioImagenesProducto, req.file.filename)
+      await writeFile(rutaImagenGuardada, req.file.buffer, { flag: 'wx' })
+    }
     const producto = em.create(Producto, {
       ...input,
       categoria: em.getReference(Categoria, categoriaId)
@@ -101,6 +131,7 @@ async function add(req: Request, res: Response) {
     await em.flush();
     return res.status(201).json({ message: 'Producto creado exitosamente', data: producto });
   } catch (error: any) {
+    if (rutaImagenGuardada) await limpiarArchivoImagen(rutaImagenGuardada)
     console.error('Error detallado al crear:', error);
     return res.status(500).json({ message: 'Error al crear producto', detalle: error.message });
   }
@@ -128,20 +159,32 @@ async function add(req: Request, res: Response) {
 
 // actualizar producto
 async function update(req: Request, res: Response) {
+  let rutaImagenGuardada: string | undefined
   try {
       const id = req.params.id as string;
       const producto = await em.findOneOrFail(Producto, { id });
       const input = req.body.sanitizedInput || req.body;
+      const imagenAnterior = producto.imagen;
 
       if (input.categoria) {
         const categoriaId = typeof input.categoria === 'object' ? input.categoria.id : input.categoria;
         input.categoria = em.getReference(Categoria, categoriaId);
       }
 
+      if (req.file) {
+        rutaImagenGuardada = join(directorioImagenesProducto, req.file.filename)
+        await writeFile(rutaImagenGuardada, req.file.buffer, { flag: 'wx' })
+      }
+
       em.assign(producto, input);
       await em.flush();
+      if (rutaImagenGuardada) {
+        const rutaImagenAnterior = obtenerRutaImagen(imagenAnterior)
+        if (rutaImagenAnterior) await limpiarArchivoImagen(rutaImagenAnterior)
+      }
       return res.status(200).json({ message: 'Producto actualizado', data: producto });
   } catch (error:any) {
+    if (rutaImagenGuardada) await limpiarArchivoImagen(rutaImagenGuardada)
     if (error instanceof NotFoundError) {
       return res.status(404).json({ message: 'Producto no encontrado' })
     }

@@ -23,4 +23,7 @@ export class Producto extends BaseEntity {
 
     @Property({ nullable: false })
     precio!: number
+
+    @Property({ nullable: true })
+    imagen?: string
 }

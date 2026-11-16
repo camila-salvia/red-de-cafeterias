@@ -35,7 +35,7 @@ export class ApiService {
       .pipe(catchError(this.manejarError));
   }
 
-  crearProducto(producto: any): Observable<any> {
+  crearProducto(producto: FormData): Observable<any> {
     return this.http.post(`${this.apiUrl}/producto`, producto)
       .pipe(catchError(this.manejarError));
   }
@@ -45,7 +45,7 @@ export class ApiService {
       .pipe(catchError(this.manejarError));
   }
 
-  actualizarProducto(id: string, producto: any): Observable<any> {
+  actualizarProducto(id: string, producto: FormData): Observable<any> {
     return this.http.put(`${this.apiUrl}/producto/${id}`, producto)
       .pipe(catchError(this.manejarError));
   }

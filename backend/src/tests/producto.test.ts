@@ -13,9 +13,15 @@ const em = vi.hoisted(() => ({
   flush: vi.fn(),
 }));
 
+const archivoSistema = vi.hoisted(() => ({
+  writeFile: vi.fn(),
+  unlink: vi.fn(),
+}));
+
 vi.mock('../shared/database/orm.js', () => ({ orm: { em } }));
 vi.mock('../categoria/categoria.entity.js', () => ({ Categoria: class Categoria {} }));
 vi.mock('../producto/producto.entity.js', () => ({ Producto: class Producto {} }));
+vi.mock('node:fs/promises', () => archivoSistema);
 
 import { validarProductoInput } from '../producto/producto.validator.js';
 import { add, findAll, findAllAdmin, findOne, update, remove, cambiarEstadoProducto, sanitizeProductoInput } from '../producto/producto.controller.js';
@@ -50,6 +56,8 @@ const productoValido = {
 
 beforeEach(() => {
   vi.resetAllMocks();
+  archivoSistema.writeFile.mockResolvedValue(undefined);
+  archivoSistema.unlink.mockResolvedValue(undefined);
   em.getReference.mockImplementation((_entity: unknown, id: string) => ({ id }));
   // Evita ensuciar la salida con los console.error de los catch del controller
   vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -140,6 +148,19 @@ describe('Producto - Tests unitarios', () => {
       expect(req.body.sanitizedInput).not.toHaveProperty('precio');
       expect(next).toHaveBeenCalledOnce();
     });
+
+    it('agrega al producto la ruta de la imagen subida', () => {
+      const req = {
+        body: { ...productoValido },
+        file: { filename: 'imagen-1.webp' },
+      } as unknown as Request;
+      const next = vi.fn();
+
+      sanitizeProductoInput(req, comoRes(crearRes()), next);
+
+      expect(req.body.sanitizedInput.imagen).toBe('/uploads/productos/imagen-1.webp');
+      expect(next).toHaveBeenCalledOnce();
+    });
   });
 
 // Creación
@@ -184,6 +205,31 @@ describe('Producto - Tests unitarios', () => {
       await add(req, comoRes(res));
 
       expect(em.getReference).toHaveBeenCalledWith(Categoria, 'cat-9');
+      expect(res.status).toHaveBeenCalledWith(201);
+    });
+
+    it('Guarda el archivo subido y conserva su ruta en el producto', async () => {
+      const archivo = { filename: 'imagen-1.webp', buffer: Buffer.from('imagen') };
+      const input = { ...productoValido, imagen: '/uploads/productos/imagen-1.webp' };
+      em.create.mockReturnValue({ id: 'prod-1', ...input });
+      em.flush.mockResolvedValue(undefined);
+      const req = {
+        body: { sanitizedInput: input },
+        file: archivo,
+      } as unknown as Request;
+      const res = crearRes();
+
+      await add(req, comoRes(res));
+
+      expect(archivoSistema.writeFile).toHaveBeenCalledWith(
+        expect.stringMatching(/[\\/]uploads[\\/]productos[\\/]imagen-1\.webp$/),
+        archivo.buffer,
+        { flag: 'wx' }
+      );
+      expect(em.create).toHaveBeenCalledWith(Producto, {
+        ...input,
+        categoria: { id: productoValido.categoria },
+      });
       expect(res.status).toHaveBeenCalledWith(201);
     });
   });

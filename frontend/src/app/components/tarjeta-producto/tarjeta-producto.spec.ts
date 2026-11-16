@@ -26,4 +26,10 @@ describe('TarjetaProducto', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('uses the uploaded image when the product has one', () => {
+    component.producto.imagen = '/uploads/productos/imagen-1.webp';
+
+    expect(component.getBackgroundImage()).toContain('/uploads/productos/imagen-1.webp');
+  });
 });
