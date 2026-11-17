@@ -68,13 +68,18 @@ export class AuthService {
 
   constructor() {
     const guardado = localStorage.getItem(TOKEN_KEY);
-    if (guardado && this.esTokenVigente(guardado)) {
+    const payloadGuardado = guardado ? decodificarToken(guardado) : null;
+    const tokenVencido = typeof payloadGuardado?.exp === 'number'
+      && Number.isFinite(payloadGuardado.exp)
+      && payloadGuardado.exp * 1000 <= Date.now();
+
+    if (guardado && payloadGuardado && !tokenVencido) {
       this.token.set(guardado);
       this.usuarioActual.set(localStorage.getItem(NOMBRE_KEY));
       this.programarExpiracion();
     } else {
       this.limpiarAlmacenamiento();
-      if (guardado) this.mensajeSesion.set(MENSAJE_VENCIDA);
+      if (tokenVencido) this.mensajeSesion.set(MENSAJE_VENCIDA);
     }
   }
 
@@ -93,7 +98,7 @@ export class AuthService {
   }
 
   // Cierre de sesión voluntario (botón "Cerrar sesión")
-  logout(): void {
+  logout(preservarCarrito = false): void {
     this.limpiarTemporizador();
     this.limpiarAlmacenamiento();
 
@@ -101,12 +106,12 @@ export class AuthService {
     this.usuarioActual.set(null);
     this.mensajeSesion.set(null);
     // el carrito es de la sesión: no debe quedar para el próximo usuario
-    this.cartService.limpiarCarrito();
+    if (!preservarCarrito) this.cartService.limpiarCarrito();
   }
 
   // Cierre forzado (token vencido o rechazado por el backend): cierra, avisa y lleva al login
-  forzarLogin(mensaje: string): void {
-    this.logout();
+  forzarLogin(mensaje: string, preservarCarrito = false): void {
+    this.logout(preservarCarrito);
     this.mensajeSesion.set(mensaje);
     this.router.navigate(['/login']);
   }

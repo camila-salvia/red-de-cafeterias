@@ -10,6 +10,9 @@
       @if (mensajeSesion()) {
         <div class="text-secondary small text-center mb-3 fw-bold" role="status">{{ mensajeSesion() }}</div>
       }
+      @if (mensajeRegistro()) {
+        <div class="text-success small text-center mb-3 fw-bold" role="status">{{ mensajeRegistro() }}</div>
+      }
 
       <!-- (ngSubmit): permite enviar con Enter -->
       <form class="login-form" (ngSubmit)="iniciarSesion()">
@@ -44,28 +47,34 @@
     } @else {
       <!-- VISTA CREAR CUENTA -->
       <h2 class="text-center mb-4">Crear cuenta</h2>
-      <form>
+      <form class="create-form" (ngSubmit)="crearCuenta()">
         <div class="row g-3 mb-3">
           <div class="col-6">
-            <input type="text" class="form-control custom-input" placeholder="nombre">
+            <input type="text" name="nombre" [(ngModel)]="nombre" (input)="limpiarError()" autocomplete="given-name" aria-label="Nombre" class="form-control custom-input" placeholder="nombre" required>
           </div>
           <div class="col-6">
-            <input type="text" class="form-control custom-input" placeholder="apellido">
+            <input type="text" name="apellido" [(ngModel)]="apellido" (input)="limpiarError()" autocomplete="family-name" aria-label="Apellido" class="form-control custom-input" placeholder="apellido" required>
           </div>
         </div>
         <div class="row g-3 mb-3">
           <div class="col-6">
-            <input type="tel" class="form-control custom-input" placeholder="telefono">
+            <input type="tel" name="telefono" [(ngModel)]="telefono" (input)="limpiarError()" autocomplete="tel" aria-label="Teléfono" class="form-control custom-input" placeholder="telefono" required>
           </div>
           <div class="col-6">
-            <input type="text" class="form-control custom-input" placeholder="dirección">
+            <input type="text" name="direccion" [(ngModel)]="direccion" (input)="limpiarError()" autocomplete="street-address" aria-label="Dirección" class="form-control custom-input" placeholder="dirección" required>
           </div>
         </div>
-        <input type="email" class="form-control custom-input mb-3" placeholder="email">
-        <input type="password" class="form-control custom-input mb-4" placeholder="password">
+        <input type="email" name="email" [(ngModel)]="email" (input)="limpiarError()" autocomplete="email" aria-label="Email" class="form-control custom-input mb-3" placeholder="email" required>
+        <input type="password" name="password" [(ngModel)]="password" (input)="limpiarError()" autocomplete="new-password" aria-label="Contraseña" class="form-control custom-input mb-4" placeholder="password" required>
+
+        @if (mensajeError()) {
+          <div class="text-danger small text-center mb-3 fw-bold" role="alert">{{ mensajeError() }}</div>
+        }
 
         <div class="text-center">
-          <button type="button" class="btn custom-btn px-5">CREAR</button>
+          <button type="submit" class="btn custom-btn px-5" [disabled]="cargando()">
+            {{ cargando() ? 'CREANDO...' : 'CREAR CUENTA' }}
+          </button>
         </div>
       </form>
       <div class="text-start mt-3">

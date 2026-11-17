@@ -54,9 +54,9 @@
 
         <!-- Controles de cantidad -->
         <div class="item-cantidad">
-          <button type="button" (click)="decrementar(item.producto.id)">-</button>
+          <button type="button" [disabled]="cargandoPedido()" (click)="decrementar(item.producto.id)">-</button>
           <span class="numero-cantidad">{{ item.cantidad }}</span>
-          <button type="button" (click)="incrementar(item.producto.id)">+</button>
+          <button type="button" [disabled]="cargandoPedido()" (click)="incrementar(item.producto.id)">+</button>
         </div>
 
         <!-- Subtotal por ítem -->
@@ -65,7 +65,7 @@
         </div>
 
         <!-- Botón quitar -->
-        <button type="button" class="btn-eliminar" (click)="eliminar(item.producto.id)" title="Eliminar">
+        <button type="button" class="btn-eliminar" [disabled]="cargandoPedido()" (click)="eliminar(item.producto.id)" title="Eliminar">
           Eliminar
         </button>
       </div>
@@ -84,23 +84,32 @@
       </div>
       <!-- Selector de pago -->
        <div class="selector-pago">
-        <label>Método de pago:</label>
-        <select [(ngModel)]="metodoSeleccionado">
+        <label for="metodo-pago">Método de pago:</label>
+        <select id="metodo-pago" [(ngModel)]="metodoSeleccionado" [disabled]="cargandoPedido()">
           <option [ngValue]="null" disabled>Selecciona un método de pago</option>
           @for (metodo of metodosPago(); track metodo.id) {
             <option [value]="metodo.id">{{ metodo.nombre }}</option>
           }
         </select>
+        @if (mensajeErrorMetodosPago()) {
+          <div class="mensaje-error" role="alert">
+            {{ mensajeErrorMetodosPago() }}
+            <button type="button" (click)="cargarMetodosPago()">Reintentar</button>
+          </div>
+        }
        </div>
 
       <div class="acciones">
-        <button type="button" class="btn-vaciar" (click)="cartService.limpiarCarrito()">
+        <button type="button" class="btn-vaciar" [disabled]="cargandoPedido()" (click)="cartService.limpiarCarrito()">
           Vaciar Carrito
         </button>
-        <button type="button" class="btn-confirmar" (click)="confirmarPedido()">
-          Confirmar Pedido
+        <button type="button" class="btn-confirmar" [disabled]="cargandoPedido()" (click)="confirmarPedido()">
+          {{ cargandoPedido() ? 'Procesando...' : 'Confirmar Pedido' }}
         </button>
       </div>
+      @if (mensajeError()) {
+        <div class="mensaje-error" role="alert">{{ mensajeError() }}</div>
+      }
     </div>
 
   </div>

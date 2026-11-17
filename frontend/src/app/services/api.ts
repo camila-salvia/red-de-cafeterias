@@ -5,6 +5,20 @@ import { Producto } from '../models/producto.interface';
 import { ComentarioApi, ComentarioResponse, ComentariosResponse } from '../models/comentario.interface';
 import { environment } from '../../environments/environment';
 
+export interface PedidoRequest {
+  direccion_envio: string;
+  metodo_pago: string;
+  items: Array<{ productoId: string; cantidad: number }>;
+}
+
+export interface PedidoResponse {
+  data: {
+    id: string;
+    estado_pago: string;
+    costo_total: number;
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -77,14 +91,21 @@ export class ApiService {
     .pipe(catchError(this.manejarError));
   }
 
-  crearUsuario(nuevoUsuario: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/usuario`, nuevoUsuario)
+  crearUsuario(nuevoUsuario: {
+    nombre: string;
+    apellido: string;
+    telefono: string;
+    direccion: string;
+    email: string;
+    password: string;
+  }): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/usuario`, nuevoUsuario)
       .pipe(catchError(this.manejarError));
   }
 
   // pedido
-  crearPedido(pedidoData: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/pedido`, pedidoData)
+  crearPedido(pedidoData: PedidoRequest): Observable<PedidoResponse> {
+    return this.http.post<PedidoResponse>(`${this.apiUrl}/pedido`, pedidoData)
       .pipe(catchError(this.manejarError));
   }
 

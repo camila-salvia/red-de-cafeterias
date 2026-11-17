@@ -17,7 +17,7 @@ export class Usuario extends BaseEntity {
     apellido!: string
 
     @Property({ nullable: false })
-    telefono!: number
+    telefono!: string
 
     @Property({ nullable: false})
     direccion!: string

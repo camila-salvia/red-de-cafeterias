@@ -15,6 +15,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // En el login un 401 significa "credenciales incorrectas", no "sesión vencida":
   // ese caso lo maneja el componente de login.
   const esLogin = req.url.endsWith('/usuario/login');
+  const esCrearPedido = req.method === 'POST' && req.url.endsWith('/pedido');
 
   const reqConToken = token
     ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
@@ -25,7 +26,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       // 401 del backend: token ausente, inválido o vencido
       if (error instanceof HttpErrorResponse && error.status === 401 && !esLogin) {
         authService.forzarLogin(
-          token ? 'Tu sesión venció. Iniciá sesión nuevamente.' : 'Iniciá sesión para continuar.'
+          token ? 'Tu sesión venció. Iniciá sesión nuevamente.' : 'Iniciá sesión para continuar.',
+          esCrearPedido
         );
       }
       // El 403 (rol insuficiente) no se intercepta: cada pantalla recibe el error
