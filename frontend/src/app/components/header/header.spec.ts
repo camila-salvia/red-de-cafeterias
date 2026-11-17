@@ -6,8 +6,12 @@ import { HeaderComponent } from './header';
 describe('Header', () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
+  let esAdmin: boolean;
+  let isLoggedIn: boolean;
 
   beforeEach(async () => {
+    esAdmin = false;
+    isLoggedIn = false;
     await TestBed.configureTestingModule({
       imports: [HeaderComponent],
       providers: [
@@ -15,8 +19,8 @@ describe('Header', () => {
         {
           provide: AuthService,
           useValue: {
-            isLoggedIn: () => false,
-            esAdmin: () => false,
+            isLoggedIn: () => isLoggedIn,
+            esAdmin: () => esAdmin,
             usuarioActual: () => null,
             logout: () => undefined,
           },
@@ -32,5 +36,21 @@ describe('Header', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows the admin panel before the greeting and logout button', () => {
+    esAdmin = true;
+    isLoggedIn = true;
+    fixture.detectChanges();
+
+    const navigationText = (fixture.nativeElement as HTMLElement)
+      .querySelector('nav')?.textContent ?? '';
+    const panelIndex = navigationText.indexOf('Panel Admin');
+    const greetingIndex = navigationText.indexOf('Hola,');
+    const logoutIndex = navigationText.indexOf('Cerrar sesión');
+
+    expect(panelIndex).toBeGreaterThanOrEqual(0);
+    expect(panelIndex).toBeLessThan(greetingIndex);
+    expect(greetingIndex).toBeLessThan(logoutIndex);
   });
 });

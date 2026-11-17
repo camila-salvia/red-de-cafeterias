@@ -1,7 +1,8 @@
 :host {
-  display: block;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   width: 100%;
-  min-height: calc(100vh - 150px);
   background-image: url("/assets/fondo_cafeteria.jpeg");
   background-size: cover;
   background-position: center;
@@ -11,7 +12,7 @@
 
 // Fondo a pantalla completa
 .auth-background {
-  min-height: calc(100vh - 150px);
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;

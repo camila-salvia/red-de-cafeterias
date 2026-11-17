@@ -7,6 +7,10 @@
     }
     <a routerLink="/comentarios" class="nav-link">Reseñas</a>
 
+    @if (authService.esAdmin()) {
+      <a routerLink="/admin" class="nav-link">Panel Admin</a>
+    }
+
     @if (authService.isLoggedIn()) {
       @if (!authService.esAdmin()) {
         <a routerLink="/ver-pedido" class="nav-link">Ver carrito</a>
@@ -17,10 +21,6 @@
       </app-boton>
     } @else {
       <a routerLink="/login" class="nav-link">Ingresar</a>
-    }
-
-    @if (authService.esAdmin()) {
-    <a routerLink="/admin" class="nav-link">Panel Admin</a>
     }
   </nav>
 </div>

@@ -1,1 +1,13 @@
 /* You can add global styles to this file, and also import other style files */
+
+:host {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
