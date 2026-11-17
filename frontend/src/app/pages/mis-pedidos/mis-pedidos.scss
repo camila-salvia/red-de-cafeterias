@@ -11,6 +11,16 @@
   }
 }
 
+.filtro-estado {
+  max-width: 320px;
+  margin: 0 0 1.25rem auto;
+
+  label {
+    display: block;
+    margin-bottom: 0.35rem;
+  }
+}
+
 .tarjeta-pedido {
   background: #fff;
   border-radius: 10px;
@@ -103,6 +113,19 @@
   &:disabled {
     cursor: wait;
     opacity: 0.7;
+  }
+}
+
+.btn-ver-detalle {
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #6f4e37;
+  border-radius: 5px;
+  color: #6f4e37;
+  text-decoration: none;
+
+  &:hover {
+    background-color: #6f4e37;
+    color: #fff;
   }
 }
 

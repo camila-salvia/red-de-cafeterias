@@ -48,27 +48,18 @@
         </span>
       </header>
 
-      <div class="datos-cliente">
-        <p><strong>Cliente:</strong> {{ pedido.usuario?.nombre }} {{ pedido.usuario?.apellido }}</p>
-        <p><strong>Email:</strong> {{ pedido.usuario?.email || 'No disponible' }}</p>
-        <p><strong>Método de pago:</strong> {{ pedido.metodo_pago?.nombre || 'No disponible' }}</p>
-        <p><strong>Entrega:</strong> {{ pedido.direccion_envio || 'No especificada' }}</p>
+      <div class="datos-pedido">
+        <p>
+          <strong>Cliente:</strong>
+          {{ pedido.usuario?.nombre || 'No disponible' }}
+          {{ pedido.usuario?.apellido || '' }}
+        </p>
+        <p><strong>Dirección de envío:</strong> {{ pedido.direccion_envio || 'No especificada' }}</p>
       </div>
-
-      <h4>Productos</h4>
-      <ul class="detalle-pedido">
-        @for (detalle of (pedido.detalles ?? []); track detalle.id ?? $index) {
-        <li>
-          <span>{{ detalle.cantidad }} × {{ detalle.producto?.nombre || 'Producto' }}</span>
-          <span>{{ detalle.cantidad * detalle.precio_unitario | currency:'ARS' }}</span>
-        </li>
-        } @empty {
-        <li>El pedido no tiene productos disponibles.</li>
-        }
-      </ul>
 
       <footer class="pedido-pie">
         <strong>Total: {{ pedido.costo_total | currency:'ARS' }}</strong>
+        <a class="btn-ver-detalle" [routerLink]="['/pedido', pedido.id]">Ver detalle</a>
         @if (pedido.estado_pago === 'Pendiente') {
         <button
           type="button"

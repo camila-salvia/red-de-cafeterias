@@ -1,0 +1,64 @@
+<main class="detalle-pedido">
+  <a
+    class="volver"
+    [routerLink]="esAdmin() ? '/pedidos' : '/mis-pedidos'"
+  >
+    Volver a {{ esAdmin() ? 'Pedidos de clientes' : 'Mis pedidos' }}
+  </a>
+
+  <h2>Detalle del pedido</h2>
+
+  @if (cargando()) {
+    <p class="estado-pagina" role="status">Cargando pedido...</p>
+  } @else if (error()) {
+    <p class="aviso error" role="alert">{{ error() }}</p>
+  } @else if (pedido(); as pedido) {
+    <article class="pedido-card">
+      <header class="pedido-cabecera">
+        <div>
+          <h3>Pedido #{{ pedido.id }}</h3>
+          <p>{{ pedido.fecha_pedido | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+        <span
+          class="estado-badge"
+          [class.pendiente]="pedido.estado_pago === 'Pendiente'"
+          [class.confirmado]="pedido.estado_pago === 'Confirmado'"
+          [class.cancelado]="pedido.estado_pago === 'Cancelado'"
+        >
+          {{ pedido.estado_pago }}
+        </span>
+      </header>
+
+      <section class="datos-pedido" aria-label="Datos del pedido">
+        <p><strong>Dirección de entrega:</strong> {{ pedido.direccion_envio || 'No especificada' }}</p>
+        <p><strong>Método de pago:</strong> {{ pedido.metodo_pago?.nombre || 'No disponible' }}</p>
+        @if (esAdmin()) {
+          <p>
+            <strong>Cliente:</strong>
+            {{ pedido.usuario?.nombre || 'Nombre no disponible' }}
+            {{ pedido.usuario?.apellido || '' }}
+          </p>
+          <p><strong>Email:</strong> {{ pedido.usuario?.email || 'No disponible' }}</p>
+        }
+      </section>
+
+      <section aria-labelledby="productos-pedido">
+        <h4 id="productos-pedido">Productos</h4>
+        <ul class="lista-productos">
+          @for (detalle of (pedido.detalles ?? []); track detalle.id ?? detalle.producto?.id ?? $index) {
+            <li>
+              <span>{{ detalle.cantidad }} × {{ detalle.producto?.nombre || 'Producto no disponible' }}</span>
+              <span>{{ detalle.cantidad * detalle.precio_unitario | currency:'ARS' }}</span>
+            </li>
+          } @empty {
+            <li>El pedido no tiene productos disponibles.</li>
+          }
+        </ul>
+      </section>
+
+      <footer class="pedido-pie">
+        <strong>Total: {{ pedido.costo_total | currency:'ARS' }}</strong>
+      </footer>
+    </article>
+  }
+</main>

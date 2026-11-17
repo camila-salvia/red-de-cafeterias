@@ -16,12 +16,13 @@
   </div>
   } @else {
   <div class="filtro-estado">
-    <label for="filtro-estado" class="form-label">Filtrar por estado:</label>
+    <label for="filtro-estado">Filtrar por estado:</label>
     <select
       id="filtro-estado"
       class="form-select"
       [ngModel]="estadoSeleccionado()"
-      (ngModelChange)="estadoSeleccionado.set($event)">
+      (ngModelChange)="estadoSeleccionado.set($event)"
+    >
       <option value="Todos">Todos los estados</option>
       @for (estado of estadosPedidos(); track estado) {
       <option [value]="estado">{{ estado }}</option>
@@ -62,6 +63,7 @@
         <div class="pie-pedido">
           <span>Total:</span>
           <strong>${{ pedido.costo_total }}</strong>
+          <a class="btn-ver-detalle" [routerLink]="['/pedido', pedido.id]">Ver detalle</a>
           @if (pedido.estado_pago === 'Pendiente') {
           <button
             type="button"

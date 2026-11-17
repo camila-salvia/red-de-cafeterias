@@ -1,3 +1,4 @@
+import { signal, type WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AuthService } from '../../services/auth';
@@ -6,12 +7,12 @@ import { HeaderComponent } from './header';
 describe('Header', () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
-  let esAdmin: boolean;
-  let isLoggedIn: boolean;
+  let esAdmin: WritableSignal<boolean>;
+  let isLoggedIn: WritableSignal<boolean>;
 
   beforeEach(async () => {
-    esAdmin = false;
-    isLoggedIn = false;
+    esAdmin = signal(false);
+    isLoggedIn = signal(false);
     await TestBed.configureTestingModule({
       imports: [HeaderComponent],
       providers: [
@@ -19,8 +20,8 @@ describe('Header', () => {
         {
           provide: AuthService,
           useValue: {
-            isLoggedIn: () => isLoggedIn,
-            esAdmin: () => esAdmin,
+            isLoggedIn,
+            esAdmin,
             usuarioActual: () => null,
             logout: () => undefined,
           },
@@ -39,8 +40,8 @@ describe('Header', () => {
   });
 
   it('shows the admin panel before the greeting and logout button', () => {
-    esAdmin = true;
-    isLoggedIn = true;
+    esAdmin.set(true);
+    isLoggedIn.set(true);
     fixture.detectChanges();
 
     const navigationText = (fixture.nativeElement as HTMLElement)
