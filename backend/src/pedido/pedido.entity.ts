@@ -15,11 +15,17 @@ export class Pedido extends BaseEntity {
   @Property({nullable: false})
   direccion_envio!: string
 
-  @Property({nullable: false})
-  fecha_pago!: Date
+  @Property({nullable: true}) // el pedido pendiente de pago no tiene fecha de pago
+  fecha_pago?: Date
 
   @Property({nullable: false})
   estado_pago!: string
+
+  @Property({nullable: true})
+  mp_preference_id?: string
+
+  @Property({nullable: true})
+  mp_payment_id?: string
 
   @ManyToOne(() => Usuario, { nullable: false })
   usuario!: Rel<Usuario>

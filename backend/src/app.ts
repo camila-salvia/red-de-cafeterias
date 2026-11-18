@@ -6,6 +6,7 @@ import comentarioRoutes from './comentario/comentario.routes.js';
 import metodoPagoRoutes from './metodo-pago/metodo-pago.routes.js';
 import detallePedidoRoutes from './detalle-pedido/detalle-pedido.routes.js';
 import pedidoRoutes from './pedido/pedido.routes.js';
+import pagoRoutes from './pago/pago.routes.js';
 import 'reflect-metadata';
 import { orm, syncSchema } from './shared/database/orm.js';
 import { seedInitialData } from './shared/database/seed.js';
@@ -33,6 +34,7 @@ app.use('/api/comentario', comentarioRoutes);
 app.use('/api/metodo-pago', metodoPagoRoutes);
 app.use('/api/detalle-pedido', detallePedidoRoutes);
 app.use('/api/pedido', pedidoRoutes);
+app.use('/api/pago', pagoRoutes);
 
 // Health / root
 app.get('/', (req, res) => {
