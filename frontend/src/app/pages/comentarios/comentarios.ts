@@ -1,7 +1,7 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Comentario, ComentarioApi } from '../../models/comentario.interface';
+import { Comentario } from '../../models/comentario.interface';
 import { AuthService } from '../../services/auth';
 import { ApiService } from '../../services/api';
 
@@ -28,6 +28,8 @@ export class ComentariosComponent {
   textoComentario = signal<string>('');
   mostrarPopup = signal<boolean>(false);
   mensajeError = signal<string | null>(null);
+  // Advertencia de la moderación con IA (motivo + sugerencia de comentario amable)
+  advertencia = signal<{ motivo: string; sugerencia: string } | null>(null);
 
   filtroEstrellas = signal<number>(0); // 0 = todos
   ordenReciente = signal<boolean>(true); // true = mas recientes primero
@@ -50,7 +52,7 @@ export class ComentariosComponent {
   }
 
   // el JSON trae la fecha como string: la convertimos a Date
-  private aComentario(c: ComentarioApi): Comentario {
+  private aComentario(c: any): Comentario {
     return { ...c, fecha_publicacion: new Date(c.fecha_publicacion) };
   }
 
@@ -58,8 +60,9 @@ export class ComentariosComponent {
     this.cargando.set(true);
     this.errorCarga.set(null);
     this.apiService.getComentarios().subscribe({
-      next: (res) => {
-        this.resenas.set(res.data.map(c => this.aComentario(c)));
+      next: (res: any) => {
+        const data = res.data ? res.data : res;
+        this.resenas.set(Array.isArray(data) ? data.map(c => this.aComentario(c)) : []);
         this.cargando.set(false);
       },
       error: () => {
@@ -74,10 +77,11 @@ export class ComentariosComponent {
     this.mensajeError.set(null);
   }
 
-  //Simulador IA para moderacion (modificar)
-  moderarIA(texto: string): boolean {
-    const groserias = ['malo', 'asqueroso', 'horrible'];
-    return !groserias.some(palabra => texto.toLowerCase().includes(palabra));
+  // Usa la sugerencia amable que propuso la moderación en lugar del texto original
+  usarSugerencia() {
+    const sugerida = this.advertencia()?.sugerencia;
+    if (sugerida) this.textoComentario.set(sugerida);
+    this.advertencia.set(null);
   }
 
   enviarResena() {
@@ -88,11 +92,8 @@ export class ComentariosComponent {
       return;
     }
 
-    if (this.textoComentario().trim().length > 0 && !this.moderarIA(this.textoComentario())) {
-      this.mensajeError.set('Tu comentario contiene palabras que infringen nuestras normas de convivencia.');
-      return;
-    }
-
+    this.advertencia.set(null);
+    this.mensajeError.set(null);
     this.enviando.set(true);
 
     // No se envía usuario ni fecha: el servidor los decide (usuario desde el token)
@@ -100,7 +101,7 @@ export class ComentariosComponent {
       puntuacion: this.puntajeSeleccionado(),
       contenido: this.textoComentario().trim()
     }).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         const creado = this.aComentario(res.data);
         this.resenas.update(lista => [creado, ...lista]);
         this.puntajeSeleccionado.set(0);
@@ -111,6 +112,12 @@ export class ComentariosComponent {
         setTimeout(() => this.mostrarPopup.set(false), 3000);
       },
       error: (err) => {
+        // 422 con "moderacion": la IA detectó una falta de respeto; no se publicó
+        if (err?.status === 422 && err?.error?.moderacion) {
+          this.advertencia.set(err.error.moderacion);
+          this.enviando.set(false);
+          return;
+        }
         // 401 lo maneja el interceptor (redirige a login). Acá mostramos el resto.
         const errores: string[] | undefined = err?.error?.errores;
         this.mensajeError.set(

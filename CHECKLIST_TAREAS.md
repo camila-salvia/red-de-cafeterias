@@ -89,8 +89,8 @@
 - [x] Conectar la página de Comentarios con la API: listar comentarios persistidos y crear mediante endpoint autenticado. El servidor decide el usuario; se quitaron las reseñas de ejemplo. Verificado con las suites frontend (19 pruebas) y backend (68 pruebas) el 16/11/2026.
 - [x] Mantener las reseñas independientes de los pedidos. El endpoint requiere autenticación y el servidor asigna el usuario desde el token; no se exige una compra web.
 - [x] Completar MisPedidos: quitar el ID de usuario de respaldo `|| 1`, manejar ausencia de sesión y agregar filtro por estado. Verificado con build frontend y suite de pruebas el 14/11/2026.
-- [ ] Agregar navegación desde el listado a un detalle de pedido histórico con fecha, estado, dirección, cliente, productos y total.
-- [ ] Verificar flujo de carrito y pedido con JWT; mostrar errores y limpiar el carrito solo después de una creación exitosa.
+- [x] Agregar navegación desde el listado a un detalle de pedido histórico con fecha, estado, dirección, cliente, productos y total.
+- [x] Verificar flujo de carrito y pedido con JWT; mostrar errores y limpiar el carrito solo después de una creación exitosa.
 
 ### Trabajo conjunto
 

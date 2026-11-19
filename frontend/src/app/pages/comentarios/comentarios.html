@@ -35,18 +35,34 @@
 
             <!-- Autocompletado IA -->
             <textarea 
-              [ngModel]="textoComentario()"
-              (ngModelChange)="textoComentario.set($event)"
+              [(ngModel)]="textoComentario" 
               class="form-control mb-2 custom-textarea" 
               rows="3" 
               placeholder="Escribe tu comentario (Opcional)..."
-              list="sugerenciasIA"></textarea>
+              list="sugerenciasIA"
+              (input)="advertencia.set(null)"></textarea>
             
             <datalist id="sugerenciasIA">
               <option value="El café estaba delicioso y a buena temperatura."></option>
               <option value="Excelente atención por parte del personal."></option>
               <option value="Me encantó la decoración del lugar."></option>
             </datalist>
+
+            @if (advertencia(); as adv) {
+              <div class="alert alert-warning small mb-2" role="alert">
+                <strong>Tu comentario no se publicó.</strong>
+                @if (adv.motivo) { <div class="mt-1">{{ adv.motivo }}</div> }
+                @if (adv.sugerencia) {
+                  <div class="mt-2">
+                    <span class="fw-bold">Podrías escribir algo como:</span>
+                    <div class="fst-italic mt-1">"{{ adv.sugerencia }}"</div>
+                    <button type="button" class="btn btn-sm btn-outline-dark mt-2" (click)="usarSugerencia()">
+                      Usar esta sugerencia
+                    </button>
+                  </div>
+                }
+              </div>
+            }
 
             @if (mensajeError()) {
               <div class="text-danger small text-center mb-2">{{ mensajeError() }}</div>
@@ -90,17 +106,14 @@
         @if (cargando()) {
           <div class="text-center p-5 text-muted">Cargando reseñas...</div>
         } @else if (errorCarga()) {
-          <div class="text-center p-5 text-danger">
-            <p>{{ errorCarga() }}</p>
-            <button type="button" class="btn btn-outline-secondary" (click)="cargarResenas()">Reintentar</button>
-          </div>
+          <div class="text-center p-5 text-danger">{{ errorCarga() }}</div>
         } @else {
         <div class="row g-3">
           @for (resena of resenasFiltradas(); track resena.id) {
             <div class="col-12">
               <div class="card resena-card shadow-sm p-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                  <h6 class="fw-bold m-0">{{ resena.usuario.nombre }}</h6>
+                  <h6 class="fw-bold m-0">{{ resena.usuario?.nombre }}</h6>
                   <span class="text-muted small">{{ resena.fecha_publicacion | date:'dd/MM/yyyy' }}</span>
                 </div>
                 
