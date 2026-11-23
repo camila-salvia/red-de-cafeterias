@@ -46,8 +46,8 @@
 
 - [x] Configurar Vitest y scripts de test del backend (`backend/package.json`); establecer aislamiento seguro para pruebas (base de test o mocks, nunca la base productiva).
 - [X] Implementar el test automatizado de Usuario: alta válida, consulta, validación de datos y email duplicado.
-- [ ] Revisar validación de pedidos: rechazar cantidades decimales, no numéricas, cero y negativas.
-- [ ] Preparar el test de integración de Pedido con datos aislados; verificar que el total se calcula con precios de BD y que una entrada inválida no crea el pedido.
+- [x] Revisar validación de pedidos: rechazar cantidades decimales, no numéricas, cero y negativas.
+- [x] Preparar el test de integración de Pedido con datos aislados; verificar que el total se calcula con precios de BD y que una entrada inválida no crea el pedido.
 
 ### Salvia Camila (49373)
 

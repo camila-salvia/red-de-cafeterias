@@ -1,0 +1,279 @@
+import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest';
+import express from 'express';
+import jwt from 'jsonwebtoken';
+import type { Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
+
+
+const db = vi.hoisted(() => ({
+  usuarios: new Map<string, any>(),
+  productos: new Map<string, any>(),
+  metodosPago: new Map<string, any>(),
+  pedidos: [] as any[],      
+  detalles: [] as any[],     
+  pendientes: [] as any[],   
+}));
+
+const em = vi.hoisted(() => {
+  const tabla = (entidad: { name: string }) =>
+    entidad.name === 'Usuario' ? db.usuarios
+    : entidad.name === 'Producto' ? db.productos
+    : db.metodosPago;
+
+  return {
+    findOne: vi.fn(async (entidad: any, filtro: any) => tabla(entidad).get(filtro.id) ?? null),
+    findOneOrFail: vi.fn(async (entidad: any, filtro: any) => {
+      const encontrado = tabla(entidad).get(filtro.id);
+      if (!encontrado) throw new Error(`${entidad.name} no encontrado`);
+      return encontrado;
+    }),
+    getReference: vi.fn((_entidad: any, id: string) => ({ id })),
+    create: vi.fn((entidad: any, datos: any) => {
+      const creada = Object.assign(new entidad(), datos);
+      if (entidad.name === 'Pedido') {
+        
+        const items: any[] = [];
+        Object.defineProperty(creada, 'detalles', {
+          enumerable: false,
+          value: { items, add: (d: any) => items.push(d) },
+        });
+      }
+      db.pendientes.push(creada);
+      return creada;
+    }),
+    flush: vi.fn(async () => {
+      for (const entidad of db.pendientes) {
+        entidad.id = `id-${db.pedidos.length + db.detalles.length + 1}`;
+        if (entidad.constructor.name === 'Pedido') db.pedidos.push(entidad);
+        if (entidad.constructor.name === 'DetallePedido') db.detalles.push(entidad);
+      }
+      db.pendientes.length = 0;
+    }),
+  };
+});
+
+vi.mock('../shared/database/orm.js', () => ({ orm: { em } }));
+vi.mock('../usuario/usuario.entity.js', () => ({ Usuario: class Usuario {} }));
+vi.mock('../producto/producto.entity.js', () => ({ Producto: class Producto {} }));
+vi.mock('../metodo-pago/metodo-pago.entity.js', () => ({ MetodoPago: class MetodoPago {} }));
+vi.mock('../pedido/pedido.entity.js', () => ({ Pedido: class Pedido {} }));
+vi.mock('../detalle-pedido/detalle-pedido.entity.js', () => ({ DetallePedido: class DetallePedido {} }));
+
+import pedidoRoutes from '../pedido/pedido.routes.js';
+
+const SECRET = 'secreto-de-test';
+let server: Server;
+let baseUrl: string;
+
+const tokenDe = (id: string, esAdmin = false) =>
+  jwt.sign({ id, email: `${id}@test.com`, esAdmin }, SECRET, { expiresIn: '1h' });
+
+async function crearPedido(body: unknown, token?: string) {
+  const respuesta = await fetch(`${baseUrl}/api/pedido`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(body),
+  });
+  return { status: respuesta.status, json: (await respuesta.json()) as any };
+}
+
+const pedidoValido = {
+  direccion_envio: 'Calle Falsa 123',
+  metodo_pago: 'mp-1',
+  items: [
+    { productoId: 'p-cafe', cantidad: 2 },
+    { productoId: 'p-medialuna', cantidad: 3 },
+  ],
+};
+
+
+const nadaFuePersistido = () => {
+  expect(db.pedidos).toHaveLength(0);
+  expect(db.detalles).toHaveLength(0);
+  expect(db.pendientes).toHaveLength(0);
+};
+
+beforeAll(async () => {
+  process.env.JWT_SECRET = SECRET;
+  const app = express();
+  app.use(express.json());
+  app.use('/api/pedido', pedidoRoutes);
+  await new Promise<void>((resolver) => {
+    server = app.listen(0, resolver);
+  });
+  baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+});
+
+afterAll(async () => {
+  await new Promise<void>((resolver) => server.close(() => resolver()));
+});
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+
+  // Datos aislados: se recrean antes de cada test
+  db.usuarios.clear();
+  db.productos.clear();
+  db.metodosPago.clear();
+  db.pedidos.length = 0;
+  db.detalles.length = 0;
+  db.pendientes.length = 0;
+
+  db.usuarios.set('u-1', { id: 'u-1', email: 'u-1@test.com', esAdmin: false });
+  db.usuarios.set('u-admin', { id: 'u-admin', email: 'u-admin@test.com', esAdmin: true });
+  db.productos.set('p-cafe', { id: 'p-cafe', nombre: 'Café', precio: 3500 });
+  db.productos.set('p-medialuna', { id: 'p-medialuna', nombre: 'Medialuna', precio: 1200 });
+  db.metodosPago.set('mp-1', { id: 'mp-1', nombre: 'Efectivo' });
+});
+
+describe('Pedido - Test de integración (POST /api/pedido)', () => {
+
+  describe('Flujo exitoso', () => {
+    it('Crea el pedido con sus detalles y calcula el total con los precios de la BD', async () => {
+      const { status, json } = await crearPedido(pedidoValido, tokenDe('u-1'));
+
+      expect(status).toBe(201);
+
+      // Total = 2 x 3500 + 3 x 1200 = 10600
+      expect(db.pedidos).toHaveLength(1);
+      expect(db.pedidos[0].costo_total).toBe(10600);
+      expect(json.data.costo_total).toBe(10600);
+
+      // Un detalle por producto, con el precio unitario tomado de la BD
+      expect(db.detalles).toHaveLength(2);
+      expect(db.detalles).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ cantidad: 2, precio_unitario: 3500 }),
+          expect.objectContaining({ cantidad: 3, precio_unitario: 1200 }),
+        ])
+      );
+
+      // Estado inicial, usuario y método de pago del pedido
+      expect(db.pedidos[0].estado_pago).toBe('Pendiente');
+      expect(db.pedidos[0].usuario).toEqual({ id: 'u-1' });
+      expect(db.pedidos[0].metodo_pago).toEqual({ id: 'mp-1' });
+    });
+
+    it('Ignora el total, los precios y el usuario que manda el cliente', async () => {
+      const { status } = await crearPedido(
+        {
+          ...pedidoValido,
+          costo_total: 1,
+          usuario: 'u-admin',
+          items: [
+            { productoId: 'p-cafe', cantidad: 2, precio: 1, precio_unitario: 1 },
+            { productoId: 'p-medialuna', cantidad: 3, precio: 1, precio_unitario: 1 },
+          ],
+        },
+        tokenDe('u-1')
+      );
+
+      expect(status).toBe(201);
+      expect(db.pedidos[0].costo_total).toBe(10600);
+      expect(db.pedidos[0].usuario).toEqual({ id: 'u-1' });
+      expect(db.detalles.map((d) => d.precio_unitario).sort()).toEqual([1200, 3500]);
+    });
+
+    it('Si cambia el precio en la BD, el total del nuevo pedido refleja el precio actual', async () => {
+      db.productos.set('p-cafe', { id: 'p-cafe', nombre: 'Café', precio: 4000 });
+
+      const { status } = await crearPedido(pedidoValido, tokenDe('u-1'));
+
+      expect(status).toBe(201);
+      // 2 x 4000 + 3 x 1200 = 11600
+      expect(db.pedidos[0].costo_total).toBe(11600);
+    });
+  });
+
+  describe('Entradas inválidas: no se crea el pedido', () => {
+    it.each([
+      ['decimal', 1.5],
+      ['cero', 0],
+      ['negativa', -2],
+      ['texto no numérico', 'abc'],
+    ])('Rechaza con 400 una cantidad %s', async (_nombre, cantidad) => {
+      const { status } = await crearPedido(
+        { ...pedidoValido, items: [{ productoId: 'p-cafe', cantidad }] },
+        tokenDe('u-1')
+      );
+
+      expect(status).toBe(400);
+      nadaFuePersistido();
+      expect(em.flush).not.toHaveBeenCalled();
+    });
+
+    it('Rechaza con 400 si un solo ítem es inválido, aunque los demás estén bien', async () => {
+      const { status } = await crearPedido(
+        {
+          ...pedidoValido,
+          items: [
+            { productoId: 'p-cafe', cantidad: 2 },
+            { productoId: 'p-medialuna', cantidad: 0 },
+          ],
+        },
+        tokenDe('u-1')
+      );
+
+      expect(status).toBe(400);
+      nadaFuePersistido();
+    });
+
+    it('Rechaza con 400 un pedido sin ítems', async () => {
+      const { status } = await crearPedido({ ...pedidoValido, items: [] }, tokenDe('u-1'));
+
+      expect(status).toBe(400);
+      nadaFuePersistido();
+    });
+
+    it('Rechaza con 400 un pedido sin método de pago', async () => {
+      const { status } = await crearPedido({ ...pedidoValido, metodo_pago: undefined }, tokenDe('u-1'));
+
+      expect(status).toBe(400);
+      nadaFuePersistido();
+    });
+
+    it('Rechaza con 404 un producto inexistente', async () => {
+      const { status } = await crearPedido(
+        { ...pedidoValido, items: [{ productoId: 'no-existe', cantidad: 1 }] },
+        tokenDe('u-1')
+      );
+
+      expect(status).toBe(404);
+      nadaFuePersistido();
+    });
+
+    it('Rechaza con 404 un método de pago inexistente', async () => {
+      const { status } = await crearPedido({ ...pedidoValido, metodo_pago: 'no-existe' }, tokenDe('u-1'));
+
+      expect(status).toBe(404);
+      nadaFuePersistido();
+    });
+  });
+
+  describe('Autenticación y permisos', () => {
+    it('Rechaza con 401 sin token', async () => {
+      const { status } = await crearPedido(pedidoValido);
+
+      expect(status).toBe(401);
+      nadaFuePersistido();
+    });
+
+    it('Rechaza con 401 con un token inválido', async () => {
+      const { status } = await crearPedido(pedidoValido, 'token-falso');
+
+      expect(status).toBe(401);
+      nadaFuePersistido();
+    });
+
+    it('Rechaza con 403 si quien crea el pedido es administrador', async () => {
+      const { status } = await crearPedido(pedidoValido, tokenDe('u-admin', true));
+
+      expect(status).toBe(403);
+      nadaFuePersistido();
+    });
+  });
+});

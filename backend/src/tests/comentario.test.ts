@@ -1,10 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Request, Response } from 'express';
 
-// Mocks: estos tests NO tocan MySQL.
-// `orm.ts` hace `await MikroORM.init(...)` al importarse, así que se reemplaza
-// completo por un `em` falso. Las entidades también se reemplazan para no
-// depender de los decoradores de MikroORM.
+
 
 const em = vi.hoisted(() => ({
   findOne: vi.fn(),
@@ -40,14 +37,14 @@ function crearReq(body: Record<string, unknown>) {
   return { body: { ...body, sanitizedInput: { ...body } }, params: {} } as unknown as Request;
 }
 
-// Comentario válido para pruebas
+
 const comentarioValido = {
   contenido: 'Excelente café y muy buena atención',
   puntuacion: 5,
   usuario: 'user-1',
 };
 
-// Mock de la entidad Usuario para pruebas
+
 beforeEach(() => {
   vi.resetAllMocks();
 });
