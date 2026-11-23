@@ -88,6 +88,11 @@ async function add(req: Request, res: Response) {
       return res.status(400).json({ message: 'El pedido debe contener al menos un producto' });
     }
 
+  for (const item of items) {
+      if (typeof item.cantidad !== 'number' || !Number.isInteger(item.cantidad) || item.cantidad <= 0) {
+        return res.status(400).json({ message: 'Las cantidades deben ser enteros mayores a 0.' });
+      }
+    }
     const input = req.body.sanitizedInput;
 
     // Convertir IDs a referencias de MikroORM para las relaciones
@@ -108,11 +113,7 @@ async function add(req: Request, res: Response) {
       const producto = await em.findOneOrFail(Producto, { id: prodId })
 
       const precioUnitario = Number(producto.precio)
-      const cantidad = Number(item.cantidad)
-      
-      if (isNaN(cantidad) || cantidad <= 0) {
-        return res.status(400).json({ message: 'Cantidad inválida en los ítems' });
-      }
+      const cantidad = item.cantidad as number
 
       totalCalculado += precioUnitario * cantidad
 

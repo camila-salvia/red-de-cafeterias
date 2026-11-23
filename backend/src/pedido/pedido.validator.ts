@@ -56,12 +56,13 @@ const esActualizacion = req.method === 'PUT' || req.method === 'PATCH';
     if (!esActualizacion && items && Array.isArray(items)) {
       for (const item of items) {
         const prodId = item.productoId || item.producto?.id || item.producto;
-        const cant = Number(item.cantidad);
+                const cant = item.cantidad;
 
         if (!prodId) {
           return res.status(400).json({ message: 'Cada item debe contener un ID de producto.' });
         }
-        if (isNaN(cant) || cant <= 0) {
+        // Debe ser un número entero (no decimal, no texto, no Infinity) mayor a 0
+        if (typeof cant !== 'number' || !Number.isInteger(cant) || cant <= 0) {
           return res.status(400).json({ message: 'Las cantidades deben ser enteros mayores a 0.' });
         }
 
