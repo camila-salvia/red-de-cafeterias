@@ -26,12 +26,23 @@ function sanitizeMetodoPagoInput(
     next();
 }
 
-// obtener todas los métodos de pago
+// obtener todas los métodos de pago (vista cliente)
 async function findAll(req: Request, res: Response) {
   try {
-    const metodoPago = await em.find(MetodoPago, {})
+    const metodoPago = await em.find(MetodoPago, { activo: true })
     return res.status(200).json({ message: 'Todos los métodos de pago encontrados', data: metodoPago })
   } catch (error:any) {
+    return res.status(500).json({ message: 'Error al obtener los métodos de pago' })
+  }
+}
+
+// obtener todos los métodos de pago para administradores (activos e inactivos)
+async function findAllAdmin(req: Request, res: Response) {
+  try {
+    const metodoPago = await em.find(MetodoPago, {})
+    return res.status(200).json({ message: 'Listado completo de métodos de pago (admin)', data: metodoPago })
+  } catch (error:any) {
+    console.error('Error en findAllAdmin (método de pago):', error)
     return res.status(500).json({ message: 'Error al obtener los métodos de pago' })
   }
 }
@@ -90,4 +101,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export {sanitizeMetodoPagoInput, findAll, add, findOne, update, remove}
+export {sanitizeMetodoPagoInput, findAll, findAllAdmin, add, findOne, update, remove}

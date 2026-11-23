@@ -15,8 +15,8 @@
         <form (ngSubmit)="guardarCategoria()">
           <div class="campo">
             <label>Nombre de la Categoría</label>
-            <input type="text" placeholder="Ej: Cafetería, Pastelería" [(ngModel)]="nuevaCategoriaNombre" name="catNombre"
-              required />
+            <input type="text" placeholder="Ej: Cafetería, Pastelería" [(ngModel)]="nuevaCategoriaNombre"
+              name="catNombre" required />
           </div>
           <button type="submit" class="btn-guardar">Agregar Categoría</button>
         </form>
@@ -36,8 +36,56 @@
             <tr>
               <td>{{ cat.nombre }}</td>
               <td>
-                <button type="button" class="btn-accion btn-desactivar" (click)="eliminarCategoria(cat.id)">Borrar</button>
+                <button type="button" class="btn-accion btn-desactivar"
+                  (click)="eliminarCategoria(cat.id)">Borrar</button>
               </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card categoria-form">
+        <h3>Crear Método de Pago</h3>
+        <form (ngSubmit)="guardarMetodoPago()">
+          <div class="campo">
+            <label>Nombre del Método de Pago</label>
+            <input type="text" placeholder="Ej: Efectivo, Mercado Pago" [(ngModel)]="nuevoMetodoPagoNombre"
+              name="metodoNombre" required />
+          </div>
+          <button type="submit" class="btn-guardar">Agregar Método de Pago</button>
+        </form>
+      </section>
+
+      <section class="card lista-categorias">
+        <h3>Métodos de Pago</h3>
+        <table class="tabla-admin">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (metodo of metodosPago(); track metodo.id) {
+            <tr [class.fila-inactiva]="!metodo.activo">
+              <td>{{ metodo.nombre }}</td>
+              <td>
+                <span class="badge" [ngClass]="metodo.activo ? 'badge-activo' : 'badge-inactivo'">
+                  {{ metodo.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td>
+                <button type="button" class="btn-accion" [ngClass]="metodo.activo ? 'btn-desactivar' : 'btn-activar'"
+                  (click)="cambiarEstadoMetodoPago(metodo)">
+                  {{ metodo.activo ? 'Desactivar' : 'Activar' }}
+                </button>
+              </td>
+            </tr>
+            } @empty {
+            <tr>
+              <td colspan="3">No hay métodos de pago registrados.</td>
             </tr>
             }
           </tbody>
@@ -78,13 +126,8 @@
 
           <div class="campo">
             <label for="imagen-producto">Imagen</label>
-            <input
-              #imagenInput
-              id="imagen-producto"
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              (change)="seleccionarImagen($event)"
-            />
+            <input #imagenInput id="imagen-producto" type="file" accept="image/jpeg,image/png,image/webp"
+              (change)="seleccionarImagen($event)" />
             <small>JPG, PNG o WebP. Tamaño máximo: 5 MB.</small>
             @if (vistaPreviaImagen()) {
             <img class="vista-previa-imagen" [src]="vistaPreviaImagen()" alt="Vista previa del producto" />

@@ -164,8 +164,25 @@ export class ApiService {
   }
 
   // pago
+  // solo métodos activos: los que se ofrecen al armar un pedido nuevo
   getMetodosPago(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/metodo-pago`)
+      .pipe(catchError(this.manejarError));
+  }
+
+  // todos (activos e inactivos): para la pantalla de administración
+  getMetodosPagoAdmin(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/metodo-pago/admin/metodos`)
+      .pipe(catchError(this.manejarError));
+  }
+
+  crearMetodoPago(metodo: { nombre: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/metodo-pago`, metodo)
+      .pipe(catchError(this.manejarError));
+  }
+
+  cambiarEstadoMetodoPago(id: string, activo: boolean): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/metodo-pago/${id}`, { activo })
       .pipe(catchError(this.manejarError));
   }
 }

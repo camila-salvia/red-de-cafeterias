@@ -17,6 +17,7 @@ export class AdminDashboard implements OnDestroy {
 
   categorias = signal<any[]>([]);
   productos = signal<any[]>([]);
+  metodosPago = signal<any[]>([]);
   mensaje = signal<string | null>(null);
   error = signal<string | null>(null);
   imagenSeleccionada = signal<File | null>(null);
@@ -37,9 +38,13 @@ export class AdminDashboard implements OnDestroy {
   // Formulario Categoría
   nuevaCategoriaNombre = '';
 
+  // Formulario Método de pago
+  nuevoMetodoPagoNombre = '';
+
   constructor() {
     this.cargarCategorias();
     this.cargarProductos();
+    this.cargarMetodosPago();
   }
 
   ngOnDestroy() {
@@ -63,6 +68,16 @@ export class AdminDashboard implements OnDestroy {
         this.productos.set(Array.isArray(data) ? data : []);
       },
       error: (err) => this.error.set('Error al traer productos (admin):')
+    });
+  }
+
+  cargarMetodosPago() {
+    this.apiService.getMetodosPagoAdmin().subscribe({
+      next: (res: any) => {
+        const data = res.data ? res.data : res;
+        this.metodosPago.set(Array.isArray(data) ? data : []);
+      },
+      error: () => this.error.set('Error al traer métodos de pago (admin).')
     });
   }
 
@@ -97,6 +112,42 @@ export class AdminDashboard implements OnDestroy {
     }
   }
 
+  guardarMetodoPago() {
+    this.limpiarMensajes();
+    const nombre = this.nuevoMetodoPagoNombre.trim();
+    if (!nombre) return;
+
+    this.apiService.crearMetodoPago({ nombre }).subscribe({
+      next: () => {
+        this.mensaje.set('Método de pago creado exitosamente.');
+        this.nuevoMetodoPagoNombre = '';
+        this.cargarMetodosPago();
+      },
+      error: (err) => {
+        const errores = err.error?.errores;
+        this.error.set(
+          Array.isArray(errores) ? errores.join(' ') : (err.error?.message || 'Error al crear método de pago.')
+        );
+      }
+    });
+  }
+
+  cambiarEstadoMetodoPago(metodo: any) {
+    this.limpiarMensajes();
+    const nuevoEstado = !metodo.activo;
+    const accion = nuevoEstado ? 'activar' : 'desactivar';
+
+    if (confirm(`¿Seguro que deseas ${accion} el método de pago "${metodo.nombre}"?`)) {
+      this.apiService.cambiarEstadoMetodoPago(metodo.id, nuevoEstado).subscribe({
+        next: () => {
+          this.mensaje.set(`Método de pago ${nuevoEstado ? 'activado' : 'desactivado'} correctamente.`);
+          this.cargarMetodosPago();
+        },
+        error: (err) => this.error.set(err.error?.message || 'Error al cambiar el estado del método de pago.')
+      });
+    }
+  }
+
   guardarProducto() {
     this.limpiarMensajes();
     const idEdicion = this.productoEnEdicionId();
@@ -112,7 +163,7 @@ export class AdminDashboard implements OnDestroy {
         error: (err) => this.error.set('Error al actualizar producto.')
       });
     } else {
-      // mode creacion POST  
+      // modo creacion POST
       this.apiService.crearProducto(productoFormData).subscribe({
         next: () => {
           this.mensaje.set('Producto creado exitosamente.');
@@ -156,11 +207,11 @@ export class AdminDashboard implements OnDestroy {
     this.imagenSeleccionada.set(archivo);
     this.vistaPreviaImagen.set(urlTemporal);
   }
-       
+
   cambiarEstadoProducto(id: string, activoActual: boolean) {
     this.limpiarMensajes();
     const accion = activoActual ? 'desactivar' : 'activar';
-    
+
     if (confirm(`¿Seguro que deseas ${accion} este producto?`)) {
       this.apiService.cambiarEstadoProducto(id).subscribe({
         next: (res: any) => {
@@ -173,7 +224,7 @@ export class AdminDashboard implements OnDestroy {
       });
     }
   }
-  
+
   cargarParaEditar(producto: any) {
     this.limpiarImagenSeleccionada();
     this.nuevoProducto = {
