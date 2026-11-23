@@ -101,8 +101,8 @@ beforeAll(async () => {
   const app = express();
   app.use(express.json());
   app.use('/api/pedido', pedidoRoutes);
-  await new Promise<void>((resolver) => {
-    server = app.listen(0, resolver);
+    await new Promise<void>((resolver) => {
+    server = app.listen(0, () => resolver());
   });
   baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
 });
