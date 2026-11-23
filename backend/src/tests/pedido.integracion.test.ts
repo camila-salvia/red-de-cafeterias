@@ -145,6 +145,11 @@ describe('Pedido - Test de integración (POST /api/pedido)', () => {
 
       // Un detalle por producto, con el precio unitario tomado de la BD
       expect(db.detalles).toHaveLength(2);
+            // Cada detalle apunta al pedido creado y a su producto
+      for (const detalle of db.detalles) {
+        expect(detalle.pedido).toBe(db.pedidos[0]);
+      }
+      expect(db.detalles.map((d) => d.producto.id).sort()).toEqual(['p-cafe', 'p-medialuna']);
       expect(db.detalles).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ cantidad: 2, precio_unitario: 3500 }),
