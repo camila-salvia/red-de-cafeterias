@@ -6,7 +6,9 @@ import { Pedido } from '../pedido/pedido.entity.js';
 const em = orm.em;
 
 export async function validarDetallePedidoInput(req: Request, res: Response, next: NextFunction) {
-  const input = req.body.sanitizedInput || req.body;
+  // El validador corre ANTES de sanitizar: solo puede confiar en el body real. Leer
+  // req.body.sanitizedInput permitiria a un cliente falsificarlo y saltear la comprobacion.
+  const input = req.body;
   const errores: string[] = [];
   const esActualizacion = req.method === 'PUT' || req.method === 'PATCH';
 

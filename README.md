@@ -6,13 +6,13 @@ Trabajo Práctico de Desarrollo de Software (DSW).
 
 ### Integrantes
 
-* 50026 - Vivas, Martin
-* 49373 - Salvia, Camila
-* 51337 - Leonardelli, Marianela
+- 50026 - Vivas, Martin
+- 49373 - Salvia, Camila
+- 51337 - Leonardelli, Marianela
 
 ### Repositorio
 
-* [Full stack app (monorepo: `backend/` + `frontend/`)](https://github.com/camila-salvia/red-de-cafeterias)
+- [Full stack app (monorepo: `backend/` + `frontend/`)](https://github.com/camila-salvia/red-de-cafeterias)
 
 ## Tema
 
@@ -79,19 +79,19 @@ erDiagram
 
 ## Alcance funcional
 
-| Req | Detalle |
-|:-|:-|
-| CRUD simple | 1. CRUD Usuario<br>2. CRUD Categoría |
-| CRUD dependiente | 1. CRUD Producto {depende de} CRUD Categoría<br>2. CRUD Detalle Pedido {depende de} CRUD Pedido, CRUD Producto<br>3. CRUD Pedido {depende de} CRUD Usuario, CRUD Método de pago<br>4. CRUD Comentario {depende de} CRUD Usuario |
+| Req               | Detalle                                                                                                                                                                                                                                                                 |
+| :---------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CRUD simple       | 1. CRUD Usuario<br>2. CRUD Categoría                                                                                                                                                                                                                                    |
+| CRUD dependiente  | 1. CRUD Producto {depende de} CRUD Categoría<br>2. CRUD Detalle Pedido {depende de} CRUD Pedido, CRUD Producto<br>3. CRUD Pedido {depende de} CRUD Usuario, CRUD Método de pago<br>4. CRUD Comentario {depende de} CRUD Usuario                                         |
 | Listado + detalle | 1. Listado de productos por categoría (nombre y precio); al seleccionar un producto se accede al detalle con descripción y categoría.<br>2. Listado de pedidos filtrados por estado; al seleccionar un pedido se muestra la dirección de envío y el nombre del cliente. |
-| CUU/Epic | 1. Realizar un pedido<br>2. Moderar comentarios con IA<br>3. Agregar un producto al catálogo |
+| CUU/Epic          | 1. Realizar un pedido<br>2. Moderar comentarios con IA<br>3. Agregar un producto al catálogo                                                                                                                                                                            |
 
 ## Tecnologías
 
-| Parte | Stack |
-|:-|:-|
-| Backend | Node.js, TypeScript, Express 5, MikroORM 6, MySQL, JWT (jsonwebtoken), bcrypt |
-| Frontend | Angular 21, Bootstrap 5, RxJS |
+| Parte    | Stack                                                                         |
+| :------- | :---------------------------------------------------------------------------- |
+| Backend  | Node.js, TypeScript, Express 5, MikroORM 6, MySQL, JWT (jsonwebtoken), bcrypt |
+| Frontend | Angular 21, Bootstrap 5, RxJS                                                 |
 
 ## Instalación y ejecución (local)
 
@@ -99,9 +99,9 @@ erDiagram
 
 Instalar en la computadora:
 
-* [Node.js](https://nodejs.org/) (versión LTS reciente; Angular 21 requiere Node 20.19+, 22.12+ o 24+) con `npm`.
-* [MySQL](https://dev.mysql.com/downloads/) 8.0 o superior, en ejecución.
-* [Git](https://git-scm.com/).
+- [Node.js](https://nodejs.org/) (versión LTS reciente; Angular 21 requiere Node 20.19+, 22.12+ o 24+) con `npm`.
+- [MySQL](https://dev.mysql.com/downloads/) 8.0 o superior, en ejecución.
+- [Git](https://git-scm.com/).
 
 ### 2. Clonar el repositorio
 
@@ -134,14 +134,14 @@ JWT_SECRET=una_clave_secreta
 CREATE DATABASE cafeteria;
 ```
 
-**3.3 Crear las tablas.** No hace falta ejecutar nada: las tablas se crean y actualizan automáticamente a partir de las entidades de MikroORM cada vez que se inicia el servidor (`syncSchema()` en `backend/src/app.ts`). Alcanza con que la base de datos del paso anterior exista.
+**3.3 Crear las tablas.** En desarrollo (`npm run start:dev`) no hace falta ejecutar nada: al iniciar, el servidor sincroniza las tablas con las entidades de MikroORM (`syncSchema()` en `backend/src/app.ts`). Alcanza con que la base del paso anterior exista. En producción esto no ocurre: ver [Producción y cambios de esquema](#producción-y-cambios-de-esquema).
 
 **3.4 Datos iniciales (seeds).** La aplicación necesita los siguientes datos para funcionar:
 
-| Tabla | Datos |
-|:-|:-|
-| Método de pago | efectivo, transferencia, tarjeta |
-| Categoría | comida, bebida |
+| Tabla                 | Datos                                              |
+| :-------------------- | :------------------------------------------------- |
+| Método de pago        | efectivo, transferencia, tarjeta                   |
+| Categoría             | comida, bebida                                     |
 | Usuario administrador | ver [credenciales](#credenciales-de-la-aplicación) |
 
 > ⚠️ COMPLETAR: indicar cómo se cargan (script SQL, script de seed, o carga manual).
@@ -160,9 +160,9 @@ Las imágenes de productos se guardan en `backend/uploads/productos/` y se sirve
 
 Otros scripts disponibles en `backend/`:
 
-| Script | Descripción |
-|:-|:-|
-| `npm run build` | Compila el proyecto TypeScript a `dist/` |
+| Script              | Descripción                                 |
+| :------------------ | :------------------------------------------ |
+| `npm run build`     | Compila el proyecto TypeScript a `dist/`    |
 | `npm run start:dev` | Compila en modo watch y ejecuta el servidor |
 
 ### 4. Frontend
@@ -183,28 +183,47 @@ La URL de la API que consume el frontend se define en `frontend/src/environments
 
 Otros scripts disponibles en `frontend/`:
 
-| Script | Descripción |
-|:-|:-|
-| `npm start` | Servidor de desarrollo (`ng serve`, puerto 3000) |
-| `npm run build` | Build de producción en `dist/` |
-| `npm run watch` | Build en modo watch (configuración development) |
-| `npm test` | Ejecuta los tests |
+| Script          | Descripción                                      |
+| :-------------- | :----------------------------------------------- |
+| `npm start`     | Servidor de desarrollo (`ng serve`, puerto 3000) |
+| `npm run build` | Build de producción en `dist/`                   |
+| `npm run watch` | Build en modo watch (configuración development)  |
+| `npm test`      | Ejecuta los tests                                |
+
+## Producción y cambios de esquema
+
+Con `NODE_ENV=production` el backend **no** ejecuta `syncSchema()` al iniciar y no imprime las consultas SQL (`debug` del ORM desactivado). Los cambios de esquema se aplican a mano:
+
+| Comando                  | Qué hace                                                                                    |
+| :----------------------- | :------------------------------------------------------------------------------------------ |
+| `npm run schema:preview` | Muestra el SQL pendiente sin ejecutarlo.                                                    |
+| `npm run schema:sync`    | Aplica los cambios a la base configurada en `.env`. No borra tablas ni columnas existentes. |
+| `npm start`              | Inicia el servidor compilado (`dist/app.js`).                                               |
+
+Pasos para un deploy o una actualización:
+
+1. `npm install` y `npm run build`.
+2. Configurar las variables de entorno, con `NODE_ENV=production`.
+3. `npm run schema:preview` para revisar y `npm run schema:sync` para aplicar. En el primer deploy, con la base vacía, este paso es obligatorio antes de iniciar el servidor.
+4. `npm start`.
+
+No es un sistema de migraciones versionadas: `schema:sync` solo agrega y modifica. Si se renombra o elimina una columna, hay que migrar los datos a mano.
 
 ## Deploy
 
-| Componente | URL |
-|:-|:-|
-| Frontend | ⚠️ COMPLETAR |
-| Backend / API | ⚠️ COMPLETAR |
+| Componente                | URL          |
+| :------------------------ | :----------- |
+| Frontend                  | ⚠️ COMPLETAR |
+| Backend / API             | ⚠️ COMPLETAR |
 | Base de datos (proveedor) | ⚠️ COMPLETAR |
 
 ## Credenciales de la aplicación
 
 Usuarios de prueba creados por el seed del backend local:
 
-| Rol | Email | Contraseña |
-|:-|:-|:-|
-| Administrador | `admin@cafeteria.com` | `password123` |
-| Cliente | `usuario@cafeteria.com` | `password123` |
+| Rol           | Email                   | Contraseña    |
+| :------------ | :---------------------- | :------------ |
+| Administrador | `admin@cafeteria.com`   | `password123` |
+| Cliente       | `usuario@cafeteria.com` | `password123` |
 
 El administrador accede al **Panel Admin** (alta, edición y baja de categorías y productos) y a **Pedidos de clientes** para consultar y confirmar pedidos pendientes. El cliente puede explorar productos, armar el carrito, cancelar pedidos pendientes y ver su historial.

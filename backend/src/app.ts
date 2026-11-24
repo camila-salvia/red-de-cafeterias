@@ -8,7 +8,7 @@ import detallePedidoRoutes from './detalle-pedido/detalle-pedido.routes.js';
 import pedidoRoutes from './pedido/pedido.routes.js';
 import pagoRoutes from './pago/pago.routes.js';
 import 'reflect-metadata';
-import { orm, syncSchema } from './shared/database/orm.js';
+import { orm, syncSchema, esProduccion } from './shared/database/orm.js';
 import { seedInitialData } from './shared/database/seed.js';
 import { RequestContext } from '@mikro-orm/core';
 import cors from 'cors';
@@ -41,7 +41,11 @@ app.get('/', (req, res) => {
   res.json({ message: 'Hello' });
 });
 
-await syncSchema()  //never in production
+if (esProduccion) {
+  console.log('Producción: el esquema no se sincroniza al iniciar (usar npm run schema:sync).')
+} else {
+  await syncSchema()
+}
 
 // Datos iniciales: categorías, métodos de pago y usuario administrador (idempotente)
 await seedInitialData()

@@ -1,17 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
 
-// Variables de entorno (.env del backend):
-//   GEMINI_API_KEY=...                      
-//   GEMINI_MODEL=gemini-2.5-flash           (opcional; cambialo si Google retira el modelo)
-//   MODERACION_FALLA_ABIERTA=true|false     (por defecto true)
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-const TIMEOUT_MS = 8000;
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
+const MODELOS_RESPALDO = (process.env.GEMINI_MODEL_FALLBACK || 'gemini-3.1-flash-lite,gemini-3.6-flash')
+  .split(',')
+  .map(m => m.trim())
+  .filter(m => m && m !== GEMINI_MODEL);
+const TIMEOUT_MS = Number(process.env.GEMINI_TIMEOUT_MS) || 20000;
+//   GEMINI_THINKING_LEVEL=minimal|low|medium|high  (opcional; si no se define, se usa el valor por defecto
+//   del modelo. Un nivel bajo acelera la respuesta, pero no todos los modelos lo soportan: si Gemini
+//   responde 400, quitá esta variable.)
+const THINKING_LEVEL = process.env.GEMINI_THINKING_LEVEL || '';
+const ESPERA_REINTENTO_MS = 600;
 
 // Si Gemini no responde (caída, cuota, clave inválida):
 //   true  -> el comentario se publica igual (no se bloquea a los usuarios por una falla externa)
 //   false -> se rechaza con 503 hasta que el servicio vuelva
-const FALLA_ABIERTA = (process.env.MODERACION_FALLA_ABIERTA ?? 'true') !== 'false';
+const FALLA_ABIERTA = (process.env.MODERACION_FALLA_ABIERTA ?? 'false') !== 'false';
 
 export interface ResultadoModeracion {
   ofensivo: boolean;
@@ -45,44 +49,99 @@ const ESQUEMA_RESPUESTA = {
   required: ['ofensivo', 'motivo', 'sugerencia'],
 };
 
-export async function moderarTexto(texto: string): Promise<ResultadoModeracion> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error('Falta GEMINI_API_KEY en el entorno');
+// Errores transitorios: vale la pena reintentar (saturación, límite de ritmo, fallas del servidor, timeout)
+class ErrorGemini extends Error {
+  constructor(mensaje: string, public readonly transitorio: boolean) {
+    super(mensaje);
+  }
+}
+
+const esperar = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function consultarGemini(modelo: string, texto: string, apiKey: string): Promise<ResultadoModeracion> {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`;
+
+  // "Response" está importado de express; usamos el de fetch explícitamente
+  let resp: globalThis.Response;
+  try {
+    resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey,
+      },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: INSTRUCCION_SISTEMA }] },
+        contents: [{ role: 'user', parts: [{ text: `Reseña a analizar:\n"""\n${texto}\n"""` }] }],
+        generationConfig: {
+          temperature: 0,
+          responseMimeType: 'application/json',
+          responseSchema: ESQUEMA_RESPUESTA,
+          ...(THINKING_LEVEL ? { thinkingConfig: { thinkingLevel: THINKING_LEVEL } } : {}),
+        },
+      }),
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+  } catch (error: any) {
+    // timeout o error de red
+    throw new ErrorGemini(`${modelo}: ${error.message}`, true);
   }
 
-  const resp = await fetch(GEMINI_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-goog-api-key': apiKey,
-    },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: INSTRUCCION_SISTEMA }] },
-      contents: [{ role: 'user', parts: [{ text: `Reseña a analizar:\n"""\n${texto}\n"""` }] }],
-      generationConfig: {
-        temperature: 0,
-        responseMimeType: 'application/json',
-        responseSchema: ESQUEMA_RESPUESTA,
-      },
-    }),
-    signal: AbortSignal.timeout(TIMEOUT_MS),
-  });
-
   if (!resp.ok) {
-    throw new Error(`Gemini respondió ${resp.status}: ${await resp.text()}`);
+    const transitorio = [429, 500, 502, 503, 504].includes(resp.status);
+    throw new ErrorGemini(`${modelo} respondió ${resp.status}: ${await resp.text()}`, transitorio);
   }
 
   const data: any = await resp.json();
   const partes: any[] = data?.candidates?.[0]?.content?.parts ?? [];
   const crudo = partes.map(p => p?.text ?? '').join('');
-  const parsed = JSON.parse(crudo);
+
+  let parsed: any;
+  try {
+    parsed = JSON.parse(crudo);
+  } catch {
+    throw new ErrorGemini(`${modelo} devolvió una respuesta que no es JSON válido`, true);
+  }
 
   return {
     ofensivo: parsed.ofensivo === true,
     motivo: typeof parsed.motivo === 'string' ? parsed.motivo : '',
     sugerencia: typeof parsed.sugerencia === 'string' ? parsed.sugerencia : '',
   };
+}
+
+export async function moderarTexto(texto: string): Promise<ResultadoModeracion> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error('Falta GEMINI_API_KEY en el entorno');
+  }
+
+  // Orden de intentos: modelo principal (con 1 reintento) y luego cada modelo de respaldo, en orden.
+  // Los errores NO transitorios (clave inválida, modelo inexistente, etc.) descartan ese modelo,
+  // pero igual se prueban los de respaldo por si el problema es solo del principal.
+  const intentos: string[] = [GEMINI_MODEL, GEMINI_MODEL, ...MODELOS_RESPALDO];
+
+  let ultimoError: Error | null = null;
+  let modeloDescartado: string | null = null;
+
+  for (let i = 0; i < intentos.length; i++) {
+    const modelo = intentos[i];
+    if (modelo === modeloDescartado) continue; // ya falló con un error no transitorio
+
+    try {
+      return await consultarGemini(modelo, texto, apiKey);
+    } catch (error: any) {
+      ultimoError = error;
+      console.warn(`Moderación: intento ${i + 1}/${intentos.length} falló -> ${error.message}`);
+      if (error instanceof ErrorGemini && !error.transitorio) {
+        modeloDescartado = modelo;
+      } else if (i < intentos.length - 1) {
+        await esperar(ESPERA_REINTENTO_MS * (i + 1));
+      }
+    }
+  }
+
+  throw ultimoError ?? new Error('No se pudo moderar el comentario');
 }
 
 // Middleware: se ejecuta después de sanitizar/validar y antes de crear el comentario.

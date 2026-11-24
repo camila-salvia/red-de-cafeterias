@@ -27,6 +27,16 @@ const em = vi.hoisted(() => {
       if (!encontrado) throw new Error(`${entidad.name} no encontrado`);
       return encontrado;
     }),
+
+        find: vi.fn(async (_entidad: any, where: any) =>
+      db.pedidos.filter((p) => {
+        if (where.estado_pago && p.estado_pago !== where.estado_pago) return false;
+        if (typeof where.usuario === 'string' && p.usuario?.id !== where.usuario) return false;
+        if (where.usuario?.esAdmin === false && p.usuario?.esAdmin !== false) return false;
+        return true;
+      })
+    ),
+
     getReference: vi.fn((_entidad: any, id: string) => ({ id })),
     create: vi.fn((entidad: any, datos: any) => {
       const creada = Object.assign(new entidad(), datos);
@@ -79,6 +89,23 @@ async function crearPedido(body: unknown, token?: string) {
   });
   return { status: respuesta.status, json: (await respuesta.json()) as any };
 }
+
+async function listar(ruta: string, token?: string) {
+  const respuesta = await fetch(`${baseUrl}${ruta}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  return { status: respuesta.status, json: (await respuesta.json()) as any };
+}
+
+const idsDe = (json: any) => json.data.map((p: any) => p.id).sort();
+
+const sembrarPedidos = () => {
+  db.pedidos.push(
+    { id: 'ped-1', usuario: { id: 'u-1', esAdmin: false }, estado_pago: 'Pendiente' },
+    { id: 'ped-2', usuario: { id: 'u-1', esAdmin: false }, estado_pago: 'Confirmado' },
+    { id: 'ped-3', usuario: { id: 'u-2', esAdmin: false }, estado_pago: 'Pendiente' }
+  );
+};
 
 const pedidoValido = {
   direccion_envio: 'Calle Falsa 123',
@@ -279,6 +306,82 @@ describe('Pedido - Test de integración (POST /api/pedido)', () => {
 
       expect(status).toBe(403);
       nadaFuePersistido();
+    });
+  });
+
+    describe('Filtro de pedidos por estado (GET)', () => {
+    beforeEach(sembrarPedidos);
+
+    it('El cliente filtra sus pedidos por estado', async () => {
+      const { status, json } = await listar('/api/pedido/usuario/u-1?estado=Pendiente', tokenDe('u-1'));
+
+      expect(status).toBe(200);
+      expect(idsDe(json)).toEqual(['ped-1']);
+    });
+
+    it('Sin filtro devuelve todos los pedidos del cliente, y solo los suyos', async () => {
+      const { status, json } = await listar('/api/pedido/usuario/u-1', tokenDe('u-1'));
+
+      expect(status).toBe(200);
+      expect(idsDe(json)).toEqual(['ped-1', 'ped-2']);
+    });
+
+    it('El estado no distingue mayúsculas de minúsculas', async () => {
+      const { status, json } = await listar('/api/pedido/usuario/u-1?estado=confirmado', tokenDe('u-1'));
+
+      expect(status).toBe(200);
+      expect(idsDe(json)).toEqual(['ped-2']);
+    });
+
+    it('Rechaza con 400 un estado inexistente', async () => {
+      const { status } = await listar('/api/pedido/usuario/u-1?estado=Inexistente', tokenDe('u-1'));
+
+      expect(status).toBe(400);
+    });
+
+    it('Rechaza con 400 si el estado se envía repetido', async () => {
+      const { status } = await listar('/api/pedido/usuario/u-1?estado=Pendiente&estado=Cancelado', tokenDe('u-1'));
+
+      expect(status).toBe(400);
+    });
+
+    it('Un usuario no puede ver los pedidos de otro aunque use el filtro (403)', async () => {
+      const { status, json } = await listar('/api/pedido/usuario/u-1?estado=Pendiente', tokenDe('u-2'));
+
+      expect(status).toBe(403);
+      expect(json.data).toBeUndefined();
+    });
+
+    it('El permiso se evalúa antes que el filtro: pedidos ajenos con estado inválido dan 403', async () => {
+      const { status } = await listar('/api/pedido/usuario/u-1?estado=Inexistente', tokenDe('u-2'));
+
+      expect(status).toBe(403);
+    });
+
+    it('Rechaza con 401 sin token', async () => {
+      const { status } = await listar('/api/pedido/usuario/u-1?estado=Pendiente');
+
+      expect(status).toBe(401);
+    });
+
+    it('El admin filtra los pedidos de cualquier usuario', async () => {
+      const { status, json } = await listar('/api/pedido/usuario/u-1?estado=Confirmado', tokenDe('u-admin', true));
+
+      expect(status).toBe(200);
+      expect(idsDe(json)).toEqual(['ped-2']);
+    });
+
+    it('El admin filtra el listado general por estado', async () => {
+      const { status, json } = await listar('/api/pedido?estado=Pendiente', tokenDe('u-admin', true));
+
+      expect(status).toBe(200);
+      expect(idsDe(json)).toEqual(['ped-1', 'ped-3']);
+    });
+
+    it('Un cliente no puede acceder al listado general, con o sin filtro (403)', async () => {
+      const { status } = await listar('/api/pedido?estado=Pendiente', tokenDe('u-1'));
+
+      expect(status).toBe(403);
     });
   });
 });

@@ -49,6 +49,11 @@ async function add(req: Request, res: Response) {
     const pedidoId = typeof input.pedido === 'object' ? input.pedido.id : input.pedido
     const pedido = await em.findOneOrFail(Pedido, { id: pedidoId })
 
+    // Solo se pueden agregar detalles mientras el pedido siga pendiente
+    if (pedido.estado_pago !== 'Pendiente') {
+      return res.status(409).json({ message: 'Solo se pueden agregar detalles a pedidos pendientes.' })
+    }
+
     const detallePedido = em.create(DetallePedido, {
       cantidad: input.cantidad,
       precio_unitario: Number(producto.precio), // El precio sale de la base de datos

@@ -37,11 +37,25 @@ function sanitizePedidoInput(
     next();
 }
 
+const ESTADOS_PEDIDO = ['Pendiente', 'Confirmado', 'Cancelado']
+
+// Lee y valida el filtro ?estado=. Devuelve undefined si no se envió y null si es inválido.
+function leerFiltroEstado(req: Request): string | undefined | null {
+  const crudo = req.query.estado
+  if (crudo === undefined || crudo === '') return undefined
+  if (typeof crudo !== 'string') return null
+  return ESTADOS_PEDIDO.find(e => e.toLowerCase() === crudo.trim().toLowerCase()) ?? null
+}
+
 // obtener todos los pedidos (solo admin)
 async function findAll(req: Request, res: Response) {
-  try {
+    try {
+    const estado = leerFiltroEstado(req)
+    if (estado === null) {
+      return res.status(400).json({ message: `Estado inválido. Valores permitidos: ${ESTADOS_PEDIDO.join(', ')}.` })
+    }
     const pedidos = await em.find(Pedido, 
-      { usuario: { esAdmin: false } },
+      { usuario: { esAdmin: false }, ...(estado ? { estado_pago: estado } : {}) },
       {
         populate: ['detalles.producto', 'usuario', 'metodo_pago'],
         orderBy: { fecha_pedido: 'DESC' },
@@ -61,9 +75,14 @@ async function findByUsuario(req: Request, res: Response) {
       return res.status(403).json({ message: 'Acceso denegado' });  // Un usuario común solo debería poder ver sus propios pedidos
     }
 
+        const estado = leerFiltroEstado(req)
+    if (estado === null) {
+      return res.status(400).json({ message: `Estado inválido. Valores permitidos: ${ESTADOS_PEDIDO.join(', ')}.` })
+    }
+
     const pedidos = await em.find(
       Pedido, 
-      { usuario: usuarioId as any }, 
+            { usuario: usuarioId as any, ...(estado ? { estado_pago: estado } : {}) }, 
       { 
         populate: ['detalles.producto', 'metodo_pago'],
         orderBy: { fecha_pedido: 'DESC' }

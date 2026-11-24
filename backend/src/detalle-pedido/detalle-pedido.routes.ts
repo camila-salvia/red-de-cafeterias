@@ -10,7 +10,7 @@ router.get('/', verificarToken, soloAdmin, findAll);
 
 // usuario propietario o admin
 router.get('/:id', verificarToken, findOne);
-router.post('/', verificarToken, validarDetallePedidoInput, sanitizeDetallePedidoInput, add);
+router.post('/', verificarToken, soloAdmin, validarDetallePedidoInput, sanitizeDetallePedidoInput, add);
 router.patch('/:id', verificarToken, soloAdmin, validarDetallePedidoInput, sanitizeDetallePedidoInput, update);
 router.put('/:id', verificarToken, soloAdmin, validarDetallePedidoInput, sanitizeDetallePedidoInput, update);
 router.delete('/:id', verificarToken, soloAdmin, remove);

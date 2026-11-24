@@ -18,4 +18,5 @@ export const routes: Routes = [
   { path: 'ver-pedido', loadComponent: () => import('./pages/ver-pedido/ver-pedido').then(m => m.VerPedidoComponent), canActivate: [authGuard, clienteGuard]},
   { path: 'mis-pedidos', loadComponent: () => import('./pages/mis-pedidos/mis-pedidos').then(m => m.MisPedidosComponent), canActivate: [authGuard, clienteGuard]},
   { path: '**', redirectTo: '' }
-];
+]; 
+

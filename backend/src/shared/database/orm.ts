@@ -4,6 +4,7 @@ import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 import 'dotenv/config';
 
 const isTestEnvironment = process.env.NODE_ENV === 'test' || !!process.env.VITEST;
+export const esProduccion = process.env.NODE_ENV === 'production';
 
 const ormInstance = isTestEnvironment
   ? ({ em: {} } as any)
@@ -14,7 +15,7 @@ const ormInstance = isTestEnvironment
       driver: MySqlDriver,
       clientUrl: `mysql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
       highlighter: new SqlHighlighter(),
-      debug: true,
+      debug: !esProduccion,
       schemaGenerator: {
         disableForeignKeys: true,
         createForeignKeyConstraints: true,
