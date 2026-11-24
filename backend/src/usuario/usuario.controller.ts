@@ -23,7 +23,8 @@ function sanitizeUsuarioInput(
         direccion: req.body.direccion,
         email: req.body.email,
         password: req.body.password,
-        //esAdmin: req.body.esAdmin, --> solo un admin puede cambiar el rol, no se permite desde el front
+        // esAdmin: req.body.esAdmin, 
+        //--> solo un admin puede cambiar el rol, no se permite desde el front
     }
 
     Object.keys(req.body.sanitizedInput).forEach(key => {

@@ -5,9 +5,10 @@ GET http://localhost:3000/api/metodo-pago
 # @name createMetodoPago
 POST http://localhost:3000/api/metodo-pago
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImMxYjhlOWU1LTBmMzUtNDBiOS1hODQzLTI1ZGJiYzZjMTc5NiIsImVtYWlsIjoiYWRtaW5AY2FmZXRlcmlhLmNvbSIsImVzQWRtaW4iOnRydWUsImlhdCI6MTc5NTU0NjcwNywiZXhwIjoxNzk1NTc1NTA3fQ.mGvz7BO1tDHBSyrjj-ZbnLhda3jORAqYQKXgiGuYB4g
 
 {
-  "nombre": "Tarjeta"
+  "nombre": "Mercado Pago"
 }
 
 ### ID
