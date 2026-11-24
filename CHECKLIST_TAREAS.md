@@ -1,146 +1,111 @@
-# Checklist de entrega — Red de Cafeterías
+# Checklist unificado de tareas pendientes — Red de Cafeterías
 
-**Equipo:** Vivas Martin (50026), Salvia Camila (49373), Marianela Leonardelli (51337)
-**Plazo de trabajo:** 3 semanas desde el 6 de noviembre de 2026 (fecha estimada de entrega: 27 de noviembre; confirmar fecha oficial).
-**Objetivo:** cumplir los requisitos de regularidad y aprobación directa descritos en `requisitos-backend.md`, además del alcance funcional de la propuesta.
+**Equipo:** Vivas Martin (50026), Salvia Camila (49373), Marianela Leonardelli (51337)  
+**Fecha de revisión:** 24 de noviembre de 2026  
+**Objetivo:** cierre verificable de los requisitos del backend, frontend y entrega académica.
 
-## Estado base verificado
+Esta lista reúne el contenido pendiente de `ANALISIS_FALTANTE.md`, los requisitos backend/frontend y el estado actual del código. Las tareas marcadas como completadas han sido verificadas en el proyecto.
 
-- [x] Backend organizado por capas, expone API REST con Express y persiste mediante MikroORM/MySQL.
-- [x] Backend compila con `npm run build`.
-- [x] Hay login JWT y roles de usuario/administrador; existen controles de autenticación y propiedad en rutas backend.
-- [x] Existen CRUD para Usuario, Categoría, Método de Pago y entidades dependientes.
-- [x] Existen listados de productos por categoría y pedidos por usuario.
-- [x] Vitest está configurado y los tests de Producto y Comentario pasan: 67 pruebas en total. Aún faltan los tests de Usuario y de integración de Pedido. Verificado el 14/11/2026 con `cd backend; npm test -- --run`.
-- [x] La suite frontend compila y pasa: 15 archivos, 16 pruebas. Verificado el 14/11/2026 con `cd frontend; npm test -- --watch=false`.
-- [ ] El build frontend termina, pero excede el presupuesto del bundle inicial y de `ver-pedido.scss`; falta optimizar esos tamaños.
-- [x] El panel admin tiene una única ruta `/admin` protegida por `adminGuard`; falta verificar el comportamiento de los tres perfiles (ver tareas abajo).
-- [ ] La interfaz de comentarios todavía usa datos locales; faltan detalle de producto y detalle de pedido histórico. El filtro de pedidos por estado ya está en MisPedidos; queda pendiente confirmar el filtro en API.
+## Estado verificado el 24/11/2026
 
-## Requisitos de entrega y criterio de aceptación
+- [x] Backend: `npm run build` finaliza correctamente.
+- [x] Backend: `npm test -- --run` finaliza con 5 archivos aprobados y 145 pruebas aprobadas (1 prueba marcada como todo).
+- [x] Backend: existen tests individuales de Usuario, Producto y Comentario.
+- [x] Backend: existe el test de integración de Pedido y forma parte de la suite aprobada.
+- [x] Frontend: `npm run build` finaliza correctamente.
+- [ ] Frontend: `npm test -- --watch=false` no finaliza correctamente: 17 archivos pasan, 2 archivos fallan y 4 pruebas fallan por `localStorage` inexistente o no disponible.
+- [ ] Frontend: el build conserva advertencias de presupuesto: bundle inicial 600.46 kB sobre el máximo de 500 kB y `ver-pedido.scss` 4.25 kB sobre el máximo de 4 kB.
+- [ ] Faltan evidencias verificadas de la prueba final desplegada, el video y la documentación pública de entrega.
 
-### Regularidad
+## Backend — requisitos y cierre funcional
 
-- [ ] **Backend JavaScript:** confirmar con la cátedra que TypeScript compilado a JavaScript satisface el requisito; documentar/entregar el JavaScript ejecutado. Si exigen JavaScript fuente, acordar y realizar la conversión.
-- [ ] **Framework, API, persistencia y capas:** Express, API REST, MySQL externo mediante MikroORM y separación por capas; documentar cómo se configura y ejecuta.
-- [ ] **Validación y errores:** entradas inválidas y recursos inexistentes producen respuestas/códigos apropiados; respuestas de producción no exponen errores internos.
-- [ ] **Dependencias y ambiente:** dependencias de ejecución/desarrollo/prueba registradas en `package.json`; documentar variables `.env` necesarias sin incluir secretos.
-- [ ] **CRUD simple:** verificar CRUD funcional de al menos tres clases simples para los tres integrantes (Usuario, Categoría y Método de Pago).
-- [ ] **CRUD dependiente:** verificar al menos dos CRUDs con relaciones persistidas; objetivo del proyecto: Producto–Categoría, Pedido–Usuario/Método de Pago, DetallePedido–Pedido/Producto y Comentario–Usuario.
-- [ ] **Listados filtrables:** verificar al menos dos listados con filtro. Ya existen productos por categoría y pedidos por usuario; completar además el filtro de pedidos por estado indicado en la propuesta (API y vista según corresponda).
-- [ ] **Detalle desde el listado:** desde productos, abrir detalle con descripción y categoría; desde pedidos, abrir detalle con dirección y nombre del cliente. Mantener autorización de propietario/admin en pedidos.
-- [ ] **Caso de uso de negocio:** completar el flujo de realizar un pedido.
+- [ ] Resolver o documentar formalmente el fallback de contraseñas en texto plano de login. Como alternativa segura: migrar las contraseñas existentes y eliminar el comparador temporal.
+- [ ] Uniformar las respuestas de error del backend para evitar que producción exponga `error.message`, `detalle` o información interna de validaciones, MikroORM o dependencias.
+- [ ] Revisar y cubrir con pruebas adicionales las rutas sensibles con token ausente, usuario propietario, usuario ajeno y administrador.
+- [ ] Confirmar y conservar una prueba de regresión para DetallePedido: GET y POST de usuario propietario, usuario ajeno y administrador.
+- [ ] Registrar el resultado final de las pruebas de permisos sobre Usuario, Pedido, Comentario y DetallePedido.
+- [ ] Documentar el procedimiento completo para instalar y levantar el backend desde una instalación limpia.
+- [ ] Confirmar que `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `JWT_SECRET` y `NODE_ENV` estén documentados sin secretos reales.
+- [ ] Confirmar que las dependencias de ejecución, desarrollo y test estén declaradas y sean reproducibles con una instalación limpia.
+- [ ] Completar la documentación de seed: indicar cómo cargar categorías, métodos de pago y usuarios iniciales sin afectar datos productivos.
+- [ ] Preparar y guardar evidencias de `npm run build` y `npm test -- --run` para la defensa.
 
-### Aprobación directa
+### CRUD, filtros y casos de uso
 
-- [ ] Implementar y ejecutar **un test automatizado backend por integrante**: Usuario, Producto y Comentario.
-- [ ] Implementar y ejecutar **un test de integración** que recorra creación de pedido y verifique detalles y total calculado por backend.
-- [ ] Demostrar login propio con JWT y al menos dos niveles de acceso.
-- [ ] Verificar permisos de todas las rutas sensibles con casos anónimo, usuario y administrador.
-- [ ] Definir y documentar el ambiente de ejecución mediante `.env` y configuración del proyecto.
-- [ ] Completar tres casos de uso con valor de negocio: realizar pedido, dejar una reseña independiente del pedido y agregar producto al catálogo. Para reseñar no debe ser necesario haber comprado por la aplicación.
+- [x] Backend: CRUD de Usuario, Categoría, Método de Pago, Producto, Pedido, DetallePedido y Comentario.
+- [x] Backend: cálculo del total de Pedido con precios vigentes de la base de datos.
+- [x] Backend: filtro de pedidos por estado con permisos conservados.
+- [x] Backend: reseñas independientes de pedidos; el usuario se obtiene del JWT.
+- [ ] Verificar con persistencia real el CRUD administrativo de Categoría, Producto y Método de Pago.
+- [ ] Verificar con persistencia real las relaciones Producto–Categoría, Pedido–Usuario/Método de Pago, DetallePedido–Pedido/Producto y Comentario–Usuario.
+- [ ] Demostrar desde el listado el detalle de producto y desde el listado el detalle de pedido con sus datos requeridos.
+- [ ] Ejecutar una revisión cruzada de los tests individuales y el test de integración antes de la entrega.
 
-## Semana 1 — 6 al 12 de noviembre
+## Frontend — integración y navegación
 
-### Vivas Martin (50026)
+- [ ] Implementar una ruta y página de detalle de Producto desde el catálogo, con nombre, descripción, precio, categoría e acción para agregar al carrito.
+- [ ] Conectar completamente la tarjeta/listado de productos con ese detalle y preservar el filtrado por categoría.
+- [ ] Verificar visualmente el comportamiento mobile-first en 320 px, 768 px y 1024 px.
+- [ ] Revisar el uso de HTML5 semántico y mantener una estructura Bootstrap/SCSS coherente en las páginas modificadas.
+- [ ] Completar estados claros de carga, vacío, éxito y error en los flujos de catálogo, comentarios, pedidos, login y checkout.
+- [ ] Revisar validaciones de formularios, navegación y feedback accesible de las acciones del usuario.
+- [ ] Comprobar que los componentes reutilizables usan inputs/outputs correctamente y reemplazar errores o comportamientos inconsistentes.
+- [ ] Implementar en pruebas los casos de TarjetaProducto y el flujo completo detalle de producto → carrito.
+- [ ] Reemplazar los tipos `any` innecesarios de servicios y páginas por interfaces/modelos sincronizados con las respuestas reales de la API.
+- [ ] Configurar explícitamente el puerto y la URL de API para desarrollo y producción. Actualmente el entorno de desarrollo usa `http://localhost:3000/api` y el de producción una URL externa que no corresponde a un deploy real.
+- [ ] Revisar el manejo de sesión vencida, errores de red, errores HTTP y respuestas inválidas del backend, coordinando los mensajes visibles.
+- [ ] Verificar los guards frontend como mejora de navegación, sin depender de ellos para la seguridad administrativa o de propiedad.
+- [ ] Confirmar el comportamiento de `/admin` para anónimo, usuario autenticado y administrador.
+- [ ] Confirmar la autorización de DetallePedido para propietario, usuario ajeno y administrador.
+- [ ] Verificar comentarios persistidos, publicación solo con sesión y mensaje amigable ante fallos.
+- [ ] Verificar filtro y navegación de pedidos y impedir desde el frontend la consulta visual de pedidos ajenos.
+- [ ] Revisar login, cierre de sesión, carrito y checkout con token, errores de sesión y limpieza del carrito solo ante pedido exitoso.
 
-- [x] Configurar Vitest y scripts de test del backend (`backend/package.json`); establecer aislamiento seguro para pruebas (base de test o mocks, nunca la base productiva).
-- [x] Implementar el test automatizado de Usuario: alta válida, consulta, validación de datos y email duplicado.
-- [x] Revisar validación de pedidos: rechazar cantidades decimales, no numéricas, cero y negativas.
-- [x] Preparar el test de integración de Pedido con datos aislados; verificar que el total se calcula con precios de BD y que una entrada inválida no crea el pedido.
+## Pruebas frontend
 
-### Salvia Camila (49373)
+- [ ] Corregir la disponibilidad de `localStorage` en el entorno Vitest/Angular. Los tests de AuthService y Inicio fallan actualmente en `src/app/services/auth.spec.ts` y `src/app/pages/inicio/inicio.spec.ts`.
+- [ ] Ejecutar nuevamente `npm test -- --watch=false` hasta obtener 0 pruebas fallidas.
+- [ ] Guardar evidencia de la suite frontend aprobada.
+- [ ] Añadir al menos un test end-to-end de un flujo principal que incluya autenticación y acceso protegido.
+- [ ] Incluir en el E2E al menos un recorrido completo de catálogo, login, carrito y creación de pedido.
+- [ ] Ejecutar el E2E sobre la aplicación desplegada o, como mínimo, sobre una aplicación levantada con backend y datos aislados.
+- [ ] Guardar evidencia del test E2E y documentar cómo reproducirlo.
 
-- [x] Corregir `frontend/src/app/app.routes.ts`: dejar una sola ruta `/admin` protegida por `adminGuard`.
-- [ ] Verificar el comportamiento de `/admin` para anónimo, usuario y administrador.
-- [x] Implementar y ejecutar el test automatizado backend de Producto: categoría existente, categoría inexistente, precio inválido y filtro por categoría.
-- [ ] Añadir cobertura de regresión para la autorización de DetallePedido recientemente revisada: GET de detalle y POST asociado a pedido propio/ajeno, incluyendo administrador. Aprovechar el setup de Vitest de Martin.
-- [x] Corregir los imports/configuración de pruebas frontend de Comentarios, Login y MisPedidos para que la suite compile; los tres specs pasan individualmente y la suite completa pasa.
+## Build y optimización
 
-### Marianela Leonardelli (51337)
+- [ ] Reducir el bundle inicial por debajo del máximo warning de 500 kB, sin elevar simplemente el presupuesto.
+- [ ] Reducir `ver-pedido.scss` por debajo del máximo warning de 4 kB.
+- [ ] Revisar si los estilos globales pueden separarse o cargarse de forma diferida y eliminar CSS duplicado o sin uso.
+- [ ] Ejecutar nuevamente `npm run build` y exigir build limpio o con advertencias aceptadas y documentadas.
+- [ ] Revisar el tamaño de imágenes y recursos de `public/` y `assets/`.
 
-- [x] Corregir y ejecutar el test automatizado backend de Comentario: validar creación, puntuación fuera de rango y asociación a usuario (31 pruebas pasan).
-- [x] Auditar el login frontend contra el endpoint JWT existente: persiste el token, el interceptor lo envía a la API, logout limpia la sesión y las credenciales inválidas muestran un mensaje amigable.
-- [x] Definir los estados de carga, error y vacío para Comentarios: carga del listado, error de lectura con reintento, listado vacío y vacío por filtros; envío en progreso, éxito y error. La implementación queda para la tarea de integración con la API de Semana 2.
+## API, documentación y entrega
 
-### Trabajo conjunto
+- [ ] Crear o completar la documentación de la API backend y enlazarla desde el README o desde un documento de referencia accesible.
+- [ ] Completar las URLs públicas de frontend, backend/API y base de datos en el README.
+- [ ] Completar las instrucciones de seeds, puertos y configuración de API de desarrollo local.
+- [ ] Completar las credenciales reales y seguras de prueba para el demo/deploy.
+- [ ] Actualizar la propuesta con links a los pull requests de frontend y backend.
+- [ ] Preparar y enlazar el video explicativo del sistema.
+- [ ] Completar los datos de contacto para coordinar la defensa.
+- [ ] Probar la aplicación desplegada con credenciales reales y confirmar que frontend y backend se comunican.
+- [ ] Registrar la URL final de despliegue y el estado del servicio antes de la entrega.
 
-- [ ] Acordar cómo se ejecutan tests y builds desde una instalación limpia, y anotar dependencias/variables requeridas.
-- [ ] Ejecutar y registrar el resultado de los tres tests backend; resolver fallos antes de iniciar la integración.
+## Cierre funcional y demostración final
 
-## Semana 2 — 13 al 19 de noviembre
+- [ ] Ejecutar en conjunto `npm run build` y `npm test` en backend y frontend.
+- [ ] Ejecutar el test de integración de Pedido y guardar el resultado.
+- [ ] Demostrar login JWT con usuario y administrador y acceso permitido/denegado a rutas protegidas.
+- [ ] Demostrar CRUDs administrativos y persistencia real de las relaciones dependientes.
+- [ ] Demostrar filtros por categoría y estado y navegación a detalle de producto y detalle de pedido.
+- [ ] Demostrar realizar pedido, dejar una reseña sin haber comprado mediante la aplicación y agregar un producto al catálogo.
+- [ ] Revisar consola, respuestas HTTP, `.env`, instalación limpia, responsive y estilos antes de entregar.
 
-### Vivas Martin (50026)
+## Trabajo opcional, solo después del cierre obligatorio
 
-- [ ] Completar el test de integración de Pedido; incluir usuario autenticado, método de pago, producto(s), detalles y total calculado.
-- [ ] Verificar controles backend de autenticación, roles y propiedad en rutas de Usuario, Pedido, Comentario y DetallePedido; corregir cualquier brecha encontrada.
-- [x] Implementar el filtro de pedidos por estado en el listado/API y comprobar que conserva los permisos de acceso.
-- [x] Confirmar que las reseñas no dependen de los pedidos: cualquier usuario autenticado puede publicar una, haya comprado o no mediante la aplicación.
-- [x] Separar el arranque de producción de `syncSchema()` y del debug de ORM; documentar migración/sincronización para desarrollo sin ejecutar cambios de esquema automáticamente en producción.
-
-### Salvia Camila (49373)
-
-- [ ] Completar una página/ruta de detalle de Producto desde el catálogo con descripción, precio, categoría y acción para agregar al carrito.
-- [ ] Resolver el presupuesto excedido de `frontend/src/app/app.scss` mediante organización de estilos; no limitarse a elevar el presupuesto. Volver a ejecutar `npm run build`.
-- [ ] Comprobar que los guards frontend solo mejoran la navegación: las operaciones administrativas deben seguir rechazándose también en backend.
-
-### Marianela Leonardelli (51337)
-
-- [x] Conectar la página de Comentarios con la API: listar comentarios persistidos y crear mediante endpoint autenticado. El servidor decide el usuario; se quitaron las reseñas de ejemplo. Verificado con las suites frontend (19 pruebas) y backend (68 pruebas) el 16/11/2026.
-- [x] Mantener las reseñas independientes de los pedidos. El endpoint requiere autenticación y el servidor asigna el usuario desde el token; no se exige una compra web.
-- [x] Completar MisPedidos: quitar el ID de usuario de respaldo `|| 1`, manejar ausencia de sesión y agregar filtro por estado. Verificado con build frontend y suite de pruebas el 14/11/2026.
-- [x] Agregar navegación desde el listado a un detalle de pedido histórico con fecha, estado, dirección, cliente, productos y total.
-- [x] Verificar flujo de carrito y pedido con JWT; mostrar errores y limpiar el carrito solo después de una creación exitosa.
-
-### Trabajo conjunto
-
-- [ ] Ejecutar pruebas de API para permisos: token ausente, usuario propietario, usuario ajeno y administrador.
-- [ ] Revisar respuestas de validación y errores del backend; evitar exponer `error.message`/detalles internos en producción.
-- [ ] Hacer revisión cruzada de los tres tests individuales y el test de integración.
-
-## Semana 3 — 20 al 27 de noviembre
-
-### Vivas Martin (50026)
-
-- [ ] Ejecutar la suite backend desde una instalación limpia y corregir cualquier fallo reproducible.
-- [ ] Confirmar que dependencias de runtime, desarrollo y test están declaradas y que las instrucciones de configuración de `.env` son completas, sin valores secretos.
-- [ ] Resolver el fallback de login con contraseñas en texto plano mediante una migración segura antes de eliminarlo, o documentar una decisión de transición aprobada.
-- [ ] Participar en la prueba final de permisos y probar por separado los flujos de pedido y reseñas.
-
-### Salvia Camila (49373)
-
-- [x] Ejecutar build frontend y suite de pruebas: build completado con advertencias de presupuesto; 15 archivos y 16 pruebas pasan.
-- [ ] Comprobar guards de admin y regresiones de propiedad de DetallePedido.
-- [ ] Completar/verificar las pruebas de comportamiento de TarjetaProducto y el flujo de detalle de producto → carrito.
-- [ ] Revisar estilos responsive en 320 px, 768 px y 1024 px; corregir defectos visibles en las pantallas modificadas.
-
-### Marianela Leonardelli (51337)
-
-- [ ] Verificar comentarios persistidos y restringidos a usuarios autenticados.
-- [ ] Verificar filtro, navegación y detalle de pedidos; confirmar que un usuario no puede consultar pedidos ajenos.
-- [ ] Revisar login, cierre de sesión y carrito/checkout con manejo de errores.
-
-### Trabajo conjunto — aceptación final
-
-- [ ] Ejecutar `npm run build` en backend y frontend, `npm test` en ambos proyectos y el test de integración; guardar resultados.
-- [ ] Demostrar en vivo login JWT con usuario y admin, acceso permitido/denegado a rutas protegidas y CRUD administrativo.
-- [ ] Demostrar CRUDs requeridos y relaciones dependientes con persistencia real.
-- [ ] Demostrar listados filtrados por categoría y estado, detalle de producto y detalle de pedido.
-- [ ] Demostrar tres casos de uso independientes: realizar pedido, dejar una reseña (con o sin pedido web) y agregar producto al catálogo.
-- [ ] Revisar consola, errores HTTP, configuración de ambiente y responsive antes de entregar.
-
-## Fuera del alcance obligatorio (solo si terminan los requisitos)
-
-- [ ] E2E automatizado de frontend (no reemplaza el test de integración backend requerido).
-- [ ] Reportes, gráficos, roles adicionales, tema oscuro, notificaciones, Docker y CI/CD.
-- [ ] Seed de datos de desarrollo, siempre que no borre ni altere datos de producción.
-
-## Referencias
-
-- Requisitos obligatorios y funcionales: `requisitos-backend.md`.
-- Estado de implementación y brechas verificadas: `ANALISIS_FALTANTE.md`.
-- Propuesta funcional del grupo: `Propsal DSW.md`.
-
----
-
-_Checklist reorganizado el 6 de noviembre de 2026. Marcar una tarea como completa solo después de implementar y verificar el criterio indicado._
+- [ ] Reportes o gráficos.
+- [ ] Roles adicionales.
+- [ ] Tema oscuro.
+- [ ] Notificaciones.
+- [ ] Docker y CI/CD.
+- [ ] Seed adicional que nunca altere ni borre datos de producción.
