@@ -1,4 +1,4 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://api.tucafeteria.com/api'
+    apiUrl: 'https://red-de-cafeterias.onrender.com'
 };
