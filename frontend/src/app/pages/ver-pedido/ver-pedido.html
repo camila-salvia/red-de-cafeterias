@@ -5,13 +5,17 @@
     <div class="icono-exito">✅</div>
     <h2>¡Gracias por tu compra!</h2>
     <p class="subtitulo">Tu orden ya fue enviada a la barra para preparación.</p>
-  
+
+    @if (mensajeError()) {
+    <div class="mensaje-error" role="alert">{{ mensajeError() }}</div>
+    }
+
     <div class="ticket-pedido">
       <div class="cabecera-ticket">
         <span><strong>Orden:</strong> #{{ pedido.id }}</span>
         <span class="estado-badge">{{ pedido.estado_pago }}</span>
       </div>
-  
+
       <div class="items-ticket">
         @for (item of pedido.itemsVisuales; track item.producto.id) {
         <div class="linea-ticket">
@@ -20,20 +24,20 @@
         </div>
         }
       </div>
-  
+
       <div class="total-ticket">
         <span>Total abonado:</span>
         <strong>${{ pedido.costo_total }}</strong>
       </div>
     </div>
-  
+
     <div class="acciones-exito">
       <button class="btn-volver" (click)="volverAlMenu()">Pedir algo más</button>
       <a routerLink="/mis-pedidos" class="btn-mis-pedidos">Ver todo mi historial</a>
     </div>
   </div>
 
-} @else if (cartService.items().length === 0) {
+  } @else if (cartService.items().length === 0) {
   <div class="carrito-vacio">
     <p>Tu carrito está vacío</p>
     <a routerLink="/" class="btn-volver">Explorar la carta</a>
@@ -65,7 +69,8 @@
         </div>
 
         <!-- Botón quitar -->
-        <button type="button" class="btn-eliminar" [disabled]="cargandoPedido()" (click)="eliminar(item.producto.id)" title="Eliminar">
+        <button type="button" class="btn-eliminar" [disabled]="cargandoPedido()" (click)="eliminar(item.producto.id)"
+          title="Eliminar">
           Eliminar
         </button>
       </div>
@@ -83,21 +88,21 @@
         <strong>${{ cartService.precioTotal() }}</strong>
       </div>
       <!-- Selector de pago -->
-       <div class="selector-pago">
+      <div class="selector-pago">
         <label for="metodo-pago">Método de pago:</label>
         <select id="metodo-pago" [(ngModel)]="metodoSeleccionado" [disabled]="cargandoPedido()">
           <option [ngValue]="null" disabled>Selecciona un método de pago</option>
           @for (metodo of metodosPago(); track metodo.id) {
-            <option [value]="metodo.id">{{ metodo.nombre }}</option>
+          <option [value]="metodo.id">{{ metodo.nombre }}</option>
           }
         </select>
         @if (mensajeErrorMetodosPago()) {
-          <div class="mensaje-error" role="alert">
-            {{ mensajeErrorMetodosPago() }}
-            <button type="button" (click)="cargarMetodosPago()">Reintentar</button>
-          </div>
+        <div class="mensaje-error" role="alert">
+          {{ mensajeErrorMetodosPago() }}
+          <button type="button" (click)="cargarMetodosPago()">Reintentar</button>
+        </div>
         }
-       </div>
+      </div>
 
       <div class="acciones">
         <button type="button" class="btn-vaciar" [disabled]="cargandoPedido()" (click)="cartService.limpiarCarrito()">
@@ -108,7 +113,7 @@
         </button>
       </div>
       @if (mensajeError()) {
-        <div class="mensaje-error" role="alert">{{ mensajeError() }}</div>
+      <div class="mensaje-error" role="alert">{{ mensajeError() }}</div>
       }
     </div>
 

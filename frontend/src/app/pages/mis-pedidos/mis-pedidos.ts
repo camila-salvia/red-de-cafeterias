@@ -20,6 +20,7 @@ export class MisPedidosComponent implements OnInit {
   error = signal<string | null>(null);
   mensaje = signal<string | null>(null);
   pedidoCancelandoId = signal<string | null>(null);
+  pedidoPagandoId = signal<string | null>(null);
   estadoSeleccionado = signal<string>('Todos');
   estadosPedidos = computed(() =>
     [...new Set(this.pedidos()
@@ -57,6 +58,36 @@ export class MisPedidosComponent implements OnInit {
         this.error.set(err.error?.message || 'No se pudieron cargar tus pedidos.');
         this.cargando.set(false);
       }
+    });
+  }
+
+  // Solo los pedidos pendientes pagados con Mercado Pago pueden reintentar el pago
+  puedePagarAhora(pedido: any): boolean {
+    const nombre = String(pedido?.metodo_pago?.nombre ?? '').toLowerCase();
+    return pedido?.estado_pago === 'Pendiente' && nombre.includes('mercado');
+  }
+
+  pagarAhora(pedido: any) {
+    if (!this.puedePagarAhora(pedido) || this.pedidoPagandoId()) return;
+
+    this.error.set(null);
+    this.mensaje.set(null);
+    this.pedidoPagandoId.set(pedido.id);
+
+    this.apiService.crearPreferenciaPago(pedido.id).subscribe({
+      next: (res: any) => {
+        const urlPago = res?.data?.init_point;
+        if (!urlPago) {
+          this.error.set('No pudimos iniciar el pago con Mercado Pago.');
+          this.pedidoPagandoId.set(null);
+          return;
+        }
+        window.location.href = urlPago;
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'No pudimos iniciar el pago con Mercado Pago.');
+        this.pedidoPagandoId.set(null);
+      },
     });
   }
 

@@ -17,12 +17,8 @@
   } @else {
   <div class="filtro-estado">
     <label for="filtro-estado">Filtrar por estado:</label>
-    <select
-      id="filtro-estado"
-      class="form-select"
-      [ngModel]="estadoSeleccionado()"
-      (ngModelChange)="estadoSeleccionado.set($event)"
-    >
+    <select id="filtro-estado" class="form-select" [ngModel]="estadoSeleccionado()"
+      (ngModelChange)="estadoSeleccionado.set($event)">
       <option value="Todos">Todos los estados</option>
       @for (estado of estadosPedidos(); track estado) {
       <option [value]="estado">{{ estado }}</option>
@@ -35,47 +31,46 @@
   } @else {
   <div class="lista-pedidos">
     @for (pedido of pedidosFiltrados(); track pedido.id) {
-      <div class="tarjeta-pedido">
-        <div class="cabecera-pedido">
-          <div>
-            <span class="numero-pedido">Pedido #{{ pedido.id }}</span>
-            <span class="fecha-pedido">{{ pedido.fecha_pedido | date:'dd/MM/yyyy HH:mm' }}</span>
-          </div>
-          <span
-            class="estado-badge"
-            [class.pendiente]="pedido.estado_pago === 'Pendiente'"
-            [class.confirmado]="pedido.estado_pago === 'Confirmado'"
-            [class.cancelado]="pedido.estado_pago === 'Cancelado'"
-          >
-            {{ pedido.estado_pago }}
-          </span>
+    <div class="tarjeta-pedido">
+      <div class="cabecera-pedido">
+        <div>
+          <span class="numero-pedido">Pedido #{{ pedido.id }}</span>
+          <span class="fecha-pedido">{{ pedido.fecha_pedido | date:'dd/MM/yyyy HH:mm' }}</span>
         </div>
-
-        <div class="detalles-productos">
-          @for (detalle of pedido.detalles; track detalle.id) {
-          <div class="linea-producto">
-            <span>{{ detalle.cantidad }}x {{ detalle.producto?.nombre || 'Producto' }}</span>
-            <span>${{ detalle.precio_unitario * detalle.cantidad }}</span>
-          </div>
-          }
-        </div>
-
-        <div class="pie-pedido">
-          <span>Total:</span>
-          <strong>${{ pedido.costo_total }}</strong>
-          <a class="btn-ver-detalle" [routerLink]="['/pedido', pedido.id]">Ver detalle</a>
-          @if (pedido.estado_pago === 'Pendiente') {
-          <button
-            type="button"
-            class="btn-cancelar"
-            [disabled]="pedidoCancelandoId() !== null"
-            (click)="cancelarPedido(pedido)"
-          >
-            {{ pedidoCancelandoId() === pedido.id ? 'Cancelando...' : 'Cancelar pedido' }}
-          </button>
-          }
-        </div>
+        <span class="estado-badge" [class.pendiente]="pedido.estado_pago === 'Pendiente'"
+          [class.confirmado]="pedido.estado_pago === 'Confirmado'"
+          [class.cancelado]="pedido.estado_pago === 'Cancelado'">
+          {{ pedido.estado_pago }}
+        </span>
       </div>
+
+      <div class="detalles-productos">
+        @for (detalle of pedido.detalles; track detalle.id) {
+        <div class="linea-producto">
+          <span>{{ detalle.cantidad }}x {{ detalle.producto?.nombre || 'Producto' }}</span>
+          <span>${{ detalle.precio_unitario * detalle.cantidad }}</span>
+        </div>
+        }
+      </div>
+
+      <div class="pie-pedido">
+        <span>Total:</span>
+        <strong>${{ pedido.costo_total }}</strong>
+        <a class="btn-ver-detalle" [routerLink]="['/pedido', pedido.id]">Ver detalle</a>
+        @if (puedePagarAhora(pedido)) {
+        <button type="button" class="btn-ver-detalle" [disabled]="pedidoPagandoId() !== null"
+          (click)="pagarAhora(pedido)">
+          {{ pedidoPagandoId() === pedido.id ? 'Redirigiendo...' : 'Pagar ahora' }}
+        </button>
+        }
+        @if (pedido.estado_pago === 'Pendiente') {
+        <button type="button" class="btn-cancelar" [disabled]="pedidoCancelandoId() !== null"
+          (click)="cancelarPedido(pedido)">
+          {{ pedidoCancelandoId() === pedido.id ? 'Cancelando...' : 'Cancelar pedido' }}
+        </button>
+        }
+      </div>
+    </div>
     }
   </div>
   }

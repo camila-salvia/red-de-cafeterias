@@ -187,7 +187,7 @@ export class ApiService {
   }
 
   crearPreferenciaPago(pedidoId: string): Observable<any> {
-  return this.http.post<any>(`${this.apiUrl}/pago/preferencia/${pedidoId}`, {})
-    .pipe(catchError(this.manejarError));
+    return this.http.post<any>(`${this.apiUrl}/pago/preferencia/${pedidoId}`, {})
+      .pipe(catchError(this.manejarError));
 }
 }

@@ -129,13 +129,29 @@ export class VerPedidoComponent {
         return;
       }
 
+      // El pedido ya existe en el servidor: el carrito se vacía en cualquier caso
+      this.cartService.limpiarCarrito();
+
+      // Si eligió Mercado Pago, lo mandamos a pagar
+      if (this.esMercadoPago(metodoPagoId)) {
+        try {
+          const pref = await firstValueFrom(this.apiService.crearPreferenciaPago(pedidoGenerado.id));
+          const urlPago = pref?.data?.init_point;
+          if (!urlPago) throw new Error('El servidor no devolvió la URL de pago.');
+          window.location.href = urlPago;
+          return;
+        } catch {
+          this.mensajeError.set('Tu pedido quedó registrado como pendiente, pero no pudimos iniciar el pago con Mercado Pago.');
+          // se continúa para mostrar el pedido generado
+        }
+      }
+
       this.pedidoReciente.set({
         id: pedidoGenerado.id,
         estado_pago: pedidoGenerado.estado_pago,
         costo_total: pedidoGenerado.costo_total,
         itemsVisuales: itemsComprados,
       });
-      this.cartService.limpiarCarrito();
     } catch (error: unknown) {
       this.mensajeError.set(this.mensajeDeErrorPedido(error));
     } finally {
@@ -146,6 +162,11 @@ export class VerPedidoComponent {
   volverAlMenu() {
     this.pedidoReciente.set(null);
     this.router.navigate(['/']);
+  }
+
+  private esMercadoPago(metodoPagoId: string): boolean {
+    const metodo = this.metodosPago().find(m => m.id === metodoPagoId);
+    return !!metodo && metodo.nombre.toLowerCase().includes('mercado');
   }
 
   private mensajeDeErrorPedido(error: unknown): string {

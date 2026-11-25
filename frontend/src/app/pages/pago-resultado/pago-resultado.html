@@ -1,1 +1,34 @@
-<p>pago-resultado works!</p>
+<div class="container my-5" style="max-width: 560px">
+  @if (error()) {
+  <div class="alert alert-danger">{{ error() }}</div>
+  }
+
+  @if (pedido(); as p) {
+  <div class="card shadow-sm">
+    <div class="card-body text-center py-4">
+      @if (p.estado_pago === 'Confirmado') {
+      <h2 class="h4 text-success">¡Pago aprobado!</h2>
+      <p class="mb-1">Recibimos tu pago y tu pedido fue confirmado.</p>
+      } @else if (p.estado_pago === 'Cancelado') {
+      <h2 class="h4 text-danger">Pedido cancelado</h2>
+      <p class="mb-1">Este pedido está cancelado.</p>
+      } @else if (cargando()) {
+      <h2 class="h4">Estamos confirmando tu pago…</h2>
+      <div class="spinner-border my-3" role="status"></div>
+      } @else {
+      <h2 class="h4 text-warning">Pago pendiente</h2>
+      <p class="mb-1">
+        Todavía no recibimos la confirmación del pago. Si ya pagaste,
+        puede demorar unos minutos en reflejarse.
+      </p>
+      }
+      <p class="text-muted small mb-3">Pedido {{ p.id }} · Total $ {{ p.costo_total }}</p>
+      <a class="btn btn-dark" routerLink="/">Volver al menú</a>
+    </div>
+  </div>
+  } @else if (cargando() && !error()) {
+  <div class="text-center">
+    <div class="spinner-border" role="status"></div>
+  </div>
+  }
+</div>
