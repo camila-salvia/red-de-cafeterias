@@ -88,10 +88,13 @@ erDiagram
 
 ## Tecnologías
 
-| Parte    | Stack                                                                         |
-| :------- | :---------------------------------------------------------------------------- |
-| Backend  | Node.js, TypeScript, Express 5, MikroORM 6, MySQL, JWT (jsonwebtoken), bcrypt |
-| Frontend | Angular 21, Bootstrap 5, RxJS                                                 |
+| Parte | Stack |
+| :---- | :---- |
+| Backend | Node.js 24, TypeScript 5.1, Express 5.2, MikroORM 6.6, MySQL 8.0, MySQL2, JWT, bcrypt, Mercado Pago SDK 3.6, Gemini API, Multer, dotenv y CORS |
+| Frontend | Angular 21.2, Bootstrap 5.3, RxJS 7.8 y TypeScript 5.9 |
+| Entorno y pruebas | npm, Node.js 24 y Vitest |
+
+> MySQL es el motor de base de datos. `mysql2` es el controlador de MySQL que utiliza Node.js a través de MikroORM.
 
 ## Instalación y ejecución (local)
 
@@ -125,10 +128,43 @@ DB_PORT=3306
 DB_USER=root
 DB_PASSWORD=tu_password_de_mysql
 DB_NAME=cafeteria
-JWT_SECRET=una_clave_secreta
+
+JWT_SECRET=genera_una_clave_secreta_larga
+
+# Moderación de reseñas con Gemini
+GEMINI_API_KEY=tu_api_key_de_gemini
+GEMINI_MODEL=gemini-3.5-flash-lite
+GEMINI_MODEL_FALLBACK=gemini-3.1-flash-lite,gemini-3.6-flash
+GEMINI_THINKING_LEVEL=low
+GEMINI_TIMEOUT_MS=20000
+MODERACION_FALLA_ABIERTA=false
+
+# Mercado Pago
+MP_ACCESS_TOKEN=tu_access_token_de_mercado_pago
+MP_WEBHOOK_SECRET=tu_clave_secreta_del_webhook
+
+# URLs públicas necesarias para las redirecciones y notificaciones de pago
+FRONTEND_URL=http://localhost:4200
+BACKEND_URL=http://localhost:3000
 ```
 
-**3.2 Crear la base de datos.** Crear una base vacía con el mismo nombre que `DB_NAME`:
+`JWT_SECRET`, `GEMINI_API_KEY`, `MP_ACCESS_TOKEN` y `MP_WEBHOOK_SECRET` son credenciales privadas y no deben subirse al repositorio.
+
+Descripción de las variables opcionales y especiales:
+
+| Variable | Uso |
+| :------- | :-- |
+| `GEMINI_MODEL` | Modelo principal usado para moderar el texto de las reseñas. |
+| `GEMINI_MODEL_FALLBACK` | Modelos alternativos separados por comas. |
+| `GEMINI_THINKING_LEVEL` | Nivel de razonamiento opcional: `minimal`, `low`, `medium` o `high`. |
+| `GEMINI_TIMEOUT_MS` | Tiempo máximo de espera por respuesta de Gemini. |
+| `MODERACION_FALLA_ABIERTA` | Si es `true`, permite publicar un comentario si falla la moderación externa. El valor predeterminado seguro es `false`. |
+| `MP_ACCESS_TOKEN` | Credencial de Mercado Pago para crear preferencias y consultar pagos. |
+| `MP_WEBHOOK_SECRET` | Clave utilizada para verificar la firma de las notificaciones entrantes de Mercado Pago. |
+| `FRONTEND_URL` | URL base del frontend, utilizada en las URLs de retorno del pago. |
+| `BACKEND_URL` | URL base del backend, utilizada para registrar el webhook público en Mercado Pago. |
+
+**3.2 Crear la base de datos.** Crear una base vacía con el mismo nombre que `DB_NAME`: cafeteria
 
 ```sql
 CREATE DATABASE cafeteria;
@@ -140,11 +176,12 @@ CREATE DATABASE cafeteria;
 
 | Tabla                 | Datos                                              |
 | :-------------------- | :------------------------------------------------- |
-| Método de pago        | efectivo, transferencia, tarjeta                   |
-| Categoría             | comida, bebida                                     |
+| Método de pago        | efectivo, transferencia, tarjeta; todos activos   |
+| Categoría             | bebidas, comidas                                   |
 | Usuario administrador | ver [credenciales](#credenciales-de-la-aplicación) |
+| Usuario de prueba     | ver [credenciales](#credenciales-de-la-aplicación) |
 
-> ⚠️ COMPLETAR: indicar cómo se cargan (script SQL, script de seed, o carga manual).
+Los datos iniciales se cargan automáticamente al iniciar el backend mediante `seedInitialData()` en `backend/src/shared/database/seed.ts`. El seed es idempotente: crea solo los registros inexistentes y no modifica ni elimina los datos existentes.
 
 **3.5 Iniciar el servidor (modo desarrollo).**
 
@@ -164,6 +201,9 @@ Otros scripts disponibles en `backend/`:
 | :------------------ | :------------------------------------------ |
 | `npm run build`     | Compila el proyecto TypeScript a `dist/`    |
 | `npm run start:dev` | Compila en modo watch y ejecuta el servidor |
+| `npm test`          | Ejecuta las pruebas Vitest del backend     |
+| `npm run schema:preview` | Muestra el SQL pendiente sin aplicarlo |
+| `npm run schema:sync` | Aplica los cambios de esquema a la base configurada |
 
 ### 4. Frontend
 
@@ -175,20 +215,39 @@ npm install
 npm start
 ```
 
-La aplicación queda disponible en **http://localhost:3000**.
+La aplicación queda disponible en **http://localhost:4200**.
 
 La URL de la API que consume el frontend se define en `frontend/src/environments/environment.ts` (`apiUrl`).
 
-> ⚠️ COMPLETAR: valor de `apiUrl` y puerto del frontend para desarrollo local. Hoy `environment.ts` apunta a `https://api.tucafeteria.com/api` y tanto el backend como `npm start` del frontend usan el puerto 3000, por lo que no pueden correr a la vez.
+En desarrollo:
+
+- El backend usa el puerto `3000`.
+- El frontend usa el puerto `4200` definido por `npm start`.
+- `frontend/src/environments/environment.development.ts` apunta a `http://localhost:3000/api`.
+- `frontend/src/environments/environment.ts` contiene la configuración de producción y apunta a `https://red-de-cafeterias.onrender.com/api`.
 
 Otros scripts disponibles en `frontend/`:
 
 | Script          | Descripción                                      |
 | :-------------- | :----------------------------------------------- |
-| `npm start`     | Servidor de desarrollo (`ng serve`, puerto 3000) |
+| `npm start`     | Servidor de desarrollo (`ng serve`, puerto 4200) |
 | `npm run build` | Build de producción en `dist/`                   |
 | `npm run watch` | Build en modo watch (configuración development)  |
 | `npm test`      | Ejecuta los tests                                |
+
+Para ejecutar backend y frontend simultáneamente, usar dos terminales:
+
+```bash
+# Terminal 1
+cd backend
+npm run start:dev
+
+# Terminal 2
+cd frontend
+npm start
+```
+
+Abrir el frontend en `http://localhost:4200`.
 
 ## Producción y cambios de esquema
 
@@ -213,9 +272,11 @@ No es un sistema de migraciones versionadas: `schema:sync` solo agrega y modific
 
 | Componente                | URL          |
 | :------------------------ | :----------- |
-| Frontend                  | ⚠️ COMPLETAR |
-| Backend / API             | ⚠️ COMPLETAR |
-| Base de datos (proveedor) | ⚠️ COMPLETAR |
+| Frontend                  | https://red-de-cafeterias-1.onrender.com/ |
+| Backend / API             | https://red-de-cafeterias.onrender.com |
+| Base de datos (proveedor) | No desplegada actualmente |
+
+La API pública comprobada responde en `https://red-de-cafeterias.onrender.com/api` y el frontend desplegado consume esa URL en su configuración de producción.
 
 ## Credenciales de la aplicación
 
