@@ -1,4 +1,4 @@
-# CoffeMap – Red de Cafeterías
+# Aroma Café - Cafetería de Especialidad
 
 Trabajo Práctico de Desarrollo de Software (DSW).
 
@@ -79,12 +79,12 @@ erDiagram
 
 ## Alcance funcional
 
-| Req               | Detalle                                                                                                                                                                                                                                                                 |
-| :---------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CRUD simple       | 1. CRUD Usuario<br>2. CRUD Categoría                                                                                                                                                                                                                                    |
-| CRUD dependiente  | 1. CRUD Producto {depende de} CRUD Categoría<br>2. CRUD Detalle Pedido {depende de} CRUD Pedido, CRUD Producto<br>3. CRUD Pedido {depende de} CRUD Usuario, CRUD Método de pago<br>4. CRUD Comentario {depende de} CRUD Usuario                                         |
-| Listado + detalle | 1. Listado de productos por categoría (nombre y precio); al seleccionar un producto se accede al detalle con descripción y categoría.<br>2. Listado de pedidos filtrados por estado; al seleccionar un pedido se muestra la dirección de envío y el nombre del cliente. |
-| CUU/Epic          | 1. Realizar un pedido<br>2. Moderar comentarios con IA<br>3. Agregar un producto al catálogo                                                                                                                                                                            |
+| Req               | Detalle                                                                                                                                                                                                                                                                                                                                                   |
+| :---------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CRUD simple       | 1. CRUD Usuario<br>2. CRUD Categoría<br>3. CRUD Método de Pago                                                                                                                                                                                                                                                                                            |
+| CRUD dependiente  | 1. CRUD Producto {depende de} CRUD Categoría<br>2. CRUD Detalle Pedido {depende de} CRUD Pedido, CRUD Producto<br>3. CRUD Pedido {depende de} CRUD Usuario, CRUD Método de pago<br>4. CRUD Comentario {depende de} CRUD Usuario                                                                                                                           |
+| Listado + detalle | 1. Listado de productos pudiéndose filtrar por categoría en la pantalla de inicio.<br>2. Listado de pedidos pudiéndose filtrar por estado; al seleccionar un pedido se muestran los detalles del pedido.<br>3. Listado de productos, en el panel del administrador donde se observa el detalle de los productos, pudiendo editar o desactivar los mismos. |
+| CUU/Epic          | 1. Realizar un pedido<br>2. Realizar comentarios siendo moderados con IA.<br>3. Agregar un producto al catálogo.<br>4. Administrar pedidos de clientes.                                                                                                                                                                                                   |
 
 ## Tecnologías
 
