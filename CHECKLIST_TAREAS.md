@@ -1,20 +1,20 @@
 # Checklist unificado de tareas pendientes — Red de Cafeterías
 
 **Equipo:** Vivas Martin (50026), Salvia Camila (49373), Marianela Leonardelli (51337)  
-**Fecha de revisión:** 24 de noviembre de 2026  
+**Fecha de revisión:** 25 de noviembre de 2026  
 **Objetivo:** cierre verificable de los requisitos del backend, frontend y entrega académica.
 
 Esta lista reúne el contenido pendiente de `ANALISIS_FALTANTE.md`, los requisitos backend/frontend y el estado actual del código. Las tareas marcadas como completadas han sido verificadas en el proyecto.
 
-## Estado verificado el 24/11/2026
+## Estado verificado el 25/11/2026
 
 - [x] Backend: `npm run build` finaliza correctamente.
 - [x] Backend: `npm test -- --run` finaliza con 5 archivos aprobados y 145 pruebas aprobadas (1 prueba marcada como to-do).
 - [x] Backend: existen tests individuales de Usuario, Producto y Comentario.
 - [x] Backend: existe el test de integración de Pedido y forma parte de la suite aprobada.
 - [x] Frontend: `npm run build` finaliza correctamente.
-- [ En proceso ] Frontend: `npm test -- --watch=false` no finaliza correctamente: 17 archivos pasan, 2 archivos fallan y 4 pruebas fallan por `localStorage` inexistente o no disponible.
-- [ ] Frontend: el build conserva advertencias de presupuesto: bundle inicial 600.46 kB sobre el máximo de 500 kB y `ver-pedido.scss` 4.25 kB sobre el máximo de 4 kB.
+- [x] Frontend: `npm test -- --watch=false` finaliza correctamente: 19 archivos aprobados y 36 pruebas aprobadas.
+- [ ] Frontend: el build conserva advertencias de presupuesto: bundle inicial 600.66 kB sobre el máximo de 500 kB y `ver-pedido.scss` 4.25 kB sobre el máximo de 4 kB.
 - [ ] Faltan evidencias verificadas de la prueba final desplegada, el video y la documentación pública de entrega.
 
 ## Backend — requisitos y cierre funcional
@@ -24,10 +24,10 @@ Esta lista reúne el contenido pendiente de `ANALISIS_FALTANTE.md`, los requisit
 - [ ] Revisar y cubrir con pruebas adicionales las rutas sensibles con token ausente, usuario propietario, usuario ajeno y administrador.
 - [ ] Confirmar y conservar una prueba de regresión para DetallePedido: GET y POST de usuario propietario, usuario ajeno y administrador.
 - [ ] Registrar el resultado final de las pruebas de permisos sobre Usuario, Pedido, Comentario y DetallePedido.
-- [ ] Documentar el procedimiento completo para instalar y levantar el backend desde una instalación limpia.
-- [ ] Confirmar que `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `JWT_SECRET` y `NODE_ENV` estén documentados sin secretos reales.
-- [ ] Confirmar que las dependencias de ejecución, desarrollo y test estén declaradas y sean reproducibles con una instalación limpia.
-- [ ] Completar la documentación de seed: indicar cómo cargar categorías, métodos de pago y usuarios iniciales sin afectar datos productivos.
+- [x] Documentar el procedimiento completo para instalar y levantar el backend desde una instalación limpia.
+- [x] Confirmar que `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `JWT_SECRET` y `NODE_ENV` estén documentados sin secretos reales.
+- [x] Confirmar que las dependencias de ejecución, desarrollo y test estén declaradas y sean reproducibles con una instalación limpia.
+- [x] Completar la documentación de seed: indicar cómo cargar categorías, métodos de pago y usuarios iniciales sin afectar datos productivos.
 - [ ] Preparar y guardar evidencias de `npm run build` y `npm test -- --run` para la defensa.
 
 ### CRUD, filtros y casos de uso
@@ -52,7 +52,7 @@ Esta lista reúne el contenido pendiente de `ANALISIS_FALTANTE.md`, los requisit
 - [ ] Comprobar que los componentes reutilizables usan inputs/outputs correctamente y reemplazar errores o comportamientos inconsistentes.
 - [ ] Implementar en pruebas los casos de TarjetaProducto y el flujo completo detalle de producto → carrito.
 - [ ] Reemplazar los tipos `any` innecesarios de servicios y páginas por interfaces/modelos sincronizados con las respuestas reales de la API.
-- [ ] Configurar explícitamente el puerto y la URL de API para desarrollo y producción. Actualmente el entorno de desarrollo usa `http://localhost:3000/api` y el de producción una URL externa que no corresponde a un deploy real.
+- [x] Configurar explícitamente el puerto y la URL de API para desarrollo y producción. El entorno de desarrollo usa `http://localhost:3000/api`; producción usa `https://red-de-cafeterias.onrender.com/api`.
 - [ ] Revisar el manejo de sesión vencida, errores de red, errores HTTP y respuestas inválidas del backend, coordinando los mensajes visibles.
 - [ ] Verificar los guards frontend como mejora de navegación, sin depender de ellos para la seguridad administrativa o de propiedad.
 - [ ] Confirmar el comportamiento de `/admin` para anónimo, usuario autenticado y administrador.
@@ -82,8 +82,9 @@ Esta lista reúne el contenido pendiente de `ANALISIS_FALTANTE.md`, los requisit
 ## API, documentación y entrega
 
 - [ ] Crear o completar la documentación de la API backend y enlazarla desde el README o desde un documento de referencia accesible.
-- [ ] Completar las URLs públicas de frontend, backend/API y base de datos en el README.
-- [ ] Completar las instrucciones de seeds, puertos y configuración de API de desarrollo local.
+- [x] Completar las URLs públicas de frontend y backend/API en el README.
+- [ ] Completar la URL pública de la base de datos en el README.
+- [x] Completar las instrucciones de seeds, puertos y configuración de API de desarrollo local.
 - [ ] Completar las credenciales reales y seguras de prueba para el demo/deploy.
 - [ ] Actualizar la propuesta con links a los pull requests de frontend y backend.
 - [ ] Preparar y enlazar el video explicativo del sistema.
