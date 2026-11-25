@@ -13,7 +13,7 @@ Esta lista reúne el contenido pendiente de `ANALISIS_FALTANTE.md`, los requisit
 - [x] Backend: existen tests individuales de Usuario, Producto y Comentario.
 - [x] Backend: existe el test de integración de Pedido y forma parte de la suite aprobada.
 - [x] Frontend: `npm run build` finaliza correctamente.
-- [ ] Frontend: `npm test -- --watch=false` no finaliza correctamente: 17 archivos pasan, 2 archivos fallan y 4 pruebas fallan por `localStorage` inexistente o no disponible.
+- [ En proceso ] Frontend: `npm test -- --watch=false` no finaliza correctamente: 17 archivos pasan, 2 archivos fallan y 4 pruebas fallan por `localStorage` inexistente o no disponible.
 - [ ] Frontend: el build conserva advertencias de presupuesto: bundle inicial 600.46 kB sobre el máximo de 500 kB y `ver-pedido.scss` 4.25 kB sobre el máximo de 4 kB.
 - [ ] Faltan evidencias verificadas de la prueba final desplegada, el video y la documentación pública de entrega.
 
