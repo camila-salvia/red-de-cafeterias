@@ -12,6 +12,9 @@
     "schema:preview": "node ./dist/shared/database/sync-schema.js --dry",
     "schema:sync": "node ./dist/shared/database/sync-schema.js"
   },
+  "engines": {
+    "node": "^22.12.0 || ^24.0.0"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

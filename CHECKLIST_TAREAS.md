@@ -9,7 +9,7 @@ Esta lista reúne el contenido pendiente de `ANALISIS_FALTANTE.md`, los requisit
 ## Estado verificado el 24/11/2026
 
 - [x] Backend: `npm run build` finaliza correctamente.
-- [x] Backend: `npm test -- --run` finaliza con 5 archivos aprobados y 145 pruebas aprobadas (1 prueba marcada como todo).
+- [x] Backend: `npm test -- --run` finaliza con 5 archivos aprobados y 145 pruebas aprobadas (1 prueba marcada como to-do).
 - [x] Backend: existen tests individuales de Usuario, Producto y Comentario.
 - [x] Backend: existe el test de integración de Pedido y forma parte de la suite aprobada.
 - [x] Frontend: `npm run build` finaliza correctamente.
