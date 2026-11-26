@@ -274,7 +274,7 @@ No es un sistema de migraciones versionadas: `schema:sync` solo agrega y modific
 | :------------------------ | :----------- |
 | Frontend                  | https://red-de-cafeterias-1.onrender.com/ |
 | Backend / API             | https://red-de-cafeterias.onrender.com |
-| Base de datos (proveedor) | No desplegada actualmente |
+| Base de datos (proveedor) | https://railway.com/project/8783d861-1115-421e-8a4f-61430bd8314f/settings?environmentId=f976f52a-47d3-44b2-9022-b56f21eded93 |
 
 La API pública comprobada responde en `https://red-de-cafeterias.onrender.com/api` y el frontend desplegado consume esa URL en su configuración de producción.
 
