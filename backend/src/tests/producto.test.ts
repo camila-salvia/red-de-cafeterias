@@ -21,12 +21,14 @@ const archivoSistema = vi.hoisted(() => ({
 vi.mock('../shared/database/orm.js', () => ({ orm: { em } }));
 vi.mock('../categoria/categoria.entity.js', () => ({ Categoria: class Categoria {} }));
 vi.mock('../producto/producto.entity.js', () => ({ Producto: class Producto {} }));
+vi.mock('../producto/imagen-producto.entity.js', () => ({ ImagenProducto: class ImagenProducto {} }));
 vi.mock('node:fs/promises', () => archivoSistema);
 
 import { validarProductoInput } from '../producto/producto.validator.js';
 import { add, findAll, findAllAdmin, findOne, update, remove, cambiarEstadoProducto, sanitizeProductoInput } from '../producto/producto.controller.js';
 import { Categoria } from '../categoria/categoria.entity.js';
 import { Producto } from '../producto/producto.entity.js';
+import { ImagenProducto } from '../producto/imagen-producto.entity.js'; 
 
 // Helpers para simular Express (Response y Request)
 function crearRes() {
@@ -208,8 +210,8 @@ describe('Producto - Tests unitarios', () => {
       expect(res.status).toHaveBeenCalledWith(201);
     });
 
-    it('Guarda el archivo subido y conserva su ruta en el producto', async () => {
-      const archivo = { filename: 'imagen-1.webp', buffer: Buffer.from('imagen') };
+        it('Guarda la imagen subida en la base y conserva su ruta en el producto', async () => {
+      const archivo = { filename: 'imagen-1.webp', mimetype: 'image/webp', buffer: Buffer.from('imagen') };
       const input = { ...productoValido, imagen: '/uploads/productos/imagen-1.webp' };
       em.create.mockReturnValue({ id: 'prod-1', ...input });
       em.flush.mockResolvedValue(undefined);
@@ -221,18 +223,17 @@ describe('Producto - Tests unitarios', () => {
 
       await add(req, comoRes(res));
 
-      expect(archivoSistema.writeFile).toHaveBeenCalledWith(
-        expect.stringMatching(/[\\/]uploads[\\/]productos[\\/]imagen-1\.webp$/),
-        archivo.buffer,
-        { flag: 'wx' }
-      );
+      expect(em.create).toHaveBeenCalledWith(ImagenProducto, {
+        nombre: 'imagen-1.webp',
+        tipo: 'image/webp',
+        datos: archivo.buffer,
+      });
       expect(em.create).toHaveBeenCalledWith(Producto, {
         ...input,
         categoria: { id: productoValido.categoria },
       });
       expect(res.status).toHaveBeenCalledWith(201);
     });
-  });
 
   // Caso donde no se envía la categoría 
   it('Responde 400 si no se envía la categoría', async () => {
@@ -628,4 +629,4 @@ describe('Read - findAll', () => {
         detalle: 'db caída',
       });
     });
-  }); 
+  }); });

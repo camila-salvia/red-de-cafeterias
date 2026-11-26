@@ -12,19 +12,21 @@ import { orm, syncSchema, esProduccion } from './shared/database/orm.js';
 import { seedInitialData } from './shared/database/seed.js';
 import { RequestContext } from '@mikro-orm/core';
 import cors from 'cors';
-import { directorioImagenesProducto } from './producto/producto.upload.js';
+import { servirImagenProducto } from './producto/producto.imagen.js';
 
 const app = express();
 
 // Middleware para JSON
 app.use(express.json());
 app.use(cors());
-app.use('/uploads/productos', express.static(directorioImagenesProducto));
+
 
 app.use((req, res, next)=>{
   RequestContext.create(orm.em, next)
 }
 )
+
+app.get('/uploads/productos/:nombre', servirImagenProducto);
 
 // Rutas 
 app.use('/api/categoria', categoriaRoutes);
