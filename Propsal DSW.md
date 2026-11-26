@@ -25,7 +25,7 @@ Link: [https://drive.google.com/file/d/1sZl0i6KcOnkTM59hWgPCPXOhM-s7PZtP/view]
 
 | Req | Detalle |
 | :---- | :---- |
-| CRUD simple | **1.CRUD Usuario <br>  2.CRUD Categoría** <br> |
+| CRUD simple | **1.CRUD Usuario <br>  2.CRUD Categoría** <br> 3.CRUD Metodo_de_pago** <br> |
 | CRUD dependiente | **3.CRUD Producto** {depende de} CRUD Categoría <br> **4.CRUD Detalle Pedido** {depende de} CRUD Pedido, CRUD Producto <br> **5.CRUD Pedido** {depende de} CRUD Usuario <br> **6.CRUD Comentario** {depende de} CRUD Usuario <br> |
 | Listado \+ detalle | Listado de productos por categoría, muestra nombre y precio del producto, al seleccionar un producto se accede al detalle, donde se incluye la descripción, y las categorías a las que pertenece. <br> Listado de pedidos filtrados por estado (pendiente, preparado, entregado), al seleccionar un pedido muestra la dirección de envío y el nombre del cliente.  |
 | CUU/Epic | Realizar un pedido  <br> Moderar comentarios con IA <br> Agregar un producto al catálogo |
