@@ -21,9 +21,9 @@ Esta lista reúne el contenido pendiente de `ANALISIS_FALTANTE.md`, los requisit
 
 - [ ] Resolver o documentar formalmente el fallback de contraseñas en texto plano de login. Como alternativa segura: migrar las contraseñas existentes y eliminar el comparador temporal.
 - [x] Uniformar las respuestas de error del backend para evitar que producción exponga `error.message`, `detalle` o información interna de validaciones, MikroORM o dependencias.
-- [ ] Revisar y cubrir con pruebas adicionales las rutas sensibles con token ausente, usuario propietario, usuario ajeno y administrador.
-- [ ] Confirmar y conservar una prueba de regresión para DetallePedido: GET y POST de usuario propietario, usuario ajeno y administrador.
-- [ ] Registrar el resultado final de las pruebas de permisos sobre Usuario, Pedido, Comentario y DetallePedido.
+- [x] Revisar y cubrir con pruebas adicionales las rutas sensibles con token ausente, usuario propietario, usuario ajeno y administrador.
+- [x] Confirmar y conservar una prueba de regresión para DetallePedido: GET permite propietario y administrador; rechaza usuario ajeno; POST conserva la regla solo para administrador.
+- [x] Registrar el resultado final de las pruebas de permisos sobre Usuario, Pedido, Comentario y DetallePedido: suite final con 188 pruebas aprobadas y 1 marcada como to-do.
 - [x] Documentar el procedimiento completo para instalar y levantar el backend desde una instalación limpia.
 - [x] Confirmar que `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `JWT_SECRET` y `NODE_ENV` estén documentados sin secretos reales.
 - [x] Confirmar que las dependencias de ejecución, desarrollo y test estén declaradas y sean reproducibles con una instalación limpia.

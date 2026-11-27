@@ -1,4 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
+import express from 'express';
+import jwt from 'jsonwebtoken';
+import type { Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import type { Request, Response } from 'express';
 import { NotFoundError } from '@mikro-orm/core';
 
@@ -24,6 +28,7 @@ vi.mock('bcrypt', () => ({ default: bcryptMock }));
 
 import { validarUsuarioInput } from '../usuario/usuario.validator.js';
 import { add, findOne, login, sanitizeUsuarioInput } from '../usuario/usuario.controller.js';
+import usuarioRoutes from '../usuario/usuario.routes.js';
 
 // Helpers para simular Express (Response y Request)
 function crearRes() {
@@ -54,11 +59,46 @@ const usuarioValido = {
 };
 
 const nodeEnvOriginal = process.env.NODE_ENV;
+const jwtSecretOriginal = process.env.JWT_SECRET;
+const JWT_SECRET = 'secreto-de-test';
+let server: Server;
+let baseUrl: string;
+
+const tokenDe = (id: string, esAdmin = false) =>
+  jwt.sign({ id, email: `${id}@test.com`, esAdmin }, JWT_SECRET, { expiresIn: '1h' });
+
+async function consultarUsuario(id: string, token?: string) {
+  const respuesta = await fetch(`${baseUrl}/api/usuario/${id}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  return { status: respuesta.status, json: await respuesta.json() as any };
+}
+
+beforeAll(async () => {
+  process.env.JWT_SECRET = JWT_SECRET;
+  const app = express();
+  app.use('/api/usuario', usuarioRoutes);
+  await new Promise<void>((resolve) => {
+    server = app.listen(0, '127.0.0.1', () => resolve());
+  });
+  baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+});
+
+afterAll(async () => {
+  await new Promise<void>((resolve, reject) => {
+    server.close((error) => error ? reject(error) : resolve());
+  });
+  if (jwtSecretOriginal === undefined) {
+    delete process.env.JWT_SECRET;
+  } else {
+    process.env.JWT_SECRET = jwtSecretOriginal;
+  }
+});
 
 beforeEach(() => {
   vi.resetAllMocks();
   process.env.NODE_ENV = 'production';
-  process.env.JWT_SECRET = 'secreto-de-test';
+  process.env.JWT_SECRET = JWT_SECRET;
   bcryptMock.hash.mockResolvedValue('$2b$10$hashDeTest');
   // Evita ensuciar la salida con los console.error de los catch del controller
   vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -70,6 +110,36 @@ afterEach(() => {
 });
 
 describe('Usuario - Tests unitarios', () => {
+
+  describe('Autorización de la ruta GET /:id', () => {
+    it('rechaza una solicitud sin token (401)', async () => {
+      const { status } = await consultarUsuario('u-1');
+
+      expect(status).toBe(401);
+      expect(em.findOneOrFail).not.toHaveBeenCalled();
+    });
+
+    it('permite al propietario consultar su usuario', async () => {
+      em.findOneOrFail.mockResolvedValueOnce({ id: 'u-1', nombre: 'Juan' });
+
+      const { status } = await consultarUsuario('u-1', tokenDe('u-1'));
+
+      expect(status).toBe(200);
+      expect(em.findOneOrFail).toHaveBeenCalledOnce();
+    });
+
+    it('rechaza a otro usuario y permite al administrador', async () => {
+      const ajeno = await consultarUsuario('u-1', tokenDe('u-2'));
+      expect(ajeno.status).toBe(403);
+      expect(em.findOneOrFail).not.toHaveBeenCalled();
+
+      em.findOneOrFail.mockResolvedValueOnce({ id: 'u-1', nombre: 'Juan' });
+      const admin = await consultarUsuario('u-1', tokenDe('admin', true));
+
+      expect(admin.status).toBe(200);
+      expect(em.findOneOrFail).toHaveBeenCalledOnce();
+    });
+  });
 
   // Validación de datos
   describe('Validación del input', () => {

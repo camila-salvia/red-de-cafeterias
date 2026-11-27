@@ -23,7 +23,9 @@ const em = vi.hoisted(() => {
   return {
     findOne: vi.fn(async (entidad: any, filtro: any) => tabla(entidad).get(filtro.id) ?? null),
     findOneOrFail: vi.fn(async (entidad: any, filtro: any) => {
-      const encontrado = tabla(entidad).get(filtro.id);
+      const encontrado = entidad.name === 'Pedido'
+        ? db.pedidos.find((pedido: any) => pedido.id === filtro.id)
+        : tabla(entidad).get(filtro.id);
       if (!encontrado) throw new Error(`${entidad.name} no encontrado`);
       return encontrado;
     }),
@@ -92,6 +94,14 @@ async function crearPedido(body: unknown, token?: string) {
 
 async function listar(ruta: string, token?: string) {
   const respuesta = await fetch(`${baseUrl}${ruta}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  return { status: respuesta.status, json: (await respuesta.json()) as any };
+}
+
+async function cancelarPedido(id: string, token?: string) {
+  const respuesta = await fetch(`${baseUrl}/api/pedido/${id}/cancelar`, {
+    method: 'PATCH',
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   return { status: respuesta.status, json: (await respuesta.json()) as any };
@@ -382,6 +392,83 @@ describe('Pedido - Test de integración (POST /api/pedido)', () => {
       const { status } = await listar('/api/pedido?estado=Pendiente', tokenDe('u-1'));
 
       expect(status).toBe(403);
+    });
+  });
+
+  describe('Acceso a un pedido individual', () => {
+    beforeEach(sembrarPedidos);
+
+    it('permite al propietario consultar su pedido', async () => {
+      const { status, json } = await listar('/api/pedido/ped-1', tokenDe('u-1'));
+
+      expect(status).toBe(200);
+      expect(json.data.id).toBe('ped-1');
+    });
+
+    it('rechaza al usuario ajeno sin devolver el pedido', async () => {
+      const { status, json } = await listar('/api/pedido/ped-1', tokenDe('u-2'));
+
+      expect(status).toBe(403);
+      expect(json.data).toBeUndefined();
+    });
+
+    it('permite al administrador consultar el pedido de cualquier usuario', async () => {
+      const { status, json } = await listar('/api/pedido/ped-1', tokenDe('u-admin', true));
+
+      expect(status).toBe(200);
+      expect(json.data.id).toBe('ped-1');
+    });
+
+    it('rechaza sin token', async () => {
+      const { status } = await listar('/api/pedido/ped-1');
+
+      expect(status).toBe(401);
+    });
+  });
+
+  describe('Cancelación de pedidos', () => {
+    beforeEach(sembrarPedidos);
+
+    it('rechaza la solicitud sin token antes de consultar el pedido', async () => {
+      const { status } = await cancelarPedido('ped-1');
+
+      expect(status).toBe(401);
+      expect(em.findOneOrFail).not.toHaveBeenCalled();
+      expect(em.flush).not.toHaveBeenCalled();
+    });
+
+    it('permite al propietario cancelar su pedido pendiente', async () => {
+      const { status, json } = await cancelarPedido('ped-1', tokenDe('u-1'));
+
+      expect(status).toBe(200);
+      expect(json.data.estado_pago).toBe('Cancelado');
+      expect(db.pedidos[0].estado_pago).toBe('Cancelado');
+      expect(em.flush).toHaveBeenCalledOnce();
+    });
+
+    it('deniega al usuario ajeno y conserva el pedido sin cambios', async () => {
+      const { status } = await cancelarPedido('ped-1', tokenDe('u-2'));
+
+      expect(status).toBe(403);
+      expect(db.pedidos[0].estado_pago).toBe('Pendiente');
+      expect(em.flush).not.toHaveBeenCalled();
+    });
+
+    it('deniega al administrador cancelar el pedido de un cliente', async () => {
+      const { status } = await cancelarPedido('ped-1', tokenDe('u-admin', true));
+
+      expect(status).toBe(403);
+      expect(em.findOneOrFail).not.toHaveBeenCalled();
+      expect(db.pedidos[0].estado_pago).toBe('Pendiente');
+      expect(em.flush).not.toHaveBeenCalled();
+    });
+
+    it('no permite cancelar un pedido que ya no está pendiente', async () => {
+      const { status } = await cancelarPedido('ped-2', tokenDe('u-1'));
+
+      expect(status).toBe(409);
+      expect(db.pedidos[1].estado_pago).toBe('Confirmado');
+      expect(em.flush).not.toHaveBeenCalled();
     });
   });
 });

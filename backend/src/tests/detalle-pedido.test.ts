@@ -1,4 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
+import express from 'express';
+import jwt from 'jsonwebtoken';
+import type { Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import type { Request, Response } from 'express';
 import { NotFoundError } from '@mikro-orm/core';
 
@@ -17,13 +21,6 @@ vi.mock('../shared/database/orm.js', () => ({ orm: { em } }));
 vi.mock('../detalle-pedido/detalle-pedido.entity.js', () => ({ DetallePedido: class DetallePedido {} }));
 vi.mock('../pedido/pedido.entity.js', () => ({ Pedido: class Pedido {} }));
 vi.mock('../producto/producto.entity.js', () => ({ Producto: class Producto {} }));
-// Funciones "centinela": sirven para comprobar QUÉ middlewares tiene cada ruta.
-// El comportamiento real (401/403) de verificarToken y soloAdmin se prueba de punta a punta
-// con el archivo .http.
-vi.mock('../shared/middleware/auth.middleware.js', () => ({
-  verificarToken: vi.fn(),
-  soloAdmin: vi.fn(),
-}));
 
 import router from '../detalle-pedido/detalle-pedido.routes.js';
 import { verificarToken, soloAdmin } from '../shared/middleware/auth.middleware.js';
@@ -39,6 +36,11 @@ import {
 import { DetallePedido } from '../detalle-pedido/detalle-pedido.entity.js';
 import { Pedido } from '../pedido/pedido.entity.js';
 import { Producto } from '../producto/producto.entity.js';
+
+const JWT_SECRET = 'secreto-detalle-test';
+const jwtSecretOriginal = process.env.JWT_SECRET;
+let server: Server;
+let baseUrl: string;
 
 // ─────────────────────────── Helpers ───────────────────────────
 type UsuarioToken = { id: string; esAdmin: boolean };
@@ -56,6 +58,34 @@ function crearRes() {
 }
 
 const comoRes = (res: ReturnType<typeof crearRes>) => res as unknown as Response;
+
+const tokenDe = (id: string, esAdmin = false) =>
+  jwt.sign({ id, email: `${id}@test.com`, esAdmin }, JWT_SECRET, { expiresIn: '1h' });
+
+async function consultarDetalle(id: string, token?: string) {
+  const respuesta = await fetch(`${baseUrl}/api/detalle-pedido/${id}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const texto = await respuesta.text();
+  return { status: respuesta.status, json: texto ? JSON.parse(texto) : undefined };
+}
+
+async function crearDetalle(token?: string) {
+  const respuesta = await fetch(`${baseUrl}/api/detalle-pedido`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({
+      cantidad: 2,
+      pedido: 'ped-1',
+      producto: 'prod-1',
+    }),
+  });
+  const texto = await respuesta.text();
+  return { status: respuesta.status, json: texto ? JSON.parse(texto) : undefined };
+}
 
 function crearReq(opts: {
   method?: string;
@@ -126,11 +156,34 @@ const pedidoDe = (id: string, duenioId: string, estado_pago = 'Pendiente') => ({
 });
 const productoCafe = { id: 'prod-1', nombre: 'Café', precio: 3500 };
 
+beforeAll(async () => {
+  process.env.JWT_SECRET = JWT_SECRET;
+  const app = express();
+  app.use(express.json());
+  app.use('/api/detalle-pedido', router);
+  await new Promise<void>((resolve) => {
+    server = app.listen(0, '127.0.0.1', () => resolve());
+  });
+  baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+});
+
+afterAll(async () => {
+  await new Promise<void>((resolve, reject) => {
+    server.close((error) => error ? reject(error) : resolve());
+  });
+  if (jwtSecretOriginal === undefined) {
+    delete process.env.JWT_SECRET;
+  } else {
+    process.env.JWT_SECRET = jwtSecretOriginal;
+  }
+});
+
 const nodeEnvOriginal = process.env.NODE_ENV;
 
 beforeEach(() => {
   vi.resetAllMocks();
   process.env.NODE_ENV = 'production';
+  process.env.JWT_SECRET = JWT_SECRET;
   vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 
@@ -268,6 +321,56 @@ describe('DetallePedido - findOne (propiedad en cascada)', () => {
     await findOne(crearReq({ params: { id: 'det-1' }, usuario: clienteA }), comoRes(res));
 
     expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it('la ruta HTTP exige token y aplica la propiedad para propietario, ajeno y admin', async () => {
+    const sinToken = await consultarDetalle('det-1');
+    expect(sinToken.status).toBe(401);
+    expect(em.findOneOrFail).not.toHaveBeenCalled();
+
+    em.findOneOrFail.mockResolvedValueOnce(detalleDe(clienteA.id));
+    const propietario = await consultarDetalle('det-1', tokenDe(clienteA.id));
+    expect(propietario.status).toBe(200);
+
+    em.findOneOrFail.mockResolvedValueOnce(detalleDe(clienteB.id));
+    const ajeno = await consultarDetalle('det-1', tokenDe(clienteA.id));
+    expect(ajeno.status).toBe(403);
+    expect(ajeno.json.data).toBeUndefined();
+
+    em.findOneOrFail.mockResolvedValueOnce(detalleDe(clienteB.id));
+    const adminResponse = await consultarDetalle('det-1', tokenDe(admin.id, true));
+    expect(adminResponse.status).toBe(200);
+  });
+
+  it('POST /detalle-pedido conserva la regla solo para admin', async () => {
+    const sinToken = await crearDetalle();
+    expect(sinToken.status).toBe(401);
+    expect(em.findOne).not.toHaveBeenCalled();
+
+    const cliente = await crearDetalle(tokenDe(clienteA.id));
+    expect(cliente.status).toBe(403);
+    expect(em.findOne).not.toHaveBeenCalled();
+
+    const pedido = pedidoDe('ped-1', clienteA.id);
+    const producto = productoCafe;
+    em.findOne.mockImplementation(async (entidad: unknown) =>
+      entidad === Producto ? producto : entidad === Pedido ? pedido : null
+    );
+    em.findOneOrFail.mockImplementation(async (entidad: unknown) =>
+      entidad === Producto ? producto : entidad === Pedido ? pedido : null
+    );
+    em.create.mockReturnValue({
+      id: 'det-nuevo',
+      cantidad: 2,
+      precio_unitario: 3500,
+      pedido,
+      producto,
+    });
+
+    const adminResponse = await crearDetalle(tokenDe(admin.id, true));
+    expect(adminResponse.status).toBe(201);
+    expect(em.create).toHaveBeenCalled();
+    expect(em.flush).toHaveBeenCalledOnce();
   });
 });
 

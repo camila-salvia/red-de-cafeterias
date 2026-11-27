@@ -1,4 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest';
+import express from 'express';
+import jwt from 'jsonwebtoken';
+import type { Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import type { Request, Response } from 'express';
 
 
@@ -8,16 +12,22 @@ const em = vi.hoisted(() => ({
   create: vi.fn(),
   flush: vi.fn(),
   populate: vi.fn(),
+  getReference: vi.fn(),
+  removeAndFlush: vi.fn(),
 }));
 
 vi.mock('../shared/database/orm.js', () => ({ orm: { em } }));
 vi.mock('../usuario/usuario.entity.js', () => ({ Usuario: class Usuario {} }));
 vi.mock('../comentario/comentario.entity.js', () => ({ Comentario: class Comentario {} }));
+vi.mock('../comentario/comentario.moderacion.js', () => ({
+  moderarComentarioInput: (_req: unknown, _res: unknown, next: () => void) => next(),
+}));
 
 import { validarComentarioInput } from '../comentario/comentario.validator.js';
 import { add, sanitizeComentarioInput } from '../comentario/comentario.controller.js';
 import { Usuario } from '../usuario/usuario.entity.js';
 import { Comentario } from '../comentario/comentario.entity.js';
+import comentarioRoutes from '../comentario/comentario.routes.js';
 
 
 // Helpers
@@ -44,6 +54,51 @@ const comentarioValido = {
   usuario: 'user-1',
 };
 
+const JWT_SECRET = 'secreto-comentario-test';
+const jwtSecretOriginal = process.env.JWT_SECRET;
+let server: Server;
+let baseUrl: string;
+
+const tokenDe = (id: string, esAdmin = false) =>
+  jwt.sign({ id, email: `${id}@test.com`, esAdmin }, JWT_SECRET, { expiresIn: '1h' });
+
+async function solicitar(
+  ruta: string,
+  opciones: { method?: string; token?: string; body?: Record<string, unknown> } = {}
+) {
+  const respuesta = await fetch(`${baseUrl}${ruta}`, {
+    method: opciones.method ?? 'GET',
+    headers: {
+      ...(opciones.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(opciones.token ? { Authorization: `Bearer ${opciones.token}` } : {}),
+    },
+    ...(opciones.body ? { body: JSON.stringify(opciones.body) } : {}),
+  });
+  const texto = await respuesta.text();
+  return { status: respuesta.status, json: texto ? JSON.parse(texto) : undefined };
+}
+
+beforeAll(async () => {
+  process.env.JWT_SECRET = JWT_SECRET;
+  const app = express();
+  app.use(express.json());
+  app.use('/api/comentario', comentarioRoutes);
+  await new Promise<void>((resolve) => {
+    server = app.listen(0, '127.0.0.1', () => resolve());
+  });
+  baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+});
+
+afterAll(async () => {
+  await new Promise<void>((resolve, reject) => {
+    server.close((error) => error ? reject(error) : resolve());
+  });
+  if (jwtSecretOriginal === undefined) {
+    delete process.env.JWT_SECRET;
+  } else {
+    process.env.JWT_SECRET = jwtSecretOriginal;
+  }
+});
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -51,6 +106,58 @@ beforeEach(() => {
 
 // Pruebas
 describe('Comentario (backend)', () => {
+  describe('Autorización de rutas', () => {
+    it('requiere token para publicar y asocia el comentario al usuario autenticado', async () => {
+      const sinToken = await solicitar('/api/comentario', {
+        method: 'POST',
+        body: { contenido: 'Buen café', puntuacion: 5 },
+      });
+      expect(sinToken.status).toBe(401);
+
+      const usuario = { id: 'cliente-a', nombre: 'Cliente A' };
+      em.findOne.mockResolvedValueOnce(usuario);
+      em.create.mockReturnValueOnce({
+        id: 'comentario-1',
+        contenido: 'Buen café',
+        fecha_publicacion: new Date(),
+        puntuacion: 5,
+        usuario,
+      });
+      em.flush.mockResolvedValueOnce(undefined);
+      em.populate.mockResolvedValueOnce(undefined);
+
+      const respuesta = await solicitar('/api/comentario', {
+        method: 'POST',
+        token: tokenDe('cliente-a'),
+        body: { contenido: 'Buen café', puntuacion: 5, usuario: 'cliente-b' },
+      });
+
+      expect(respuesta.status).toBe(201);
+      expect(em.create).toHaveBeenCalledWith(
+        Comentario,
+        expect.objectContaining({ usuario: 'cliente-a' })
+      );
+    });
+
+    it('reserva el borrado de comentarios al administrador', async () => {
+      expect((await solicitar('/api/comentario/comentario-1', { method: 'DELETE' })).status).toBe(401);
+      expect((await solicitar('/api/comentario/comentario-1', {
+        method: 'DELETE',
+        token: tokenDe('cliente-a'),
+      })).status).toBe(403);
+      expect(em.removeAndFlush).not.toHaveBeenCalled();
+
+      em.getReference.mockReturnValueOnce({ id: 'comentario-1' });
+      em.removeAndFlush.mockResolvedValueOnce(undefined);
+      const respuesta = await solicitar('/api/comentario/comentario-1', {
+        method: 'DELETE',
+        token: tokenDe('admin', true),
+      });
+
+      expect(respuesta.status).toBe(200);
+    });
+  });
+
   describe('creación válida', () => {
     it('el validator acepta un comentario válido y pasa al siguiente middleware', async () => {
       em.findOne.mockResolvedValue({ id: 'user-1' });
