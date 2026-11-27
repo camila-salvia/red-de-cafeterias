@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { orm } from '../shared/database/orm.js';
 import { Categoria } from '../categoria/categoria.entity.js';
+import { responderError } from '../shared/errores.js';
 
 const em = orm.em;
 
@@ -48,9 +49,9 @@ export async function validarProductoInput(req: Request, res: Response, next: Ne
         return res.status(404).json({ message: 'La categoría especificada no existe.' });
       }
     }
-  } catch (error: any) {
-      return res.status(500).json({ message: 'Error al verificar categoría', error: error.message });
-    }
-  
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al verificar categoría' });
+  }
+
   next();
 }

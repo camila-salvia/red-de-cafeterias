@@ -13,6 +13,7 @@ import { seedInitialData } from './shared/database/seed.js';
 import { RequestContext } from '@mikro-orm/core';
 import cors from 'cors';
 import { servirImagenProducto } from './producto/producto.imagen.js';
+import { manejadorErrores } from './shared/errores.js';
 
 const app = express();
 
@@ -42,6 +43,9 @@ app.use('/api/pago', pagoRoutes);
 app.get('/', (req, res) => {
   res.json({ message: 'Hello' });
 });
+
+// Manejo de errores: siempre después de todas las rutas, y antes de app.listen
+app.use(manejadorErrores);  
 
 if (esProduccion) {
   console.log('Producción: el esquema no se sincroniza al iniciar (usar npm run schema:sync).')

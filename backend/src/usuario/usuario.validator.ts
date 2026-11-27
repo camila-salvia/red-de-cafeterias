@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { orm } from '../shared/database/orm.js';
 import { Usuario } from './usuario.entity.js';
+import { responderError } from '../shared/errores.js';
 
 const em = orm.em;
 
@@ -72,8 +73,8 @@ export async function validarUsuarioInput(req: Request, res: Response, next: Nex
         return res.status(409).json({ message: 'El correo electrónico ya se encuentra registrado.' });
       } 
     }
-  } catch (error: any) {
-    return res.status(500).json({ message: 'Error al verificar email duplicado', error: error.message });
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al verificar email duplicado' });
   }
 
   next();

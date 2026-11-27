@@ -18,6 +18,8 @@ const extensionesPorTipo: Record<string, string> = {
   'image/webp': '.webp',
 };
 
+const mensajeImagenInvalida = 'La imagen debe ser JPG, PNG o WebP.';
+
 class ImagenProductoInvalida extends Error {}
 
 const upload = multer({
@@ -28,7 +30,7 @@ const upload = multer({
   },
   fileFilter: (_req, file, callback) => {
     if (!Object.prototype.hasOwnProperty.call(extensionesPorTipo, file.mimetype)) {
-      callback(new ImagenProductoInvalida('La imagen debe ser JPG, PNG o WebP.'));
+      callback(new ImagenProductoInvalida(mensajeImagenInvalida));
       return;
     }
 
@@ -57,7 +59,7 @@ export function procesarImagenProducto(req: Request, res: Response, next: NextFu
     }
 
     if (error instanceof ImagenProductoInvalida) {
-      res.status(400).json({ message: error.message });
+      res.status(400).json({ message: mensajeImagenInvalida });
       return;
     }
 

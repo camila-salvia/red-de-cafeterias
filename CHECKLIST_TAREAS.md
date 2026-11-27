@@ -20,7 +20,7 @@ Esta lista reúne el contenido pendiente de `ANALISIS_FALTANTE.md`, los requisit
 ## Backend — requisitos y cierre funcional
 
 - [ ] Resolver o documentar formalmente el fallback de contraseñas en texto plano de login. Como alternativa segura: migrar las contraseñas existentes y eliminar el comparador temporal.
-- [ ] Uniformar las respuestas de error del backend para evitar que producción exponga `error.message`, `detalle` o información interna de validaciones, MikroORM o dependencias.
+- [x] Uniformar las respuestas de error del backend para evitar que producción exponga `error.message`, `detalle` o información interna de validaciones, MikroORM o dependencias.
 - [ ] Revisar y cubrir con pruebas adicionales las rutas sensibles con token ausente, usuario propietario, usuario ajeno y administrador.
 - [ ] Confirmar y conservar una prueba de regresión para DetallePedido: GET y POST de usuario propietario, usuario ajeno y administrador.
 - [ ] Registrar el resultado final de las pruebas de permisos sobre Usuario, Pedido, Comentario y DetallePedido.

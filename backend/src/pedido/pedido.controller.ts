@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express'
 import { orm } from '../shared/database/orm.js'
-import { NotFoundError } from '@mikro-orm/core'
 import { Pedido } from '../pedido/pedido.entity.js'
 import { Producto } from '../producto/producto.entity.js'
 import { DetallePedido } from '../detalle-pedido/detalle-pedido.entity.js'
 import { Usuario } from '../usuario/usuario.entity.js'
 import { MetodoPago } from '../metodo-pago/metodo-pago.entity.js'
+import { responderError } from '../shared/errores.js'
 
 const em = orm.em
 
@@ -61,8 +61,8 @@ async function findAll(req: Request, res: Response) {
         orderBy: { fecha_pedido: 'DESC' },
       })
     return res.status(200).json({ message: 'Todos los pedidos encontrados', data: pedidos })
-  } catch (error:any) {
-    return res.status(500).json({ message: 'Error al obtener los pedidos' })
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al obtener los pedidos' })
   }
 }
 
@@ -89,8 +89,8 @@ async function findByUsuario(req: Request, res: Response) {
       }
     )
     return res.status(200).json({ message: 'Pedidos del usuario encontrados', data: pedidos })
-  } catch (error: any) {
-    return res.status(500).json({ message: 'Error al obtener los pedidos del usuario', error: error.message })
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al obtener los pedidos del usuario' })
   }
 }
 
@@ -152,9 +152,8 @@ async function add(req: Request, res: Response) {
     await em.flush()
 
     return res.status(201).json({ message: 'Pedido creado exitosamente', data: pedido })
-  } catch (error: any) {
-    console.error('Error detallado al crear:', error)
-    return res.status(500).json({ message: 'Error al crear pedido', detalle: error.message })
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al crear pedido' })
   }
 }
 
@@ -171,12 +170,11 @@ async function confirmar(req: Request, res: Response) {
     pedido.estado_pago = 'Confirmado'
     await em.flush()
     return res.status(200).json({ message: 'Pedido confirmado', data: pedido })
-  } catch (error: any) {
-    if (error instanceof NotFoundError) {
-      return res.status(404).json({ message: 'Pedido no encontrado' })
-    }
-    console.error('Error al confirmar el pedido:', error)
-    return res.status(500).json({ message: 'Error al confirmar el pedido' })
+  } catch (error: unknown) {
+    return responderError(res, error, {
+      mensaje: 'Error al confirmar el pedido',
+      noEncontrado: 'Pedido no encontrado',
+    })
   }
 }
 
@@ -201,12 +199,11 @@ async function cancelar(req: Request, res: Response) {
     pedido.estado_pago = 'Cancelado'
     await em.flush()
     return res.status(200).json({ message: 'Pedido cancelado', data: pedido })
-  } catch (error: any) {
-    if (error instanceof NotFoundError) {
-      return res.status(404).json({ message: 'Pedido no encontrado' })
-    }
-    console.error('Error al cancelar el pedido:', error)
-    return res.status(500).json({ message: 'Error al cancelar el pedido' })
+  } catch (error: unknown) {
+    return responderError(res, error, {
+      mensaje: 'Error al cancelar el pedido',
+      noEncontrado: 'Pedido no encontrado',
+    })
   }
 }
 
@@ -225,11 +222,11 @@ async function cancelar(req: Request, res: Response) {
     }
 
     return res.status(200).json({ message: 'Pedido encontrado', data: pedido })
-  } catch (error:any) {
-  if (error instanceof NotFoundError) {
-      return res.status(404).json({ message: 'Pedido no encontrado' })
-    }
-    return res.status(500).json({ message: 'Error al buscar el pedido' })
+  } catch (error: unknown) {
+    return responderError(res, error, {
+      mensaje: 'Error al buscar el pedido',
+      noEncontrado: 'Pedido no encontrado',
+    })
   }
 }
 
@@ -245,11 +242,11 @@ async function update(req: Request, res: Response) {
       em.assign(pedido, input)
       await em.flush()
       return res.status(200).json({ message: 'Pedido actualizado', data: pedido })
-  } catch (error:any) {
-    if (error instanceof NotFoundError) {
-      return res.status(404).json({ message: 'Pedido no encontrado' })
-    }
-    return res.status(500).json({ message: 'Error al actualizar pedido' })
+  } catch (error: unknown) {
+    return responderError(res, error, {
+      mensaje: 'Error al actualizar pedido',
+      noEncontrado: 'Pedido no encontrado',
+    })
   }
 }
 
@@ -260,11 +257,11 @@ async function remove(req: Request, res: Response) {
     const pedido = await em.findOneOrFail(Pedido, { id: id as any })
     await em.removeAndFlush(pedido)
     return res.status(200).send({ message: 'Pedido eliminado' })
-  } catch (error:any) {
-    if (error instanceof NotFoundError) {
-      return res.status(404).json({ message: 'Pedido no encontrado' })
-    }
-    return res.status(500).send({ message: 'Error al eliminar pedido' });
+  } catch (error: unknown) {
+    return responderError(res, error, {
+      mensaje: 'Error al eliminar pedido',
+      noEncontrado: 'Pedido no encontrado',
+    })
   }
 }
 

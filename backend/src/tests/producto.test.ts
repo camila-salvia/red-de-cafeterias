@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Request, Response } from 'express';
 import { NotFoundError } from '@mikro-orm/core';
 
@@ -56,13 +56,21 @@ const productoValido = {
   categoria: 'bebidas',
 };
 
+const nodeEnvOriginal = process.env.NODE_ENV;
+
 beforeEach(() => {
   vi.resetAllMocks();
+  process.env.NODE_ENV = 'production';
   archivoSistema.writeFile.mockResolvedValue(undefined);
   archivoSistema.unlink.mockResolvedValue(undefined);
   em.getReference.mockImplementation((_entity: unknown, id: string) => ({ id }));
   // Evita ensuciar la salida con los console.error de los catch del controller
   vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  process.env.NODE_ENV = nodeEnvOriginal;
+  vi.restoreAllMocks();
 });
 
 describe('Producto - Tests unitarios', () => {
@@ -278,7 +286,6 @@ describe('Producto - Tests unitarios', () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'Error al crear producto',
-          detalle: 'fallo de base de datos',
         })
       );
     });
@@ -369,7 +376,6 @@ describe('Read - findAll', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         message: 'Error al obtener productos',
-        error: 'db caída',
       });
     });
   });
@@ -403,7 +409,6 @@ describe('Read - findAll', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         message: 'Error al obtener productos',
-        error: 'db caída',
       });
     });
   });
@@ -444,7 +449,6 @@ describe('Read - findAll', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         message: 'Error al obtener producto',
-        detalle: 'db caída',
       });
     });
   });
@@ -522,7 +526,6 @@ describe('Read - findAll', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         message: 'Error al actualizar producto',
-        detalle: 'fallo de base de datos',
       });
     });
   });
@@ -564,7 +567,6 @@ describe('Read - findAll', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         message: 'Error al eliminar producto',
-        detalle: 'fallo de base de datos',
       });
     });
   });
@@ -626,7 +628,6 @@ describe('Read - findAll', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         message: 'Error al cambiar el estado del producto',
-        detalle: 'db caída',
       });
     });
   }); });

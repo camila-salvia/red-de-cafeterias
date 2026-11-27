@@ -3,6 +3,7 @@ import { orm } from '../shared/database/orm.js';
 import { Usuario } from '../usuario/usuario.entity.js';
 import { Producto } from '../producto/producto.entity.js';
 import { MetodoPago } from '../metodo-pago/metodo-pago.entity.js';
+import { responderError } from '../shared/errores.js';
 
 const em = orm.em;
 
@@ -72,9 +73,9 @@ const esActualizacion = req.method === 'PUT' || req.method === 'PATCH';
         }
       }
     }
-  } catch (error: any) {
-      return res.status(500).json({ message: 'Error validando dependencias del pedido', error: error.message });
-    }
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error validando dependencias del pedido' });
+  }
 
-    next();
+  next();
 }

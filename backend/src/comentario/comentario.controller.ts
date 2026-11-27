@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { orm } from '../shared/database/orm.js'
 import { Comentario } from './comentario.entity.js'
+import { responderError } from '../shared/errores.js'
 
 const em = orm.em
 
@@ -52,8 +53,8 @@ async function findAll(req: Request, res: Response) {
       { populate: ['usuario'], orderBy: { fecha_publicacion: 'DESC' } }
     )
     return res.status(200).json({ message: 'Todos los comentarios encontrados', data: comentarios.map(aVistaPublica) })
-  } catch (error:any) {
-    res.status(500).json({ message: 'Error al obtener comentarios' })
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al obtener comentarios' })
   }
 }
 
@@ -65,9 +66,8 @@ async function add(req: Request, res: Response) {
     // cargar usuario para devolver misma vista pública que el listado
     await em.populate(comentario, ['usuario'])
     res.status(201).json({ message: 'Comentario creado', data: aVistaPublica(comentario) })
-  } catch (error:any) {
-    console.error('Error detallado al crear: ', error);
-    res.status(500).json({ message: 'Error al crear comentario', detalle: error.message })
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al crear comentario' })
   }
 }
 
@@ -77,8 +77,11 @@ async function add(req: Request, res: Response) {
     const id = req.params.id as string
     const comentario = await em.findOneOrFail(Comentario, { id }, { populate: ['usuario'] })
     res.status(200).json({ message: 'Comentario encontrado', data: aVistaPublica(comentario) })
-  } catch (error:any) {
-    res.status(404).json({ message: 'Comentario no encontrado' })
+  } catch (error: unknown) {
+    return responderError(res, error, {
+      mensaje: 'Error al obtener comentario',
+      noEncontrado: 'Comentario no encontrado',
+    })
   }
 }
 
@@ -90,8 +93,8 @@ async function update(req: Request, res: Response) {
       em.assign(comentario, req.body.sanitizedInput)
       await em.flush()
       res.status(200).json({ message: 'Comentario actualizado', data: comentario })
-  } catch (error:any) {
-    res.status(500).json({ message: 'Error al actualizar comentario' })
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al actualizar comentario' })
   }
 }
 
@@ -102,8 +105,8 @@ async function remove(req: Request, res: Response) {
     const comentario = em.getReference(Comentario, id)
     await em.removeAndFlush(comentario)
     res.status(200).send({ message: 'Comentario eliminado' })
-  } catch (error) {
-    res.status(500).send({ message: 'Error al eliminar comentario' });
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al eliminar comentario' })
   }
 }
 

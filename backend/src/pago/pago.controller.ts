@@ -1,9 +1,9 @@
 import { Request, Response } from 'express'
-import { NotFoundError } from '@mikro-orm/core'
 import { MercadoPagoConfig, Preference, Payment, WebhookSignatureValidator } from 'mercadopago'
 import { orm } from '../shared/database/orm.js'
 import { Pedido } from '../pedido/pedido.entity.js'
 import { DetallePedido } from '../detalle-pedido/detalle-pedido.entity.js'
+import { responderError } from '../shared/errores.js'
 
 const em = orm.em
 
@@ -74,12 +74,11 @@ async function crearPreferencia(req: Request, res: Response) {
       message: 'Preferencia de pago creada',
       data: { init_point: pref.init_point },
     })
-  } catch (error: any) {
-    if (error instanceof NotFoundError) {
-      return res.status(404).json({ message: 'Pedido no encontrado' })
-    }
-    console.error('Error en crearPreferencia:', error)
-    return res.status(500).json({ message: 'Error al crear la preferencia de pago', detalle: error.message })
+  } catch (error: unknown) {
+    return responderError(res, error, {
+      mensaje: 'Error al crear la preferencia de pago',
+      noEncontrado: 'Pedido no encontrado',
+    })
   }
 }
 
@@ -145,9 +144,8 @@ async function webhook(req: Request, res: Response) {
     // Otros estados (pending, rejected, in_process...) dejan el pedido como está.
 
     return res.sendStatus(200)
-  } catch (error) {
-    console.error('Error en webhook de Mercado Pago:', error)
-    return res.sendStatus(500) // Mercado Pago reintenta
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error interno al procesar el webhook' }) // Mercado Pago reintenta
   }
 }
 

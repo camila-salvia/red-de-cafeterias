@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { orm } from '../shared/database/orm.js';
 import { Producto } from '../producto/producto.entity.js';
 import { Pedido } from '../pedido/pedido.entity.js';
+import { responderError } from '../shared/errores.js';
 
 const em = orm.em;
 
@@ -61,8 +62,8 @@ export async function validarDetallePedidoInput(req: Request, res: Response, nex
         return res.status(403).json({ message: 'No puedes asociar un detalle a un pedido que no te pertenece.' });
       }
     }
-  } catch (error: any) {
-    return res.status(500).json({ message: 'Error al validar dependencias del detalle', error: error.message });
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al validar dependencias del detalle' });
   }
 
   next();

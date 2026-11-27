@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Request, Response } from 'express';
 import { NotFoundError } from '@mikro-orm/core';
 
@@ -126,9 +126,17 @@ const pedidoDe = (id: string, duenioId: string, estado_pago = 'Pendiente') => ({
 });
 const productoCafe = { id: 'prod-1', nombre: 'Café', precio: 3500 };
 
+const nodeEnvOriginal = process.env.NODE_ENV;
+
 beforeEach(() => {
   vi.resetAllMocks();
+  process.env.NODE_ENV = 'production';
   vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  process.env.NODE_ENV = nodeEnvOriginal;
+  vi.restoreAllMocks();
 });
 
 // ═══════════════════════ 1. GUARDS EN LAS RUTAS ═══════════════════════

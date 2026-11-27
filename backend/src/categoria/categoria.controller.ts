@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { orm } from '../shared/database/orm.js'
-import { NotFoundError } from '@mikro-orm/core'
 import { Categoria } from './categoria.entity.js'
+import { responderError } from '../shared/errores.js'
 
 const em = orm.em
 
@@ -28,8 +28,8 @@ async function findAll(req: Request, res: Response) {
   try {
     const categorias = await em.find(Categoria, {})
     return res.status(200).json({ message: 'Todas las categorías encontradas', data: categorias })
-  } catch (error:any) {
-    return res.status(500).json({ message: 'Error al obtener categorías' })
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al obtener categorías' })
   }
 }
 
@@ -39,8 +39,8 @@ async function add(req: Request, res: Response) {
     const categoria = em.create(Categoria, req.body.sanitizedInput)
     await em.flush()
     return res.status(201).json({ message: 'Categoría creada', data: categoria })
-  } catch (error:any) {
-    return res.status(500).json({ message: 'Error al crear categoría' })
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al crear categoría' })
   }
 }
 
@@ -50,8 +50,11 @@ async function add(req: Request, res: Response) {
     const id = req.params.id as string
     const categoria = await em.findOneOrFail(Categoria, { id })
     return res.status(200).json({ message: 'Categoría encontrada', data: categoria })
-  } catch (error:any) {
-    return res.status(404).json({ message: 'Categoría no encontrada' })
+  } catch (error: unknown) {
+    return responderError(res, error, {
+      mensaje: 'Error al obtener categoría',
+      noEncontrado: 'Categoría no encontrada',
+    })
   }
 }
 
@@ -63,12 +66,11 @@ async function update(req: Request, res: Response) {
       em.assign(categoria, req.body.sanitizedInput)
       await em.flush()
       return res.status(200).json({ message: 'Categoría actualizada', data: categoria })
-  } catch (error:any) {
-    if (error instanceof NotFoundError) {
-      return res.status(404).json({ message: 'Categoría no encontrada' })
-    }
-    console.error('Detalle del error en update:', error);
-    return res.status(500).json({ message: 'Error al actualizar categoría', detalle: error.message });
+  } catch (error: unknown) {
+    return responderError(res, error, {
+      mensaje: 'Error al actualizar categoría',
+      noEncontrado: 'Categoría no encontrada',
+    })
   }
 }
 
@@ -79,12 +81,11 @@ async function remove(req: Request, res: Response) {
     const categoria = await em.findOneOrFail(Categoria, { id })
     await em.removeAndFlush(categoria)
     return res.status(200).send({ message: 'Categoría eliminada' })
-  } catch (error:any) {
-    if (error instanceof NotFoundError) {
-      return res.status(404).json({ message: 'Categoría no encontrada' })
-    }
-    console.error('Detalle del error en remove:', error);
-    return res.status(500).json({ message: 'Error al eliminar categoría', detalle: error.message });
+  } catch (error: unknown) {
+    return responderError(res, error, {
+      mensaje: 'Error al eliminar categoría',
+      noEncontrado: 'Categoría no encontrada',
+    })
   }
 }
 

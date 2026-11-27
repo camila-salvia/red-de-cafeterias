@@ -2,8 +2,8 @@ import { Request, Response, NextFunction } from 'express'
 import { Producto } from './producto.entity.js'
 import { Categoria } from '../categoria/categoria.entity.js'
 import { orm } from '../shared/database/orm.js'
-import { NotFoundError } from '@mikro-orm/core'
 import { ImagenProducto } from './imagen-producto.entity.js'
+import { responderError } from '../shared/errores.js'
 
 const em = orm.em
 
@@ -67,9 +67,8 @@ async function findAll(req: Request, res: Response) {
     )
 
     return res.status(200).json({ message: 'Productos filtrados', data: productos })
-  } catch (error: any) {
-    console.error('Error detallado en findAll:', error)
-    return res.status(500).json({ message: 'Error al obtener productos', error: error.message })
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al obtener productos' })
   }
 }
 
@@ -85,12 +84,8 @@ async function findAllAdmin(req: Request, res: Response) {
       message: 'Listado completo de productos (admin)', 
       data: productos 
     })
-  } catch (error: any) {
-    console.error('Error en findAllAdmin:', error)
-    return res.status(500).json({ 
-      message: 'Error al obtener productos', 
-      error: error.message 
-    })
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al obtener productos' })
   }
 }
 
@@ -117,10 +112,8 @@ async function add(req: Request, res: Response) {
     });
     await em.flush();
     return res.status(201).json({ message: 'Producto creado exitosamente', data: producto });
-  } catch (error: any) {
-
-    console.error('Error detallado al crear:', error);
-    return res.status(500).json({ message: 'Error al crear producto', detalle: error.message });
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al crear producto' });
   }
 }
 
@@ -135,12 +128,8 @@ async function add(req: Request, res: Response) {
         { populate: ['categoria']}
     )
     return res.status(200).json({ message: 'Producto encontrado', data: producto })
-  } catch (error:any) {
-    if (error instanceof NotFoundError) {
-      return res.status(404).json({ message: 'Producto no encontrado' })
-    }
-    console.error('Detalle del error en findOne:', error)
-    return res.status(500).json({ message: 'Error al obtener producto', detalle: error.message })
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al obtener producto', noEncontrado: 'Producto no encontrado' })
   }
 }
 
@@ -170,13 +159,8 @@ async function update(req: Request, res: Response) {
       em.assign(producto, input);
       await em.flush();
       return res.status(200).json({ message: 'Producto actualizado', data: producto });
-  } catch (error:any) {
-  
-    if (error instanceof NotFoundError) {
-      return res.status(404).json({ message: 'Producto no encontrado' })
-    }
-    console.error('Detalle del error en update:', error);
-    return res.status(500).json({ message: 'Error al actualizar producto', detalle: error.message });
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al actualizar producto', noEncontrado: 'Producto no encontrado' });
   }
 }
 
@@ -188,12 +172,8 @@ async function remove(req: Request, res: Response) {
     producto.activo = false
     await em.flush()
     return res.status(200).send({ message: 'Producto eliminado' })
-  } catch (error: any) {
-    if (error instanceof NotFoundError) {
-      return res.status(404).json({ message: 'Producto no encontrado' })
-    }
-    console.error('Detalle del error en remove:', error);
-    return res.status(500).json({ message: 'Error al eliminar producto', detalle: error.message });
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al eliminar producto', noEncontrado: 'Producto no encontrado' });
   }
 }
 
@@ -209,12 +189,8 @@ async function cambiarEstadoProducto(req: Request, res: Response) {
       message: `Producto ${estadoTexto} correctamente`, 
       data: producto 
     })
-  } catch (error: any) {
-    if (error instanceof NotFoundError) {
-      return res.status(404).json({ message: 'Producto no encontrado' })
-    }
-    console.error('Detalle del error en cambiarEstadoProducto:', error)
-    return res.status(500).json({ message: 'Error al cambiar el estado del producto', detalle: error.message })
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al cambiar el estado del producto', noEncontrado: 'Producto no encontrado' });
   }
 }
 

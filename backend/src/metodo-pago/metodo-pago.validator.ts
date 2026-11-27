@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { orm } from '../shared/database/orm.js';
 import { MetodoPago } from './metodo-pago.entity.js';
+import { responderError } from '../shared/errores.js';
 
 const em = orm.em;
 
@@ -41,8 +42,8 @@ export async function validarMetodoPagoInput(req: Request, res: Response, next: 
         return res.status(409).json({ message: 'Ya existe un método de pago con ese nombre.' });
       }
     }
-  } catch (error: any) {
-    return res.status(500).json({ message: 'Error al verificar el método de pago', error: error.message });
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al verificar el método de pago' });
   }
 
   next();

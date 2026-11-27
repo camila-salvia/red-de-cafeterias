@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { orm } from '../shared/database/orm.js';
 import { Usuario } from '../usuario/usuario.entity.js';
+import { responderError } from '../shared/errores.js';
 
 const em = orm.em;
 
@@ -38,8 +39,8 @@ export async function validarComentarioInput(req: Request, res: Response, next: 
     if (!usuarioExiste) {
       return res.status(404).json({ message: 'El usuario especificado no existe.' });
     }
-  } catch (error: any) {
-    return res.status(500).json({ message: 'Error al verificar usuario', error: error.message });
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al verificar usuario' });
   }
 
   next();

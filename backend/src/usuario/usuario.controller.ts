@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
 import { Usuario } from './usuario.entity.js'
-import { NotFoundError } from '@mikro-orm/core'
 import { orm } from '../shared/database/orm.js'
 import { getJwtSecret } from '../shared/middleware/auth.middleware.js'
+import { responderError } from '../shared/errores.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
@@ -89,9 +89,8 @@ async function login(req: Request, res: Response) {
         token
       }
     });
-  } catch (error: any) {
-    console.error('Error en login:', error);
-    return res.status(500).json({ message: 'Error interno en el servidor' });
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error interno en el servidor' })
   }
 }
 
@@ -102,8 +101,8 @@ async function findAll(req: Request, res: Response) {
         Usuario, 
         {} )
     return res.status(200).json({ message: 'Todos los usuarios encontrados', data: usuarios })
-  } catch (error:any) {
-    return res.status(500).json({ message: 'Error al obtener usuarios' })
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al obtener usuarios' })
   }
 }
 
@@ -116,9 +115,8 @@ async function add(req: Request, res: Response) {
     const usuario = em.create(Usuario, input)
     await em.flush()
     return res.status(201).json({ message: 'Usuario creado', data: usuario })
-  } catch (error:any) {
-    console.error('Error detallado al crear:', error);
-    return res.status(500).json({ message: 'Error al crear usuario', detalle: error.message })
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al crear usuario' })
   }
 }
 
@@ -131,8 +129,11 @@ async function add(req: Request, res: Response) {
         { id }
     )
     return res.status(200).json({ message: 'Usuario encontrado', data: usuario })
-  } catch (error:any) {
-    return res.status(404).json({ message: 'Usuario no encontrado' })
+  } catch (error: unknown) {
+    return responderError(res, error, {
+      mensaje: 'Error al obtener usuario',
+      noEncontrado: 'Usuario no encontrado',
+    })
   }
 }
 
@@ -154,12 +155,11 @@ async function update(req: Request, res: Response) {
       em.assign(usuario, input)
       await em.flush()
       return res.status(200).json({ message: 'Usuario actualizado', data: usuario })
-  } catch (error:any) {
-    if (error instanceof NotFoundError) {
-      return res.status(404).json({ message: 'Usuario no encontrado' })
-    }
-    console.error('Error al actualizar usuario:', error)
-    return res.status(500).json({ message: 'Error al actualizar usuario' })
+  } catch (error: unknown) {
+    return responderError(res, error, {
+      mensaje: 'Error al actualizar usuario',
+      noEncontrado: 'Usuario no encontrado',
+    })
   }
 }
 
@@ -170,12 +170,11 @@ async function remove(req: Request, res: Response) {
     const usuario = await em.findOneOrFail(Usuario, { id })
     await em.removeAndFlush(usuario)
     return res.status(200).send({ message: 'Usuario eliminado' })
-  } catch (error: any) {
-    if (error instanceof NotFoundError) {
-      return res.status(404).json({ message: 'Usuario no encontrado' })
-    }
-    console.error('Error al eliminar usuario:', error)
-    return res.status(500).send({ message: 'Error al eliminar usuario' });
+  } catch (error: unknown) {
+    return responderError(res, error, {
+      mensaje: 'Error al eliminar usuario',
+      noEncontrado: 'Usuario no encontrado',
+    })
   }
 }
 

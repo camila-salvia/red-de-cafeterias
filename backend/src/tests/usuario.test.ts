@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Request, Response } from 'express';
 import { NotFoundError } from '@mikro-orm/core';
 
@@ -53,12 +53,20 @@ const usuarioValido = {
   direccion: 'Calle Falsa 123',
 };
 
+const nodeEnvOriginal = process.env.NODE_ENV;
+
 beforeEach(() => {
   vi.resetAllMocks();
+  process.env.NODE_ENV = 'production';
   process.env.JWT_SECRET = 'secreto-de-test';
   bcryptMock.hash.mockResolvedValue('$2b$10$hashDeTest');
   // Evita ensuciar la salida con los console.error de los catch del controller
   vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  process.env.NODE_ENV = nodeEnvOriginal;
+  vi.restoreAllMocks();
 });
 
 describe('Usuario - Tests unitarios', () => {

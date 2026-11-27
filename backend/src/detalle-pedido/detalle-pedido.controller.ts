@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express'
 import { orm } from '../shared/database/orm.js'
-import { NotFoundError } from '@mikro-orm/core'
 import { DetallePedido } from './detalle-pedido.entity.js'
 import { Pedido } from '../pedido/pedido.entity.js'
 import { Producto } from '../producto/producto.entity.js'
+import { responderError } from '../shared/errores.js'
 
 const em = orm.em
 
@@ -32,8 +32,8 @@ async function findAll(req: Request, res: Response) {
   try {
     const detallePedido = await em.find(DetallePedido, {}, { populate: ['producto', 'pedido.usuario'] })
     return res.status(200).json({ message: 'Todos los detalles de pedido encontrados', data: detallePedido })
-  } catch (error:any) {
-    return res.status(500).json({ message: 'Error al obtener los detalles de pedido' })
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al obtener los detalles de pedido' })
   }
 }
 
@@ -63,9 +63,8 @@ async function add(req: Request, res: Response) {
 
     await em.flush()
     return res.status(201).json({ message: 'Detalle de pedido creado', data: detallePedido })
-  } catch (error: any) {
-    console.error('Error detallado al crear:', error);
-    return res.status(500).json({ message: 'Error al crear detalle de pedido', detalle: error.message })
+  } catch (error: unknown) {
+    return responderError(res, error, { mensaje: 'Error al crear detalle de pedido' })
   }
 }
 
@@ -82,11 +81,11 @@ async function add(req: Request, res: Response) {
     }
     
     return res.status(200).json({ message: 'Detalle de pedido encontrado', data: detallePedido })
-  } catch (error:any) {
-    if (error instanceof NotFoundError) {
-      return res.status(404).json({ message: 'Detalle de pedido no encontrado' })
-    }
-    return res.status(500).json({ message: 'Error al buscar el detalle de pedido' })
+  } catch (error: unknown) {
+    return responderError(res, error, {
+      mensaje: 'Error al buscar el detalle de pedido',
+      noEncontrado: 'Detalle de pedido no encontrado',
+    })
   }
 }
 
@@ -108,11 +107,11 @@ async function update(req: Request, res: Response) {
       em.assign(detallePedido, input)
       await em.flush()
       return res.status(200).json({ message: 'Detalle de pedido actualizado', data: detallePedido })
-  } catch (error:any) {
-    if (error instanceof NotFoundError) {
-      return res.status(404).json({ message: 'Detalle de pedido no encontrado' })
-    }
-    return res.status(500).json({ message: 'Error al actualizar detalle de pedido' })
+  } catch (error: unknown) {
+    return responderError(res, error, {
+      mensaje: 'Error al actualizar detalle de pedido',
+      noEncontrado: 'Detalle de pedido no encontrado',
+    })
   }
 }
 
@@ -123,11 +122,11 @@ async function remove(req: Request, res: Response) {
     const detallePedido = await em.findOneOrFail(DetallePedido, { id })
     await em.removeAndFlush(detallePedido)
     return res.status(200).send({ message: 'Detalle de pedido eliminado' })
-  } catch (error: any) {
-    if (error instanceof NotFoundError) {
-      return res.status(404).json({ message: 'Detalle de pedido no encontrado' })
-    }
-    return res.status(500).send({ message: 'Error al eliminar detalle de pedido' });
+  } catch (error: unknown) {
+    return responderError(res, error, {
+      mensaje: 'Error al eliminar detalle de pedido',
+      noEncontrado: 'Detalle de pedido no encontrado',
+    })
   }
 }
 
